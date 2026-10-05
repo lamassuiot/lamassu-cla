@@ -128,22 +128,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "24"
+          node-version-file: .nvmrc
 
       - name: Lint Markdown
         run: |
           npx --yes markdownlint-cli@0.49.1 "**/*.md" --ignore node_modules --ignore .git
 
-      - name: Scan for likely private URLs or hostnames
-        run: |
-          set -e
-          pattern='(internal\.|intranet\.|localhost:[0-9]|\.corp\.|jira\.internal|confluence\.internal)'
-          matches=$(grep -RInE "$pattern" --exclude-dir=.git . || true)
-          if [ -n "$matches" ]; then
-            echo "::error::Possible private/internal URL reference found:"
-            echo "$matches"
-            exit 1
-          fi
+      - name: Test private-URL scan
+        run: scripts/check-private-urls.test.sh
+
+      - name: Scan for private hostnames in URLs
+        run: scripts/check-private-urls.sh
 
   dependency-review:
     name: Dependency review
