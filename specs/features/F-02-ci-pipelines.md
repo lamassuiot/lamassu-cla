@@ -75,7 +75,8 @@ None.
 - **AC-02-4** Every workflow that sets up Node.js uses `node-version-file: .nvmrc`, which contains
   `24`. *(Unit 1)*
 - **AC-02-5** Backend workflow: `go vet`, `golangci-lint`, `go test -race`, and `govulncheck`.
-- **AC-02-6** Frontend workflow: `npm ci`, type check, ESLint, Stylelint, Vitest, and build.
+- **AC-02-6** Frontend workflow: `npm ci`, type check, ESLint, Prettier check, Vitest, and build.
+  Stylelint is added with F-04 (D-23).
 - **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration and a generated-client
   drift check.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a

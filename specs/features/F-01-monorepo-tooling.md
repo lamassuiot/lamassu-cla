@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved |
+| Status | Approved; implemented on `build/f-01-monorepo-tooling`, awaiting review |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | Phase 1; D-07; [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md), [ADR-0008](../../docs/decisions/0008-hexagonal-go-backend-on-lambda.md) |
@@ -41,7 +41,9 @@ Contributors and maintainers (developer experience). No end-user roles are affec
 | Unsupported Node.js version | `engines` with `engine-strict` | Install fails | Message naming Node.js 24 |
 | Unsupported Go version | `go` directive in `go.mod` | Build fails or toolchain download | Go version error |
 | Layer rule violation | `depguard` in `golangci-lint` | Lint fails | Rule and import named |
-| Raw visual value in a page | Stylelint | Lint fails | Rule named |
+| Inline `style` attribute in the portal | ESLint `no-restricted-syntax` | Lint fails | Message pointing to design-system tokens |
+
+Stylelint enforcement of raw visual values is deferred to F-04 (D-23).
 
 ## Security considerations
 
@@ -85,8 +87,9 @@ are built in Phase 3.
 | ID | Scenario | Level | Covers |
 | --- | --- | --- | --- |
 | F01-T1 | A placeholder unit test per workspace and Go package runs and passes. | Unit | AC-01-5 |
-| F01-T2 | A test-only fixture importing an SDK into `internal/domain` makes `golangci-lint` fail. | Lint | AC-01-4 |
+| F01-T2 | `scripts/check-go-layering.test.sh`: 9 forbidden imports (cross-layer, adapters, I/O in `domain`) fail with a `depguard` finding; 4 allowed imports pass. | Lint | AC-01-4 |
 | F01-T3 | CI installs with `npm ci` on Node.js 24. | CI | AC-01-1 |
+| F01-T4 | The Dev Container builds, runs `make bootstrap`, and passes `make check`. | Environment | AC-01-5 |
 
 ## Observability requirements
 
@@ -106,6 +109,14 @@ Tooling-only changes; revert the PR. No data or infrastructure is affected.
 4. Root `Makefile`, `.editorconfig` additions for Go (tabs) and Terraform, Dependabot entries.
 5. Local development guide.
 6. Dev Container, added to CODEOWNERS in the same PR (per `AGENTS.md`).
+
+Implementation notes:
+
+- TypeScript is pinned to 6.0.3 because `typescript-eslint` 8.71 supports TypeScript below 6.1.
+- ESLint is pinned to 9.39.5 because `eslint-plugin-jsx-a11y` 6.10.2 supports ESLint up to 9.
+- Go 1.27.1 is pinned in `go.mod`; the `Makefile` sets `GOTOOLCHAIN` so older local Go installs
+  download it automatically. `golangci-lint` v2.14.0 is installed into `.tools/bin`.
+- Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 
 ## Open questions
 

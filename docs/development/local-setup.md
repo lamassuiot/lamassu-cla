@@ -1,0 +1,88 @@
+# Local Development Setup
+
+This guide covers the tooling foundation (F-01). Application features are added from Phase 3.
+See [`specs/features/F-01-monorepo-tooling.md`](../../specs/features/F-01-monorepo-tooling.md).
+
+## Prerequisites
+
+| Tool | Version | Notes |
+| --- | --- | --- |
+| Node.js | 24 (from `.nvmrc`) | Install with [nvm](https://github.com/nvm-sh/nvm) and run `nvm use`. Other major versions are rejected (`engine-strict`). |
+| npm | 11 or later | Ships with Node.js 24. |
+| Go | Any Go 1.21 or later | The `Makefile` sets `GOTOOLCHAIN=go1.27.1`; Go downloads that toolchain automatically. |
+| GNU Make | Any recent version | |
+| Docker | Any recent version | Only for the Dev Container and local emulators. |
+
+Terraform 1.16 and TFLint are needed only for infrastructure work (F-03); the Dev Container
+includes them.
+
+## First run
+
+```bash
+nvm use
+make bootstrap
+make check
+```
+
+`make bootstrap` installs npm dependencies from `package-lock.json` (`npm ci`) and installs the
+pinned `golangci-lint` into `.tools/bin`. `make check` runs lint, tests, and builds as CI does.
+
+## Make targets
+
+| Target | What it does |
+| --- | --- |
+| `make help` | Lists targets. |
+| `make bootstrap` | Installs npm dependencies and pinned Go tools. |
+| `make tools` | Installs pinned Go tools into `.tools/bin` only. |
+| `make lint` | ESLint, Prettier check, TypeScript type check, `go vet`, `golangci-lint` (including hexagonal-layering rules), and the private-URL scan. |
+| `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan and layering rules). |
+| `make build` | Builds the portal with Vite and the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
+| `make format` | Formats TypeScript, JSON, CSS, HTML, and Go sources. |
+| `make check` | `lint`, `test`, and `build`. |
+| `make clean` | Removes build output. |
+
+## Workspaces
+
+| Path | Contents |
+| --- | --- |
+| `apps/web` | Portal (Vite, React, TypeScript). Run `npm run dev -w apps/web` and open <http://localhost:5173>. |
+| `packages/design-system` | Design tokens and components (Phase 3). |
+| `packages/api-client` | Typed API client generated from OpenAPI (F-02). |
+| `packages/shared-types` | Types shared across workspaces. |
+| `services/api` | Go module for the Lambda functions. Run `go test ./...` from this directory. |
+
+## Hexagonal layering rules
+
+`golangci-lint` uses `depguard` to enforce the layering in
+[`specs/architecture.md`](../../specs/architecture.md#31-layers):
+
+| Package | May import |
+| --- | --- |
+| `internal/domain` | Standard library (without I/O packages) and `domain` only. |
+| `internal/ports` | Standard library and `domain`. |
+| `internal/application` | Standard library, `domain`, and `ports`. |
+| `internal/handlers`, `internal/middleware` | Anything except `adapters`. |
+| `internal/adapters/...` | Anything, including SDKs. |
+| Anything outside `adapters` and `cmd` | No AWS, GitHub, or signing-provider SDKs. |
+
+`scripts/check-go-layering.test.sh` proves these rules reject violations.
+
+## Dev Container
+
+The `.devcontainer/` configuration provides Node.js 24, Go 1.27, Terraform 1.16, and TFLint on
+a pinned Ubuntu 24.04 base image, and runs `make bootstrap` after creation. Open the repository in
+VS Code and choose **Reopen in Container**.
+
+The Terraform feature declares a dependency on the GitHub CLI feature, so the container also
+includes `gh`. Feature versions and digests, including that dependency, are pinned in
+`.devcontainer/devcontainer-lock.json`.
+
+The container build downloads packages, so Docker must be able to resolve external hostnames. If
+`apt` reports `Temporary failure resolving`, configure DNS for the Docker daemon on the host.
+
+## Rules for local work
+
+- Never commit `.env` files, credentials, AWS account identifiers, or real personal data. Use
+  synthetic data in tests and fixtures.
+- Dependencies are pinned to exact versions (`save-exact`). Commit `package-lock.json` and
+  `go.sum` changes together with the manifest change.

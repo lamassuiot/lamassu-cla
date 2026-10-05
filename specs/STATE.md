@@ -7,13 +7,13 @@ Last updated: 2026-10-05
 
 ## Current position
 
-- **Phase:** 1 complete (PR #4 merged as `231fcb5`). Phase 2 in progress.
-- **Phase 2:** F-01, F-02, and F-03 approved for implementation. F-02 unit 1 (private-URL scan
-  refinement and Node.js 24 pin) implemented on `ci/phase-2-tooling-foundation`.
+- **Phase:** 1 complete (PR #4). Phase 2 in progress.
+- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 implemented on `build/f-01-monorepo-tooling`;
+  pull request submission in progress.
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next step:** F-01 implementation (monorepo and tooling skeleton).
+- **Next gate:** Review of the F-01 implementation and decision D-23 (Stylelint deferral).
 
 ## Approvals
 
@@ -55,8 +55,8 @@ Feature specifications are written at the start of the phase that implements the
 
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Approved |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Approved; unit 1 implemented |
+| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Implemented; awaiting review |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); units 2–6 next |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Approved (no deployment) |
 | F-04 | Design tokens and themes | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |

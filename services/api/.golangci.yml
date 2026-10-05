@@ -1,0 +1,79 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - depguard
+    - errorlint
+    - gosec
+    - misspell
+    - nolintlint
+  settings:
+    depguard:
+      # Hexagonal layering from specs/architecture.md section 3.1.
+      rules:
+        domain:
+          files:
+            - "**/internal/domain/**"
+          list-mode: strict
+          allow:
+            - $gostd
+            - github.com/lamassuiot/lamassu-cla/services/api/internal/domain
+          deny:
+            - pkg: os
+              desc: Domain code performs no I/O.
+            - pkg: net
+              desc: Domain code performs no I/O.
+            - pkg: database/sql
+              desc: Domain code performs no I/O.
+            - pkg: syscall
+              desc: Domain code performs no I/O.
+        ports:
+          files:
+            - "**/internal/ports/**"
+          list-mode: strict
+          allow:
+            - $gostd
+            - github.com/lamassuiot/lamassu-cla/services/api/internal/domain
+        application:
+          files:
+            - "**/internal/application/**"
+          list-mode: strict
+          allow:
+            - $gostd
+            - github.com/lamassuiot/lamassu-cla/services/api/internal/domain
+            - github.com/lamassuiot/lamassu-cla/services/api/internal/ports
+        inbound:
+          files:
+            - "**/internal/handlers/**"
+            - "**/internal/middleware/**"
+          list-mode: lax
+          deny:
+            - pkg: github.com/lamassuiot/lamassu-cla/services/api/internal/adapters
+              desc: Handlers and middleware reach adapters only through application use cases and ports.
+        sdk-only-in-adapters:
+          files:
+            - $all
+            - "!**/internal/adapters/**"
+            - "!**/cmd/**"
+          list-mode: lax
+          deny:
+            - pkg: github.com/aws
+              desc: Only adapters import AWS SDKs; cmd may import Lambda wiring.
+            - pkg: github.com/google/go-github
+              desc: Only adapters import GitHub SDKs.
+            - pkg: github.com/docusign
+              desc: Only signing adapters import provider SDKs.
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/lamassuiot/lamassu-cla

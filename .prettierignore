@@ -1,0 +1,6 @@
+package-lock.json
+.devcontainer/devcontainer-lock.json
+CHANGELOG.md
+.tools/
+**/dist/
+**/coverage/
