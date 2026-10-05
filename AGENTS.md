@@ -2,21 +2,40 @@
 
 ## Purpose of this repository
 
-This repository is a reusable template for Lamassu open-source repositories. It contains
-community-health files, contribution guidance, issue forms, security guidance, and validation
-workflows that can be instantiated for a specific Lamassu project.
+This repository (`lamassuiot/lamassu-cla`, public, AGPLv3) contains Lamassu's CLA Management
+Platform. The platform publishes CLA versions, collects and stores signed ICLAs and CCLAs, manages
+contributor and organization coverage, and validates GitHub pull requests through a GitHub App.
 
-Do not treat this repository as a finished project. Before publishing a repository created from
-this template, replace or confirm every repository-specific value.
+The platform handles **legal evidence and personal data**. Treat every change to agreement
+handling, coverage rules, authentication, authorization, storage, or retention as high risk.
 
-`TEMPLATE.md` is the human-facing instantiation guide, and `scripts/configure-repository.sh`
-applies the baseline GitHub settings. Both files are template-only and must be deleted from the
-generated repository after instantiation; the `Validate repository template` job in
-`.github/workflows/ci.yml` fails while they remain.
+The repository was instantiated from the Lamassu open-source repository template. The
+instantiation is complete and the template-only files were removed.
 
-The generic template must not contain a technology-specific `.devcontainer/devcontainer.json`.
-Dev Container configuration is generated only after repository instantiation. The generated
-repository must add `.devcontainer/` to the normal CODEOWNERS review scope.
+## Read first
+
+Before planning or making changes, read in this order:
+
+1. This file.
+2. [`specs/sdd-workflow.md`](specs/sdd-workflow.md) — the mandatory Specification-Driven
+   Development workflow, approval gates, and change control.
+3. [`specs/STATE.md`](specs/STATE.md) — current phase, approvals, blocked items, contradictions.
+4. [`docs/decisions/decision-log.md`](docs/decisions/decision-log.md) — settled and open decisions.
+5. The specifications relevant to the task under `specs/`.
+
+## Repository layout
+
+| Path | Contents |
+| --- | --- |
+| `specs/` | Normative specifications: requirements, architecture, domain model, `api/`, `security/`, `ux/`, `features/`, `test-scenarios/`. |
+| `docs/` | Implementation and operational guides. |
+| `docs/decisions/` | Decision log and architecture decision records (ADRs). |
+| `apps/web/` | Portal (Vite, React, TypeScript). Added in Phase 2. |
+| `services/api/` | Go backend for AWS Lambda. Added in Phase 2. |
+| `packages/` | `api-client`, `design-system`, `shared-types`. Added in Phase 2. |
+| `infra/` | Terraform modules, environments, bootstrap. Added in Phase 2. |
+
+Keep this layout. Changing it requires an ADR.
 
 ## Information integrity
 
@@ -30,9 +49,17 @@ Never invent or guess any of the following:
 - Supported versions or support policies
 - Licenses, copyright holders, or other legal information
 
-If required information is missing, ask the repository owner for it. If the work must proceed
-without an answer, leave an explicit `TODO` or a clearly named placeholder such as
-`<REPLACE_WITH_REPOSITORY_NAME>`. Do not silently substitute plausible-looking information.
+In addition, never invent or guess:
+
+- AWS account IDs, regions, resource names, ARNs, or domains.
+- Agreement text, signature levels, retention periods, or other legal policy.
+- Provider accounts, integration keys, or GitHub App identifiers.
+
+If required information is missing, ask the repository owner for it and record the question in the
+[decision log](docs/decisions/decision-log.md) with the person or team that must confirm it. If the
+work must proceed without an answer, use a placeholder as described in
+[Placeholder conventions](#placeholder-conventions). Do not silently substitute plausible-looking
+information.
 
 ## Repository tooling
 
@@ -42,65 +69,74 @@ support the required operation, use the repository's standard tools, such as `rg
 available build or validation commands. Do not assume that Serena or any other optional MCP server
 is installed.
 
-## Instantiation workflow
+## Specification-Driven Development
 
-When creating a repository from this template, complete these steps in order:
+All work follows [`specs/sdd-workflow.md`](specs/sdd-workflow.md). In particular:
 
-1. **Repository identity**
-   - Confirm the repository name and GitHub slug.
-   - Replace `<REPLACE_WITH_REPOSITORY_NAME>` only with the verified value.
-   - Confirm the repository visibility and that it belongs to the intended Lamassu organization.
+- Do not implement a feature until its specification and acceptance criteria exist and approval is
+  recorded in [`specs/STATE.md`](specs/STATE.md).
+- Never silently change an API contract, the data model, a security assumption, legal behavior, or
+  a design token. Follow the change-control rules.
+- Update specifications and ADRs in the same pull request as the implementation they describe.
+- When code and specifications disagree, stop and record the contradiction in `specs/STATE.md`.
+- Run the relevant tests and validations after every implementation unit.
+- Keep pull requests small, focused, and reviewable.
 
-2. **Description**
-   - Obtain an approved one-sentence description of the project.
-   - Replace `<REPLACE_WITH_REPOSITORY_DESCRIPTION>` only with verified project wording.
-   - Do not infer the project purpose from its name alone.
+## Architecture guardrails
 
-3. **Owning Lamassu domain**
-   - Confirm whether the repository belongs to the IoT, SaaS, infrastructure, platform, AWS
-     Serverless, or another Lamassu domain.
-   - Use the verified domain for ownership, review, and project metadata.
-   - Domain is calculated from the source repository by automation; agents must not guess or
-     hard-code it in GitHub Project fields.
+- The backend follows the hexagonal layering in [`specs/architecture.md`](specs/architecture.md).
+  Domain code has no I/O and no SDK imports; only adapters import AWS, GitHub, or provider SDKs.
+- `specs/api/openapi.yaml` is the API source of truth. Change the contract before the handlers.
+- Signing is accessed only through the provider-neutral signing port
+  ([ADR-0004](docs/decisions/0004-provider-neutral-signing-and-signature-level.md)). Never
+  implement signature cryptography.
+- All infrastructure is managed with Terraform. Document any manual configuration explicitly.
+- Deployments use GitHub OIDC. Never add long-lived AWS access keys to GitHub.
 
-4. **Maintainers**
-   - Confirm the repository’s maintainer team and its GitHub handle.
-   - Use the verified `lamassu-maintainers` or domain-specific team only when the repository
-     owner confirms that choice.
-   - Replace all maintainer placeholders before relying on CODEOWNERS or review enforcement.
+## Security and privacy rules
 
-5. **Default branch**
-   - Verify the repository’s actual default branch in GitHub.
-   - Update branch-specific links and workflow assumptions only after confirmation.
-   - Do not assume `main`, `master`, or any other branch name.
-   - The template workflows trigger on pushes to `main`. If the confirmed default branch differs,
-     update the `push.branches` filters in `.github/workflows/ci.yml` and
-     `.github/workflows/scorecard.yml`.
+This repository is public. Agents must:
 
-6. **Security configuration**
-   - Complete the root-level `SECURITY.md` as described below.
-   - Verify whether GitHub Security Advisories are enabled for the repository.
-   - Confirm the private fallback reporting contact and replace
-     `<REPLACE_WITH_SECURITY_CONTACT>` only with an approved, real contact.
+- Never commit secrets, credentials, tokens, private keys, personal data, signed agreements, legal
+  evidence, or real contributor records, including in tests, fixtures, logs, or examples.
+- Use synthetic identities and synthetic documents in fixtures.
+- Never commit environment identifiers such as account IDs, ARNs, bucket names, or private
+  hostnames. Supply them through CI environment variables or private configuration.
+- Keep personal data out of logs, metrics, object keys, Check Run output, and audit metadata.
+- Never claim that a signature is qualified unless the configured provider service is qualified
+  ([ADR-0004](docs/decisions/0004-provider-neutral-signing-and-signature-level.md)).
+- Never infer CCLA authorization or coverage from an email domain
+  ([ADR-0006](docs/decisions/0006-explicit-ccla-authorization.md)).
+- Keep S3 Object Lock retention configurable and never set production retention values without
+  Legal confirmation ([ADR-0005](docs/decisions/0005-configurable-object-lock-retention.md)).
+- Follow [`specs/security/security.md`](specs/security/security.md) and complete its pull-request
+  checklist for code and infrastructure changes.
 
-7. **Labels and Issue Types**
-   - Confirm that the repository has the required labels: `bug`, `enhancement`, and
-     `needs-triage`.
-   - Confirm that the organization Issue Types are named exactly `Bug`, `Feature`, and `Task`.
-   - Remember that issue forms do not create missing labels automatically.
-   - Do not add a `task` label unless the repository owner explicitly confirms that it exists.
+## Design-system guardrails
 
-8. **Validation**
-   - Validate all YAML files and GitHub Issue Forms.
-   - Review links, placeholders, workflows, CODEOWNERS, and community-health files.
-   - Test the issue-template chooser in the instantiated repository.
-   - Review the final diff and confirm that unrelated template or user changes were preserved.
-   - Delete the template-only files `TEMPLATE.md` and `scripts/configure-repository.sh`.
+- Use only the tokens and components defined in
+  [`specs/ux/design-tokens.md`](specs/ux/design-tokens.md) and `packages/design-system`.
+- Pages must not define one-off button, card, or form styles.
+- New colors require a token change, a contrast check, and a specification update. New spacing
+  values require written justification.
+
+## CI constraints
+
+The `CI` workflow enforces, among other checks:
+
+- YAML syntax and GitHub configuration schemas.
+- Markdown lint for every Markdown file. Wrap bare URLs and email addresses in angle brackets.
+- No unresolved `<REPLACE_WITH_...>` placeholders outside this file.
+- A private-URL scan. Until its refinement (D-01) is merged, avoid writing the word `internal`
+  immediately followed by a dot, and `localhost` immediately followed by a colon and a port
+  number, in any file.
+- Secret scanning of the full Git history with gitleaks.
+
+The default branch is `main`. Workflows trigger on pushes to `main`.
 
 ## CODEOWNERS and review protection
 
-This template is intended primarily for public repositories in the `lamassuiot` organization.
-The default code owner is:
+This repository belongs to the `lamassuiot` organization. The code owner is:
 
 ```text
 @lamassuiot/lamassu-maintainers
@@ -112,10 +148,10 @@ The documented default rule is:
 * @lamassuiot/lamassu-maintainers
 ```
 
-When instantiating the template, verify that:
+Verify that:
 
 - The `lamassu-maintainers` team exists.
-- The team has explicit write access to the generated repository.
+- The team has explicit write access to this repository.
 - The repository belongs to the expected organization.
 - The `CODEOWNERS` file is located at a GitHub-supported path, such as
   `.github/CODEOWNERS`, `CODEOWNERS`, or `docs/CODEOWNERS`.
@@ -135,8 +171,11 @@ The maintainer team owns general repository changes and governance files, includ
 - `NOTICE`
 - `cliff.toml`
 
-CODEOWNERS only requests or identifies reviewers. It does not by itself prevent merging. After
-creating the repository, configure a branch ruleset for the repository's protected default branch
+When a `.devcontainer/` directory is added, add it to the CODEOWNERS review scope in the same pull
+request.
+
+CODEOWNERS only requests or identifies reviewers. It does not by itself prevent merging. Configure
+a branch ruleset for the repository's protected default branch
 and protected release branches, when applicable, that requires:
 
 - Pull requests.
@@ -186,7 +225,7 @@ Signed commits must be enforced through GitHub branch protection or repository r
 through agent instructions. The policy should apply primarily to the repository's protected default
 branch and protected release branches, when applicable.
 
-After repository creation, configure repository settings or rulesets to require:
+Repository settings or rulesets must require:
 
 - Pull Requests.
 - Required status checks.
@@ -196,9 +235,9 @@ After repository creation, configure repository settings or rulesets to require:
 - Squash merging only, with the Pull Request title as the default squash commit message, so the
   default branch history follows Conventional Commits for `git-cliff`.
 
-`scripts/configure-repository.sh` applies these settings to the default branch and enables private
-vulnerability reporting, secret scanning, and push protection. Rulesets for release branches remain
-manual.
+These settings, private vulnerability reporting, secret scanning, and push protection were applied
+to the default branch during instantiation. Verify them rather than assuming they are still in
+place. Rulesets for release branches remain manual.
 
 Conventional Commit Pull Request titles are enforced by this required status check. Configure the
 lint workflow's stable check name in the applicable GitHub ruleset for the protected default branch
@@ -213,9 +252,21 @@ branch and any protected release branches, and report any missing manual configu
 
 The Pull Request template must remain concise. It must not contain the full ICLA or CCLA text,
 private repositories, private signing records, legal evidence, or references to an automated CLA
-service. Contributor-facing CLA documentation belongs in `CONTRIBUTING.md`; public repositories
-should contain only references and contributor instructions. The legal text and signing process are
-centrally managed.
+service. Contributor-facing CLA documentation belongs in `CONTRIBUTING.md`. Other Lamassu
+repositories contain only references and contributor instructions. The legal text and signing
+process are centrally managed.
+
+### Canonical agreement text in this repository
+
+As the CLA platform, this repository **may** contain the canonical ICLA and CCLA text, their version
+history, and signing instructions
+([ADR-0002](docs/decisions/0002-public-cla-text-and-private-evidence.md)). Agents must:
+
+- Add or change agreement text only when Legal supplies or confirms the exact content (D-03).
+- Never draft, paraphrase, translate, or "improve" agreement text.
+- Treat a published version as immutable. Corrections are new versions.
+
+Signed agreements, personal data, and audit evidence remain exclusively in the private service.
 
 The current legal documents and maintainer process are centrally managed through the
 [Lamassu CLA portal](https://cla.developers.lamassu.cloud/). Agents must verify the authoritative
@@ -229,7 +280,9 @@ The CLA process is:
 - Contributors acting on behalf of an organization must be covered by the applicable CCLA.
 - A person whose contribution is covered by a CCLA must not also submit the same contribution under
   the ICLA.
-- CLA verification is currently manual and is performed by Lamassu maintainers.
+- CLA verification is currently manual and is performed by Lamassu maintainers. `CONTRIBUTING.md`
+  keeps describing it as manual until the platform is operational in production; switching is a
+  separate, reviewed change.
 - Signed agreements, private legal evidence, employment documents, and contributor records must
   never be added to Pull Requests, Issues, public repositories, public project boards, or public
   comments.
@@ -238,7 +291,7 @@ The CLA process is:
 
 Agents must not:
 
-- Copy the full ICLA or CCLA into target repositories.
+- Copy the full ICLA or CCLA into other repositories.
 - Create or modify signed legal agreements.
 - Invent legal wording.
 - Link to the private `lamassu-platform` legal directory.
@@ -247,42 +300,29 @@ Agents must not:
 
 ## Placeholder conventions
 
-Use explicit, searchable placeholders when verified information is unavailable:
-
-- `<REPLACE_WITH_REPOSITORY_NAME>`
-- `<REPLACE_WITH_REPOSITORY_DESCRIPTION>`
-- `<REPLACE_WITH_PROJECT_OVERVIEW>`
-- `<REPLACE_WITH_PREREQUISITES>`
-- `<REPLACE_WITH_INSTALLATION_AND_USAGE>`
-- `<REPLACE_WITH_SECURITY_CONTACT>`
-- `<REPLACE_WITH_CONDUCT_CONTACT>`
-- `<REPLACE_WITH_SUPPORTED_VERSION_POLICY>`
-- `<REPLACE_WITH_COPYRIGHT_HOLDER>`
-- `<REPLACE_WITH_COPYRIGHT_YEARS>`
-- `<REPLACE_WITH_PROJECT_HOMEPAGE_URL>`
-- `<REPLACE_WITH_DEFAULT_BRANCH>`
-- `<REPLACE_WITH_MAINTAINER_TEAM>`
-
-Always use the `<REPLACE_WITH_...>` form; do not use HTML comments or plausible-looking sample
+When verified information is unavailable, use an explicit, searchable placeholder in the
+`<REPLACE_WITH_...>` form, for example `<REPLACE_WITH_AWS_REGION>`, and add a matching entry to the
+[decision log](docs/decisions/decision-log.md). Do not use HTML comments or plausible-looking sample
 content as placeholders, because they are invisible or misleading once rendered.
+
+In documentation, prefer referring to the decision-log entry (for example "pending D-04") over a
+placeholder.
 
 A placeholder is not complete configuration. Report every remaining placeholder and the person or
 team that must confirm it. The `Validate repository template` job in `.github/workflows/ci.yml`
-fails in generated (non-template) repositories while any `<REPLACE_WITH_...>` placeholder remains
-outside `AGENTS.md` and `TEMPLATE.md`.
+fails while any `<REPLACE_WITH_...>` placeholder remains outside `AGENTS.md`, so placeholders
+block merging until resolved.
 
-## Completing SECURITY.md
+## Maintaining SECURITY.md
 
-Keep `SECURITY.md` at the repository root. Before publishing the instantiated repository:
+Keep `SECURITY.md` at the repository root and:
 
 - Verify that GitHub Security Advisories are enabled and that the repository’s private reporting
   path works.
-- Replace the supported-version placeholder with the project’s approved support policy. Do not
-  invent versions or claim support that has not been confirmed.
-- Configure a real private fallback contact when Security Advisories are unavailable, replacing
-  `<REPLACE_WITH_SECURITY_CONTACT>` only after confirmation.
-- Define the repository scope accurately, including the source code, configuration, workflows, or
-  other maintained assets that are actually covered.
+- Keep the supported-version policy aligned with the approved policy. Do not invent versions or
+  claim support that has not been confirmed.
+- Change the private fallback contact only after confirmation by the security owner.
+- Keep the repository scope accurate as source code, infrastructure, and workflows are added.
 - Keep instructions clear that vulnerabilities must not be reported through public issues,
   discussions, or pull requests.
 
@@ -300,27 +340,29 @@ Expected behavior:
 - Bug reports also use `bug`; feature requests also use `enhancement`.
 - Do not use a `task` label unless it exists and its use has been explicitly approved.
 - Do not add repository-specific URLs or contact links to these reusable forms.
-- Keep security guidance portable by referring to the instantiated repository’s local
+- Keep security guidance portable by referring to the repository’s local
   `SECURITY.md`.
 - Preserve the confidentiality warnings and do not request secrets or private legal information
   in public issues.
 
 Issue forms do not create missing labels automatically. Labels must be configured in the
-repository or supplied as organization default labels before the forms can apply them.
+repository or supplied as organization default labels before the forms can apply them. The
+required labels are `bug`, `enhancement`, and `needs-triage`; the organization Issue Types must be
+named exactly `Bug`, `Feature`, and `Task`.
 
 ## Dependabot configuration
 
 Dependabot configuration is repository-specific. Do not copy a single configuration blindly
 between Go, frontend, infrastructure, container, or other repositories.
 
-When instantiating a repository from this template:
+When adding or changing dependency manifests:
 
-1. Inspect the generated repository for dependency manifests before creating a configuration.
+1. Inspect the repository for dependency manifests before changing the configuration.
 2. Detect ecosystems from files that actually exist; do not infer an ecosystem from the project
    name, owning domain, or expected technology.
-3. Keep the template's `github-actions` entry in `.github/dependabot.yml`, because every generated
-   repository inherits the template workflows. Add entries only for other ecosystems whose
-   supported dependency manifests actually exist.
+3. Keep the `github-actions` entry in `.github/dependabot.yml`. Add entries only for other
+   ecosystems whose supported dependency manifests actually exist, in the same pull request that
+   adds the manifest.
 4. Configure the correct directory for each detected manifest. Use `/` for a root-level manifest
    and the manifest's actual subdirectory for nested projects or workspaces.
 5. Use the matching Dependabot ecosystem when applicable, including:
@@ -352,20 +394,17 @@ When instantiating a repository from this template:
 13. Validate the generated `.github/dependabot.yml` after creating it, including YAML syntax,
     ecosystem names, manifest directories, schedules, limits, grouping, and labels.
 
-The generic template ships only a `github-actions` Dependabot entry, because its workflows are
-inherited by every generated repository. Entries for other ecosystems are added only after
-repository instantiation and must match the actual technology stack. Security alerts and security
-updates can still be enabled independently in GitHub settings.
+The planned stack uses `gomod`, `npm`, and `terraform`. Add each entry only when its manifest
+exists. Security alerts and security updates can still be enabled independently in GitHub settings.
 
 ## Development container
 
-Dev Container configuration is repository-specific. Do not hardcode it into this generic template,
-because generated repositories may use Go, frontend technologies, Python, Terraform, or other
-technology stacks.
+Dev Container configuration must match the actual technology stack. Add it only after the Phase 2
+scaffolding exists.
 
-When instantiating a repository from this template:
+When creating or changing the Dev Container:
 
-1. Inspect the generated repository before creating a Dev Container.
+1. Inspect the repository before creating a Dev Container.
 2. Detect the language, framework, package manager, build tools, and required services from the
    actual repository files.
 3. Create `.devcontainer/devcontainer.json` only when a useful project-specific configuration can
@@ -398,11 +437,10 @@ Do not add these as fields to the issue forms. Domain is calculated from the sou
 automation. Agents must not duplicate, guess, or manually hard-code Domain values in issue forms
 or repository documentation unless explicitly instructed by the project owner.
 
-## Portable configuration
+## Issue chooser configuration
 
-`config.yml` must remain portable in this template. Do not add repository-specific Discussions,
-Security Advisory, contact, or other absolute links to it. Add those links only after a concrete
-repository exists and its verified URL is known.
+Add Discussions, Security Advisory, contact, or other links to `.github/ISSUE_TEMPLATE/config.yml`
+only with verified URLs. Discussions are currently disabled for this repository.
 
 ## Legal and licensing boundaries
 
@@ -411,32 +449,28 @@ unless the user explicitly requests that change and provides or confirms the aut
 Do not invent legal contacts, license terms, copyright holders, agreement text, or supported legal
 policies.
 
-## Final validation checklist
+## Validation checklist
 
-Before declaring an instantiated repository complete, verify:
+Before declaring a unit of work complete, verify:
 
-- No unresolved placeholders remain, or every remaining `TODO` has an owner and explicit follow-up.
-- No contact information, maintainer, URL, version, license, or legal information was invented.
-- `SECURITY.md` is present at the repository root and its reporting process is configured.
-- GitHub Security Advisories and the private fallback contact have been verified.
-- Required labels exist: `bug`, `enhancement`, and `needs-triage`.
-- Issue Types `Bug`, `Feature`, and `Task` exist and match the forms exactly.
-- All YAML files parse successfully.
-- All issue forms are visible and selectable in the GitHub issue chooser.
-- Reusable forms and `config.yml` contain no repository-specific links.
-- Domain automation is configured to calculate Domain from the source repository.
+- The relevant specification, acceptance criteria, and approval exist.
+- No unresolved placeholders remain, or every remaining one has a decision-log entry and owner.
+- No contact information, maintainer, URL, version, license, legal, or environment information was
+  invented.
+- All YAML files parse, and the OpenAPI contract lints successfully.
+- Markdown lint, the private-URL scan, and the placeholder scan pass locally.
+- Tests for the changed code pass.
+- Specifications, ADRs, `specs/STATE.md`, and the decision log reflect the change.
 - No unintended legal, license, CLA, copyright, or community-health changes were introduced.
-- Template-only files `TEMPLATE.md` and `scripts/configure-repository.sh` were deleted.
-- The final diff contains only the intended instantiation changes.
+- The final diff contains only the intended changes, and unrelated user changes were preserved.
 
-## Completion report
+## Work report
 
-The agent completing an instantiation must report:
+At the end of each unit of work, report:
 
 - Files changed.
-- Placeholders replaced.
-- Information still requiring confirmation.
-- Labels and Issue Types verified.
-- Validation performed.
-- Remaining manual configuration, including GitHub settings, Security Advisories, repository
-  access, CODEOWNERS, default branch, labels, Projects, and automation.
+- Specifications and decisions updated.
+- Information still requiring confirmation, with the owner.
+- Validation performed and its results.
+- Remaining manual configuration, such as GitHub settings, AWS resources, provider accounts, or
+  repository access.

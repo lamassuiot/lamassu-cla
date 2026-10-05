@@ -10,7 +10,7 @@ Instead, please report vulnerabilities privately using
 maintainers to assess and address the issue before it is publicly disclosed.
 
 If private vulnerability reporting is not enabled for this repository, report the vulnerability
-privately to lamassu+security@lksnext.com before disclosing any details publicly.
+privately to <lamassu+security@lksnext.com> before disclosing any details publicly.
 
 When reporting, please avoid including:
 
