@@ -80,6 +80,7 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 | D-20 | Lawful basis and privacy notice for contributor and signer data. | Open | Phase 4 (sign-in), Phase 6 | **Legal**, DPO | None. Legal decision. |
 | D-21 | Supported languages for the portal and agreement text. | Open | Phase 3, Phase 5 | Repository owner, **Legal** | English first; others only with Legal-approved translations. |
 | D-22 | When a new CLA version is published, must contributors with an active agreement on an older version re-sign, and by when? | Open (recommendation recorded) | Phase 5, Phase 8 | **Legal** | Substantive legal or scope changes require re-signing; purely editorial changes do not. Each published version records its change classification, set by Legal. Subject to Legal approval. |
+| D-23 | Stylelint depends on `braces`, which has an unpatched high-severity advisory (GHSA-vfj7-8cjw-p6xm, all versions up to 3.0.3). Defer Stylelint, or add a `dependency-review` exception? | Proposed | F-04 (token enforcement in CSS) | Maintainers, Security owner | Defer Stylelint until F-04. F-04 adds it only when a patched `braces` is available, or with a reviewed, time-limited `dependency-review` exception (dev-only exposure, no untrusted brace patterns). Interim: ESLint forbids inline `style` attributes in `apps/web`. |
 
 ## Summary of decisions awaiting confirmation
 

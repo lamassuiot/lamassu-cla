@@ -1,0 +1,22 @@
+# Dependencies and tool binaries
+node_modules/
+.tools/
+
+# Build and test output
+dist/
+coverage/
+*.tsbuildinfo
+
+# Terraform local state and plans
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# Local environment files may contain secrets
+.env
+.env.*
+
+# Editor and OS files
+.DS_Store
