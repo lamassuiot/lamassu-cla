@@ -65,7 +65,7 @@ Not every conflict represents a Code of Conduct violation, and this Code of Cond
 behaviors and norms that can help avoid conflicts and minimize harm.
 
 When an incident occurs, report it promptly and privately to the community leaders responsible
-for enforcement at <REPLACE_WITH_CONDUCT_CONTACT>. Do not report Code of Conduct incidents through
+for enforcement at lamassu@lksnext.com. Do not report Code of Conduct incidents through
 public issues, discussions, or pull requests, and do not use GitHub Security Advisories, which are
 reserved for security vulnerabilities.
 
