@@ -1,4 +1,4 @@
-# <REPLACE_WITH_REPOSITORY_NAME>
+# lamassu-cla
 
 <!--
 Optional: badges commonly used across Lamassu Open Source repos, e.g. license, build status,
@@ -13,7 +13,8 @@ latest release. Remove this block if not applicable to this repository.
 
 ## 🚀 Overview
 
-<REPLACE_WITH_PROJECT_OVERVIEW>
+Secure CLA management platform for Lamassu, including ICLA/CCLA workflows, GitHub App
+pull-request validation, electronic-signature integrations, and serverless AWS infrastructure.
 
 ---
 
@@ -21,11 +22,16 @@ latest release. Remove this block if not applicable to this repository.
 
 ### Prerequisites
 
-<REPLACE_WITH_PREREQUISITES>
+There are no technical prerequisites for using or contributing to the repository.
+Environment-specific requirements are documented in the development and deployment guides.
 
 ### Installation and usage
 
-<REPLACE_WITH_INSTALLATION_AND_USAGE>
+Clone the repository and follow the setup and contribution instructions in
+[CONTRIBUTING.md](./CONTRIBUTING.md). Configure the required environment variables, then use the
+provided commands to run, test, and validate the frontend and backend. Infrastructure and
+application deployments are performed through the documented Terraform and GitHub Actions
+workflows.
 
 ---
 
@@ -98,7 +104,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for release history. Entries are generated fr
 
 This project is licensed under the terms of the [LICENSE](./LICENSE) file (GNU AGPLv3).
 
-Copyright holder: <REPLACE_WITH_COPYRIGHT_HOLDER>.
+Copyright holder: LKS S. Coop.
 
 Contributions require the applicable ICLA or CCLA. Read the [current Lamassu CLA
 agreements and signing instructions](https://cla.developers.lamassu.cloud/).

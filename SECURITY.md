@@ -10,7 +10,7 @@ Instead, please report vulnerabilities privately using
 maintainers to assess and address the issue before it is publicly disclosed.
 
 If private vulnerability reporting is not enabled for this repository, report the vulnerability
-privately to <REPLACE_WITH_SECURITY_CONTACT> before disclosing any details publicly.
+privately to lamassu+security@lksnext.com before disclosing any details publicly.
 
 When reporting, please avoid including:
 
@@ -23,7 +23,11 @@ using non-sensitive, redacted examples.
 
 ## Supported versions
 
-<REPLACE_WITH_SUPPORTED_VERSION_POLICY>
+The main branch and the latest published release are supported with security updates. Older
+releases and branches are not supported unless explicitly documented. As the project is still
+under initial development, no stable releases are currently available; security fixes will be
+applied to the active development version. Users should upgrade to the latest supported release
+or commit as soon as fixes are published.
 
 ## Responsible disclosure
 

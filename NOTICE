@@ -15,11 +15,11 @@
 # section per third-party component that requires attribution, each reproducing
 # that component's original notice verbatim.
 
-<REPLACE_WITH_REPOSITORY_NAME>
-Copyright <REPLACE_WITH_COPYRIGHT_YEARS> <REPLACE_WITH_COPYRIGHT_HOLDER>
+lamassu-cla
+Copyright 2026 LKS S. Coop.
 
 This product includes software developed by
-<REPLACE_WITH_COPYRIGHT_HOLDER> (<REPLACE_WITH_PROJECT_HOMEPAGE_URL>).
+LKS S. Coop. (https://cla.developers.lamassu.cloud).
 
 # For each third-party component that requires attribution, add a section such as:
 #
