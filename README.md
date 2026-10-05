@@ -7,14 +7,17 @@ latest release. Remove this block if not applicable to this repository.
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](./LICENSE)
 -->
 
-<REPLACE_WITH_REPOSITORY_DESCRIPTION>
+Secure CLA management platform for Lamassu, including ICLA/CCLA workflows, GitHub App pull-request validation, electronic-signature integrations, and serverless AWS infrastructure.
 
 ---
 
 ## 🚀 Overview
 
-Secure CLA management platform for Lamassu, including ICLA/CCLA workflows, GitHub App
-pull-request validation, electronic-signature integrations, and serverless AWS infrastructure.
+This repository contains Lamassu's CLA management platform. It provides a secure and auditable
+workflow for publishing CLA versions, collecting and storing signed ICLAs and CCLAs, managing
+contributor and organization coverage, and validating GitHub pull requests through a GitHub App.
+The platform uses a Go-based AWS serverless backend, a Vite frontend, Terraform-managed
+infrastructure, and pluggable electronic-signature integrations.
 
 ---
 
