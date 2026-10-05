@@ -1,0 +1,52 @@
+name: "📋 Task"
+description: Define a concrete, actionable unit of implementation work.
+type: Task
+labels:
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is intended for maintainers and Product Owners to define actionable engineering work.
+
+        Thanks for filing a task!
+
+        ⚠️ **Do not include credentials, tokens, private keys, customer data, or other confidential information in this issue.**
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What is this task trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Implementation scope
+      description: What is in scope for this task?
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: What is explicitly not covered by this task?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: What conditions must be met for this task to be considered done?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and references
+      description: Links to related issues, discussions, or public documentation (public URLs only).
+    validations:
+      required: false

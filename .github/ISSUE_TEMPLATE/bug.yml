@@ -1,0 +1,126 @@
+name: "🐛 Bug"
+description: Report a reproducible problem in the project.
+labels:
+  - bug
+  - needs-triage
+type: Bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem.
+
+        Please search existing issues before submitting a new one.
+        Do not include passwords, tokens, private keys, certificates,
+        customer data, personal data, or other confidential information.
+        If this is a security vulnerability, do not report it publicly;
+        follow the private reporting process in this repository's `SECURITY.md` instead.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Initial checks
+      options:
+        - label: I have searched the existing issues.
+          required: true
+        - label: I have removed secrets and confidential information from this report.
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the problem clearly and concisely.
+      placeholder: |
+        Describe what went wrong.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      description: Describe the expected behavior.
+      placeholder: |
+        Describe what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: Provide the smallest reproducible example and exact steps.
+      placeholder: |
+        1. Configure ...
+        2. Run ...
+        3. Send ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often does this happen?
+      options:
+        - Every time
+        - Frequently
+        - Occasionally
+        - Once
+        - Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Project version or commit
+      description: Provide the released version, image tag, or commit SHA if available.
+      placeholder: "v1.2.3, main@abc1234, or container image tag"
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include relevant technical details if available.
+      placeholder: |
+        - Component:
+        - Installation method:
+        - Operating system:
+        - Architecture:
+        - Runtime version:
+        - Kubernetes version:
+        - Database or external services:
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Add relevant logs or stack traces. Redact secrets and confidential data.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Screenshots and additional context
+      description: Add screenshots, links, or other relevant context. Redact secrets and confidential data.
+    validations:
+      required: false
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: If known, describe any temporary workaround.
+      placeholder: |
+        Is there a temporary workaround?
+    validations:
+      required: false

@@ -1,0 +1,20 @@
+# CODEOWNERS
+#
+# Default reviewers for Lamassu public repositories.
+# The lamassu-maintainers team owns repository review and governance.
+#
+# This template is intended for repositories in the lamassuiot organization.
+# The team must have explicit write access to each generated repository.
+
+# All repository changes require Lamassu maintainer review.
+* @lamassuiot/lamassu-maintainers
+
+# Repository governance, automation, security, and contribution configuration.
+/.github/ @lamassuiot/lamassu-maintainers
+/AGENTS.md @lamassuiot/lamassu-maintainers
+/CODE_OF_CONDUCT.md @lamassuiot/lamassu-maintainers
+/CONTRIBUTING.md @lamassuiot/lamassu-maintainers
+/SECURITY.md @lamassuiot/lamassu-maintainers
+/LICENSE @lamassuiot/lamassu-maintainers
+/NOTICE @lamassuiot/lamassu-maintainers
+/cliff.toml @lamassuiot/lamassu-maintainers

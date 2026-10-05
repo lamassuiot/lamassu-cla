@@ -1,0 +1,60 @@
+# git-cliff configuration.
+# See https://git-cliff.org/docs/configuration for all available options.
+#
+# This uses the built-in Conventional Commits parser. Pull requests are squash-merged, so PR
+# titles become the commit subjects and must follow https://www.conventionalcommits.org/
+# for entries to be categorized correctly. See CONTRIBUTING.md's "Commit messages" section.
+
+[changelog]
+header = """
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+This changelog is generated with [git-cliff](https://git-cliff.org/) from
+[Conventional Commits](https://www.conventionalcommits.org/). Do not hand-edit entries below
+this line — regenerate with `git-cliff` instead.
+"""
+body = """
+
+{% if version %}\
+    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim | upper_first }}
+{% for commit in commits %}
+- {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](../../commit/{{ commit.id }}))\
+{% endfor %}
+{% endfor %}\
+"""
+trim = true
+footer = ""
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+# The "<!-- NN -->" prefixes fix section order (groups sort as text, so keep them zero-padded);
+# `striptags` in the body template removes them before display.
+commit_parsers = [
+  { message = "^feat", group = "<!-- 00 -->Features" },
+  { message = "^fix", group = "<!-- 01 -->Bug Fixes" },
+  { message = "^docs", group = "<!-- 02 -->Documentation" },
+  { message = "^perf", group = "<!-- 03 -->Performance" },
+  { message = "^refactor", group = "<!-- 04 -->Refactoring" },
+  { message = "^style", group = "<!-- 05 -->Styling" },
+  { message = "^test", group = "<!-- 06 -->Testing" },
+  { message = "^revert", group = "<!-- 07 -->Reverts" },
+  { message = "^chore\\(release\\)", skip = true },
+  { message = "^chore", group = "<!-- 08 -->Miscellaneous" },
+  { message = "^ci", group = "<!-- 09 -->Continuous Integration" },
+  { message = "^build", group = "<!-- 10 -->Build System" },
+]
+filter_commits = false
+protect_breaking_commits = true
+# Anchored so only version tags (optionally with pre-release/build metadata) start a release
+# section; an unanchored pattern would also match unrelated tags containing "v".
+tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+.*$"
+sort_commits = "oldest"

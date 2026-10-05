@@ -1,0 +1,46 @@
+name: Release
+
+# Publishes GitHub Release notes generated from Conventional Commits when a version tag is
+# pushed. This does not write to the repository: CHANGELOG.md is regenerated and committed by a
+# maintainer as part of the release pull request (see CONTRIBUTING.md), so that signed-commit and
+# branch-protection rules on the default branch are never bypassed by an automated commit.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: git-cliff
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4 (git-cliff v2.14.2)
+        with:
+          config: cliff.toml
+          args: --latest --strip header
+        env:
+          OUTPUT: release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          body: ${{ steps.git-cliff.outputs.content }}
+          draft: true
