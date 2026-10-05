@@ -8,8 +8,7 @@ Last updated: 2026-10-05
 ## Current position
 
 - **Phase:** 1 complete (PR #4). Phase 2 in progress.
-- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 implemented on `build/f-01-monorepo-tooling`;
-  pull request submission in progress.
+- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 implementation submitted in [PR #6](https://github.com/lamassuiot/lamassu-cla/pull/6).
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
