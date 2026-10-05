@@ -40,7 +40,12 @@ workflows.
 
 ## 📚 Documentation
 
-<!-- Optional: link to project-specific docs (public URLs only). Remove if not applicable. -->
+* [Product requirements](./specs/requirements.md)
+* [Architecture](./specs/architecture.md) and [domain model](./specs/domain-model.md)
+* [API conventions](./specs/api/conventions.md) and [OpenAPI contract](./specs/api/openapi.yaml)
+* [Security specification](./specs/security/security.md)
+* [Specification-Driven Development workflow](./specs/sdd-workflow.md) and [current state](./specs/STATE.md)
+* [Decision log and ADRs](./docs/decisions/README.md)
 
 ---
 

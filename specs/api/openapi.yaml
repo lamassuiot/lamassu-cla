@@ -1,0 +1,260 @@
+openapi: 3.1.0
+info:
+  title: Lamassu CLA Management Platform API
+  version: 0.1.0
+  summary: Contract for the CLA portal, administrative APIs, and webhooks.
+  description: |
+    Source of truth for the platform API. Conventions are defined in `conventions.md` next to
+    this file. Operations are added by feature specifications; this initial structure defines
+    shared components and the health operation only.
+  license:
+    name: AGPL-3.0-only
+    identifier: AGPL-3.0-only
+servers:
+  - url: /
+    description: Same origin as the portal. Environment hosts are configured at deployment.
+tags:
+  - name: health
+    description: Operational endpoints.
+  - name: public
+    description: Public CLA catalogue. No authentication.
+  - name: auth
+    description: GitHub sign-in and sessions.
+  - name: me
+    description: Current user, contributor status, and own agreements.
+  - name: agreements
+    description: Agreements and signing sessions.
+  - name: organizations
+    description: Organizations, CCLAs, and authorized contributors.
+  - name: admin
+    description: Maintainer, legal-administrator, and platform-administrator operations.
+  - name: webhooks
+    description: GitHub and signing-provider webhooks.
+security:
+  - sessionCookie: []
+paths:
+  /v1/health:
+    get:
+      operationId: getHealth
+      summary: Report service liveness.
+      description: Returns liveness only. Never reports dependency details or versions.
+      tags:
+        - health
+      security: []
+      responses:
+        "200":
+          description: Service is live.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: __Host-cla_session
+      description: Opaque session token set by the API after GitHub sign-in.
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: Required with the session cookie on state-changing requests.
+    githubWebhookSignature:
+      type: apiKey
+      in: header
+      name: X-Hub-Signature-256
+      description: HMAC-SHA256 of the raw request body using the GitHub App webhook secret.
+    signingProviderSignature:
+      type: apiKey
+      in: header
+      name: X-Signing-Provider-Signature
+      description: |
+        Placeholder for provider-specific callback verification. Each provider adapter documents
+        its actual headers in the provider webhook operation.
+  headers:
+    RequestId:
+      description: Correlation ID for the request.
+      schema:
+        type: string
+        maxLength: 64
+    RetryAfter:
+      description: Seconds to wait before retrying.
+      schema:
+        type: integer
+        minimum: 1
+  parameters:
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      description: Optional client-supplied correlation ID (ULID or UUID).
+      schema:
+        type: string
+        pattern: "^[0-9A-Za-z-]{26,36}$"
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Required on POST operations that create resources or start workflows.
+      schema:
+        type: string
+        pattern: "^[0-9A-Za-z-]{26,36}$"
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: Entity tag for optimistic concurrency.
+      schema:
+        type: string
+        maxLength: 128
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Page size.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor from a previous page.
+      schema:
+        type: string
+        maxLength: 1024
+  schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+    Problem:
+      type: object
+      description: RFC 9457 Problem Details with platform extensions.
+      required:
+        - type
+        - title
+        - status
+        - code
+        - request_id
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]*$"
+          description: Stable machine-readable error code.
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        request_id:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - code
+      properties:
+        field:
+          type: string
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]*$"
+    PageInfo:
+      type: object
+      description: Pagination fields merged into every list response.
+      properties:
+        next_cursor:
+          type: string
+          description: Absent on the last page.
+  responses:
+    BadRequest:
+      description: Malformed request or validation failure.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthorized:
+      description: Missing or invalid session or signature.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: Authenticated but not permitted.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Not found or not visible to the caller.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: The resource is not in a state that allows the operation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    PreconditionFailed:
+      description: The If-Match entity tag does not match.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    IdempotencyKeyReused:
+      description: The idempotency key was used with a different request.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ServiceUnavailable:
+      description: A dependency is unavailable.
+      headers:
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
