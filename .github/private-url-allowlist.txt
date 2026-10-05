@@ -1,0 +1,5 @@
+# Reviewed exceptions for scripts/check-private-urls.sh (ADR-0003).
+#
+# Each entry is a fixed string on its own line. The line directly above every entry must be a
+# comment explaining why the match is not a private hostname. Matching lines are ignored.
+# Changes require maintainer review through CODEOWNERS.

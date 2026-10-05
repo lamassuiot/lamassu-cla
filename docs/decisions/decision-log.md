@@ -50,7 +50,7 @@ here, name the owner, and wait for confirmation. See [the SDD workflow](../../sp
 | ID | Decision | Status | Record |
 | --- | --- | --- | --- |
 | D-01 | Private-URL scan matches private hostnames only in URL or host contexts, allows `localhost` and `127.0.0.1` development URLs, and supports a reviewed allowlist for exceptional cases. | Decided | [ADR-0003](0003-refine-private-url-scan.md) |
-| D-04 | One AWS account per environment (`dev`, `staging`, `production`) in an EU region. Default region `eu-west-1`, unless the platform owner or a data-residency policy requires `eu-south-2`. Account IDs are never committed. | Decided (region confirmable by platform owner) | [Architecture](../../specs/architecture.md#8-environments) |
+| D-04 | One AWS account per environment (`dev`, `staging`, `production`). Region `eu-west-1`; `eu-south-2` is the only permitted alternative. Account IDs are never committed. CloudTrail and account-level S3 Block Public Access are explicit platform-owner prerequisites, not assumed from an AWS Organizations baseline. | Decided (confirmed 2026-10-05) | [Architecture](../../specs/architecture.md#8-environments), [F-03](../../specs/features/F-03-terraform-foundation.md) |
 | D-05 | Terraform S3 backend with S3-native locking (`use_lockfile = true`), one state bucket per account, created by a bootstrap stack. No DynamoDB lock table. | Decided | [Architecture](../../specs/architecture.md#9-infrastructure-as-code) |
 | D-07 | npm workspaces, with Node.js 24 pinned for CI and local development. | Decided | [ADR-0007](0007-pin-nodejs-24.md) |
 | D-17 | SQS queues, worker Lambdas, retries, visibility timeouts, and dead-letter queues. | Decided | [ADR-0008](0008-hexagonal-go-backend-on-lambda.md) |
@@ -69,7 +69,7 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 | D-06 | Human authentication: GitHub OAuth App or GitHub App user-to-server tokens; session model. | Open | Phase 4 | Security owner | GitHub App user authorization, server-side sessions in DynamoDB, opaque HttpOnly cookie. |
 | D-08 | GitHub App scope (organizations) and who registers it. | Open | Phase 8 | Organization admins | `lamassuiot` only at launch. |
 | D-09 | Required signature level and evidence package per agreement type and jurisdiction. | Direction set | Phase 6 | **Legal** | Configuration per agreement type; default to the provider's standard electronic signature until Legal decides. |
-| D-10 | Retention periods, Object Lock mode, erasure policy, data minimization. | Direction set | Phase 5 (storage), Phase 6 | **Legal**, DPO | Governance mode outside production; production mode and period set by Legal. |
+| D-10 | Retention periods, Object Lock mode, erasure policy, data minimization. | Direction set | Phase 5 (storage), Phase 6, **any production deployment** | **Legal**, DPO | Governance mode outside production; production mode and period set by Legal. Production deployment stays blocked until confirmed. |
 | D-11 | DocuSign account, environment, and integration-key ownership. | Open | Phase 6 | Repository owner | Developer (demo) account for dev and staging; production account owned by Lamassu. |
 | D-12 | Brand assets, logos, and fonts that may be used. | Direction set | Phase 3 (final values) | Design, repository owner | Open-licensed fonts; no third-party logos. |
 | D-13 | Role assignment for maintainers, legal administrators, and platform administrators. | Open | Phase 4 | Security owner | GitHub team membership mapped to roles, cached and re-checked per session. |
@@ -84,8 +84,9 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 ## Summary of decisions awaiting confirmation
 
 - **Legal:** D-03, D-09, D-10, D-14, D-15, D-20, D-21, D-22.
-- **Platform owner:** D-16; confirmation of the `eu-west-1` default region under D-04; provisioning
-  of AWS accounts and the Terraform bootstrap.
+- **Platform owner:** D-16; creation of the three AWS accounts, verification of CloudTrail and
+  account-level S3 Block Public Access, and execution of the Terraform bootstrap before any
+  environment deployment.
 - **DPO:** D-10, D-19, D-20.
 - **Security owner:** D-06, D-13, D-19.
 - **Repository owner:** D-02, D-11, D-15, D-21.

@@ -127,9 +127,10 @@ The `CI` workflow enforces, among other checks:
 - YAML syntax and GitHub configuration schemas.
 - Markdown lint for every Markdown file. Wrap bare URLs and email addresses in angle brackets.
 - No unresolved `<REPLACE_WITH_...>` placeholders outside this file.
-- A private-URL scan. Until its refinement (D-01) is merged, avoid writing the word `internal`
-  immediately followed by a dot, and `localhost` immediately followed by a colon and a port
-  number, in any file.
+- A private-URL scan (`scripts/check-private-urls.sh`, [ADR-0003](docs/decisions/0003-refine-private-url-scan.md)).
+  It fails when a URL's host contains an `internal`, `intranet`, or `corp` label. Go `internal/`
+  packages and documented `localhost` or `127.0.0.1` development URLs are allowed. Add exceptions
+  only to `.github/private-url-allowlist.txt`, each with a justification comment, through review.
 - Secret scanning of the full Git history with gitleaks.
 
 The default branch is `main`. Workflows trigger on pushes to `main`.
