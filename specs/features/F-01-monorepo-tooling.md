@@ -124,6 +124,9 @@ Implementation notes:
   and Feature resolution) but not built locally: the host's Docker daemon could not resolve
   package hosts. The configuration is not changed for this host issue (A-14); the
   `Dev Container build` CI job builds it before merge.
+- The first CI build found a real defect: the Go Feature has no `none` value for
+  `golangciLintVersion` and failed looking up tag `vnone`. The Feature now installs the pinned
+  2.14.0; `make` targets keep using `.tools/bin/golangci-lint`.
 
 ## Open questions
 
