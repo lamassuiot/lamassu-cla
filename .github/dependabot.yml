@@ -30,6 +30,20 @@ updates:
         update-types:
           - minor
           - patch
+    # Deferred major upgrades that conflict with the A-13 pins (decision A-15).
+    ignore:
+      - dependency-name: eslint
+        update-types:
+          - version-update:semver-major
+      - dependency-name: "@eslint/js"
+        update-types:
+          - version-update:semver-major
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: gomod
     directory: /services/api
