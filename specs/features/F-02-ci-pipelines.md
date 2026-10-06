@@ -83,6 +83,9 @@ None.
   configuration security scan, for every environment and module.
 - **AC-02-9** CodeQL analyzes Go and TypeScript on pull requests and weekly.
 - **AC-02-10** The required-check names are documented for the ruleset administrator.
+- **AC-02-11** The `CI` workflow's `Dev Container build` job builds `.devcontainer/` with a pinned
+  Dev Container CLI and `--frozen-lockfile`, runs `make bootstrap`, and runs `make check` in the
+  container. It is a required check (A-14). *(F-01 follow-up)*
 
 ## Automated test scenarios
 
@@ -91,6 +94,7 @@ None.
 | F02-T1 | `scripts/check-private-urls.test.sh` (14 cases). | Script | AC-02-1 to AC-02-3 |
 | F02-T2 | `actionlint` and workflow schema validation. | CI | All workflows |
 | F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). | CI | AC-02-7 |
+| F02-T4 | The `Dev Container build` job passes on the pull request that adds it. | CI | AC-02-11 |
 
 ## Observability requirements
 
@@ -105,6 +109,7 @@ maintenance window to avoid blocking merges.
 
 1. **Implemented:** refine the private-URL scan into a tested script with a reviewed allowlist;
    pin Node.js through `.nvmrc`.
+   - **F-01 follow-up:** `Dev Container build` job in `CI` (AC-02-11), approved 2026-10-06.
 2. Backend workflow.
 3. Frontend workflow.
 4. OpenAPI workflow and Redocly configuration.

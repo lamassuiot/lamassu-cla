@@ -196,3 +196,30 @@ jobs:
       - name: Scan git history for secrets
         run: |
           "$RUNNER_TEMP/gitleaks" git --redact --verbose .
+
+  devcontainer:
+    name: Dev Container build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      DEVCONTAINER_CLI_VERSION: 0.89.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install Dev Container CLI
+        run: npm install --global "@devcontainers/cli@${DEVCONTAINER_CLI_VERSION}"
+
+      # `up` also runs the postCreateCommand (`make bootstrap`).
+      - name: Build Dev Container and run bootstrap
+        run: devcontainer up --workspace-folder . --frozen-lockfile
+
+      - name: Run make check in the Dev Container
+        run: devcontainer exec --workspace-folder . make check

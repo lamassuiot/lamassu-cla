@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; implemented on `build/f-01-monorepo-tooling`, awaiting review |
+| Status | Implemented and approved (PR #6); Dev Container CI validation in follow-up PR |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | Phase 1; D-07; [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md), [ADR-0008](../../docs/decisions/0008-hexagonal-go-backend-on-lambda.md) |
-| Approved by | Repository owner, 2026-10-05 |
+| Approved by | Repository owner, 2026-10-05 (specification); 2026-10-06 (implementation, D-23, A-13, A-14) |
 
 ## Problem statement
 
@@ -43,7 +43,8 @@ Contributors and maintainers (developer experience). No end-user roles are affec
 | Layer rule violation | `depguard` in `golangci-lint` | Lint fails | Rule and import named |
 | Inline `style` attribute in the portal | ESLint `no-restricted-syntax` | Lint fails | Message pointing to design-system tokens |
 
-Stylelint enforcement of raw visual values is deferred to F-04 (D-23).
+Stylelint enforcement of token-only CSS values is deferred to F-04 (D-23, decided): keeping a
+dependency with an unfixed high-severity advisory would weaken the `dependency-review` control.
 
 ## Security considerations
 
@@ -89,7 +90,7 @@ are built in Phase 3.
 | F01-T1 | A placeholder unit test per workspace and Go package runs and passes. | Unit | AC-01-5 |
 | F01-T2 | `scripts/check-go-layering.test.sh`: 9 forbidden imports (cross-layer, adapters, I/O in `domain`) fail with a `depguard` finding; 4 allowed imports pass. | Lint | AC-01-4 |
 | F01-T3 | CI installs with `npm ci` on Node.js 24. | CI | AC-01-1 |
-| F01-T4 | The Dev Container builds, runs `make bootstrap`, and passes `make check`. | Environment | AC-01-5 |
+| F01-T4 | The `Dev Container build` CI job builds the Dev Container from the frozen lockfile, runs `make bootstrap`, and passes `make check` (F-02, A-14). | CI | AC-01-5 |
 
 ## Observability requirements
 
@@ -117,6 +118,12 @@ Implementation notes:
 - Go 1.27.1 is pinned in `go.mod`; the `Makefile` sets `GOTOOLCHAIN` so older local Go installs
   download it automatically. `golangci-lint` v2.14.0 is installed into `.tools/bin`.
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
+- The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
+  section.
+- The Dev Container configuration was validated syntactically (`devcontainer read-configuration`
+  and Feature resolution) but not built locally: the host's Docker daemon could not resolve
+  package hosts. The configuration is not changed for this host issue (A-14); the
+  `Dev Container build` CI job builds it before merge.
 
 ## Open questions
 

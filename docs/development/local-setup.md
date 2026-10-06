@@ -80,6 +80,9 @@ includes `gh`. Feature versions and digests, including that dependency, are pinn
 The container build downloads packages, so Docker must be able to resolve external hostnames. If
 `apt` reports `Temporary failure resolving`, configure DNS for the Docker daemon on the host.
 
+The `Dev Container build` CI job builds the container from the lockfile and runs `make check` in
+it on every pull request.
+
 ## Rules for local work
 
 - Never commit `.env` files, credentials, AWS account identifiers, or real personal data. Use
