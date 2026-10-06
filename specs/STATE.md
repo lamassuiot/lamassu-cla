@@ -25,6 +25,7 @@ Last updated: 2026-10-06
 | 2026-10-05 | Repository owner | Phase 1 artifacts; D-01, D-04, D-05, D-07, D-17 (ADR-0008), D-18 (ADR-0009), A-12 (ADR-0010); D-19 technical default subject to DPO; D-22 recommendation recorded subject to Legal; start of Phase 2 tooling and CI work. |
 | 2026-10-05 | Repository owner | F-01, F-02, and F-03 (implementation, no deployment); F-02 unit 1 implementation; region `eu-west-1` with `eu-south-2` as sole alternative; CloudTrail and account-level Block Public Access as explicit platform-owner prerequisites; production blocked until D-10. |
 | 2026-10-06 | Repository owner | F-01 implementation; D-23 (Stylelint deferred, token-only CSS validation moved to F-04); A-13 tool pins (Node.js 24, TypeScript 6.0.3, ESLint 9.39.5, Go 1.27.1, `golangci-lint` 2.14.0); A-14 (local Dev Container build failure accepted as a host Docker networking issue; CI must build the Dev Container before merge). |
+| 2026-10-06 | Repository owner | A-15 (Dependabot defers major upgrades of ESLint, `@eslint/js`, TypeScript, and `@types/node`; pins unchanged; review at the start of Phase 3); `Dev Container build` added as a required check in the `main` ruleset. |
 
 ## Phases
 

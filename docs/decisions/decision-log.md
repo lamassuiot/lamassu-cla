@@ -65,6 +65,12 @@ here, name the owner, and wait for confirmation. See [the SDD workflow](../../sp
 | A-13 | Tool pins: Node.js 24, TypeScript 6.0.3, ESLint 9.39.5, Go 1.27.1, `golangci-lint` 2.14.0. Changing a pin requires a reviewed PR that updates F-01. | Decided | [F-01](../../specs/features/F-01-monorepo-tooling.md#implementation-plan) |
 | A-14 | The Dev Container configuration is validated syntactically locally but was not built locally; the local failure is a host Docker DNS issue, and the configuration is not changed to work around it. The `Dev Container build` CI job builds the image and runs `make bootstrap` and `make check` before a PR can merge. | Decided | [F-02](../../specs/features/F-02-ci-pipelines.md) |
 
+## Dependency update policy (2026-10-06)
+
+| ID | Decision | Status | Record |
+| --- | --- | --- | --- |
+| A-15 | Dependabot ignores major upgrades of `eslint`, `@eslint/js`, `typescript`, and `@types/node` because they conflict with the A-13 pins: `eslint-plugin-jsx-a11y` 6.10.2 (latest) supports ESLint up to 9, `typescript-eslint` 8.71 supports TypeScript below 6.1, and `@types/node` must match the Node.js 24 runtime ([ADR-0007](0007-pin-nodejs-24.md)). Minor and patch updates continue. The pins are unchanged; upgrading any of these majors requires a reviewed PR that updates A-13 and F-01. Dependabot PRs #7 to #10 were closed under this policy. **Review point:** at the start of Phase 3 (before F-04), or earlier when `eslint-plugin-jsx-a11y` supports ESLint 10 or `typescript-eslint` supports TypeScript 7; `@types/node` is reviewed whenever the Node.js major in ADR-0007 changes. Owner: Maintainers. | Decided | [`.github/dependabot.yml`](../../.github/dependabot.yml), [F-01](../../specs/features/F-01-monorepo-tooling.md#implementation-plan) |
+
 ## Open decisions
 
 The **Confirmation required from** column names who must confirm before the dependent work starts.

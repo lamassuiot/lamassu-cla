@@ -120,6 +120,8 @@ Implementation notes:
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 - The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
   section.
+- Dependabot ignores major upgrades of `eslint`, `@eslint/js`, `typescript`, and `@types/node`
+  until the A-15 review point; minor and patch updates continue.
 - The Dev Container configuration was validated syntactically (`devcontainer read-configuration`
   and Feature resolution) but not built locally: the host's Docker daemon could not resolve
   package hosts. The configuration is not changed for this host issue (A-14); the
