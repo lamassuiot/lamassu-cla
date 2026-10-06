@@ -57,6 +57,14 @@ here, name the owner, and wait for confirmation. See [the SDD workflow](../../sp
 | D-18 | Separate `core`, `audit`, and `ephemeral` DynamoDB tables. | Decided | [ADR-0009](0009-dynamodb-table-layout.md) |
 | A-12 | The portal is hosted on CloudFront with a private S3 bucket and Origin Access Control. | Decided | [ADR-0010](0010-cloudfront-frontend-hosting.md) |
 
+## Decisions made at F-01 approval (2026-10-06)
+
+| ID | Decision | Status | Record |
+| --- | --- | --- | --- |
+| D-23 | Stylelint is deferred because its dependency `braces` has an unpatched high-severity advisory (GHSA-vfj7-8cjw-p6xm). Keeping it would weaken the `dependency-review` control. Token-only CSS validation moves to F-04, which adds Stylelint only when a patched `braces` is available or with a reviewed, time-limited `dependency-review` exception. Interim: ESLint forbids inline `style` attributes in `apps/web`. | Decided | [F-01](../../specs/features/F-01-monorepo-tooling.md), [design tokens](../../specs/ux/design-tokens.md#10-guardrails) |
+| A-13 | Tool pins: Node.js 24, TypeScript 6.0.3, ESLint 9.39.5, Go 1.27.1, `golangci-lint` 2.14.0. Changing a pin requires a reviewed PR that updates F-01. | Decided | [F-01](../../specs/features/F-01-monorepo-tooling.md#implementation-plan) |
+| A-14 | The Dev Container configuration is validated syntactically locally but was not built locally; the local failure is a host Docker DNS issue, and the configuration is not changed to work around it. The `Dev Container build` CI job builds the image and runs `make bootstrap` and `make check` before a PR can merge. | Decided | [F-02](../../specs/features/F-02-ci-pipelines.md) |
+
 ## Open decisions
 
 The **Confirmation required from** column names who must confirm before the dependent work starts.
@@ -80,7 +88,6 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 | D-20 | Lawful basis and privacy notice for contributor and signer data. | Open | Phase 4 (sign-in), Phase 6 | **Legal**, DPO | None. Legal decision. |
 | D-21 | Supported languages for the portal and agreement text. | Open | Phase 3, Phase 5 | Repository owner, **Legal** | English first; others only with Legal-approved translations. |
 | D-22 | When a new CLA version is published, must contributors with an active agreement on an older version re-sign, and by when? | Open (recommendation recorded) | Phase 5, Phase 8 | **Legal** | Substantive legal or scope changes require re-signing; purely editorial changes do not. Each published version records its change classification, set by Legal. Subject to Legal approval. |
-| D-23 | Stylelint depends on `braces`, which has an unpatched high-severity advisory (GHSA-vfj7-8cjw-p6xm, all versions up to 3.0.3). Defer Stylelint, or add a `dependency-review` exception? | Proposed | F-04 (token enforcement in CSS) | Maintainers, Security owner | Defer Stylelint until F-04. F-04 adds it only when a patched `braces` is available, or with a reviewed, time-limited `dependency-review` exception (dev-only exposure, no untrusted brace patterns). Interim: ESLint forbids inline `style` attributes in `apps/web`. |
 
 ## Summary of decisions awaiting confirmation
 

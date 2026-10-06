@@ -3,16 +3,19 @@
 This file is the orchestrator's task-state record. Update it when a task starts, is blocked, or
 completes. See [the SDD workflow](sdd-workflow.md).
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 ## Current position
 
 - **Phase:** 1 complete (PR #4). Phase 2 in progress.
-- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 implementation submitted in [PR #6](https://github.com/lamassuiot/lamassu-cla/pull/6).
+- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6) and approved. A follow-up PR from
+  `build/f-01-monorepo-tooling` records the approval and adds the `Dev Container build` CI job.
+  F-02 units 2–6 start only after that PR passes review and merges.
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Review of the F-01 implementation and decision D-23 (Stylelint deferral).
+- **Next gate:** Review and merge of the F-01 follow-up PR, with the `Dev Container build` check
+  passing.
 
 ## Approvals
 
@@ -21,6 +24,7 @@ Last updated: 2026-10-05
 | 2026-10-05 | Repository owner | [Discovery report](discovery-report.md), Phase 1 deliverable order, decisions A-01 to A-11. |
 | 2026-10-05 | Repository owner | Phase 1 artifacts; D-01, D-04, D-05, D-07, D-17 (ADR-0008), D-18 (ADR-0009), A-12 (ADR-0010); D-19 technical default subject to DPO; D-22 recommendation recorded subject to Legal; start of Phase 2 tooling and CI work. |
 | 2026-10-05 | Repository owner | F-01, F-02, and F-03 (implementation, no deployment); F-02 unit 1 implementation; region `eu-west-1` with `eu-south-2` as sole alternative; CloudTrail and account-level Block Public Access as explicit platform-owner prerequisites; production blocked until D-10. |
+| 2026-10-06 | Repository owner | F-01 implementation; D-23 (Stylelint deferred, token-only CSS validation moved to F-04); A-13 tool pins (Node.js 24, TypeScript 6.0.3, ESLint 9.39.5, Go 1.27.1, `golangci-lint` 2.14.0); A-14 (local Dev Container build failure accepted as a host Docker networking issue; CI must build the Dev Container before merge). |
 
 ## Phases
 
@@ -54,10 +58,10 @@ Feature specifications are written at the start of the phase that implements the
 
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Implemented; awaiting review |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); units 2–6 next |
+| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Approved and merged (PR #6); Dev Container CI validation in follow-up PR |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job in F-01 follow-up; units 2–6 after it merges |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Approved (no deployment) |
-| F-04 | Design tokens and themes | 3 | F-01 | Not started |
+| F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
