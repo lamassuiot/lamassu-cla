@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; all units implemented (unit 4 partially: generated client deferred, A-18) |
+| Status | Approved; all units implemented (unit 5 in review; unit 4 partially: generated client deferred, A-18) |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
