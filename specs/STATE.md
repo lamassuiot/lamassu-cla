@@ -8,14 +8,13 @@ Last updated: 2026-10-06
 ## Current position
 
 - **Phase:** 1 complete (PR #4). Phase 2 in progress.
-- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6) and approved. A follow-up PR from
-  `build/f-01-monorepo-tooling` records the approval and adds the `Dev Container build` CI job.
-  F-02 units 2–6 start only after that PR passes review and merges.
+- **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6), approved, and completed by
+  PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
+  (PR #12).
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Review and merge of the F-01 follow-up PR, with the `Dev Container build` check
-  passing.
+- **Next gate:** F-02 units 2–6 (approved 2026-10-05).
 
 ## Approvals
 
@@ -26,6 +25,7 @@ Last updated: 2026-10-06
 | 2026-10-05 | Repository owner | F-01, F-02, and F-03 (implementation, no deployment); F-02 unit 1 implementation; region `eu-west-1` with `eu-south-2` as sole alternative; CloudTrail and account-level Block Public Access as explicit platform-owner prerequisites; production blocked until D-10. |
 | 2026-10-06 | Repository owner | F-01 implementation; D-23 (Stylelint deferred, token-only CSS validation moved to F-04); A-13 tool pins (Node.js 24, TypeScript 6.0.3, ESLint 9.39.5, Go 1.27.1, `golangci-lint` 2.14.0); A-14 (local Dev Container build failure accepted as a host Docker networking issue; CI must build the Dev Container before merge). |
 | 2026-10-06 | Repository owner | A-15 (Dependabot defers major upgrades of ESLint, `@eslint/js`, TypeScript, and `@types/node`; pins unchanged; review at the start of Phase 3); `Dev Container build` added as a required check in the `main` ruleset. |
+| 2026-10-07 | Repository owner | A-16 (Dependabot defers TypeScript `>=6.1.0` until `typescript-eslint` supports it; 6.0 patch updates continue). |
 
 ## Phases
 
@@ -59,8 +59,8 @@ Feature specifications are written at the start of the phase that implements the
 
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
-| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Approved and merged (PR #6); Dev Container CI validation in follow-up PR |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job in F-01 follow-up; units 2–6 after it merges |
+| F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11) |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); units 2–6 next |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Approved (no deployment) |
 | F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |

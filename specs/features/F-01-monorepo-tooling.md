@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Implemented and approved (PR #6); Dev Container CI validation in follow-up PR |
+| Status | Done (PR #6; Dev Container CI validation in PR #11) |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | Phase 1; D-07; [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md), [ADR-0008](../../docs/decisions/0008-hexagonal-go-backend-on-lambda.md) |
@@ -120,8 +120,9 @@ Implementation notes:
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 - The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
   section.
-- Dependabot ignores major upgrades of `eslint`, `@eslint/js`, `typescript`, and `@types/node`
-  until the A-15 review point; minor and patch updates continue.
+- Dependabot ignores major upgrades of `eslint`, `@eslint/js`, and `@types/node`, and every
+  `typescript` version `>=6.1.0`, until the A-15 and A-16 review points; other minor and patch
+  updates continue.
 - The Dev Container configuration was validated syntactically (`devcontainer read-configuration`
   and Feature resolution) but not built locally: the host's Docker daemon could not resolve
   package hosts. The configuration is not changed for this host issue (A-14); the
