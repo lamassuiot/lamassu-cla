@@ -12,11 +12,13 @@ Last updated: 2026-10-07
   PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
   merged (PR #15); unit 3 (frontend workflow) merged (PR #17). Unit 4 (OpenAPI lint; generated
-  client deferred by A-18) in review on `ci/openapi-workflow`.
+  client deferred by A-18) merged (PR #18). Unit 6 (CodeQL and required-check list) in review on
+  `ci/codeql-required-checks`. Unit 5 (Terraform workflow) ships with the first F-03 code.
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Review of F-02 unit 4; then F-02 units 5–6 (approved 2026-10-05).
+- **Next gate:** Review of F-02 unit 6; then F-03 with F-02 unit 5 (approved 2026-10-05; no
+  deployment).
 
 ## Approvals
 
@@ -64,7 +66,7 @@ Feature specifications are written at the start of the phase that implements the
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 in review (generated client deferred, A-18); units 5–6 next |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 in review; unit 5 with F-03 |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Approved (no deployment) |
 | F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |

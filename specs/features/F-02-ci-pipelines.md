@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; units 1 to 4 implemented (unit 4 partially: generated client deferred, A-18) |
+| Status | Approved; units 1 to 4 and 6 implemented (unit 4 partially: generated client deferred, A-18); unit 5 delivered with F-03 |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
@@ -85,8 +85,8 @@ None.
   API operations through `packages/api-client`)*.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a
   configuration security scan, for every environment and module.
-- **AC-02-9** CodeQL analyzes Go and TypeScript on pull requests and weekly.
-- **AC-02-10** The required-check names are documented for the ruleset administrator.
+- **AC-02-9** CodeQL analyzes Go and TypeScript on pull requests and weekly. *(Unit 6)*
+- **AC-02-10** The required-check names are documented for the ruleset administrator. *(Unit 6)*
 - **AC-02-11** The `CI` workflow's `Dev Container build` job builds `.devcontainer/` with a pinned
   Dev Container CLI and `--frozen-lockfile`, runs `make bootstrap`, and runs `make check` in the
   container. It is a required check (A-14). *(F-01 follow-up)*
@@ -102,6 +102,8 @@ None.
 | F02-T5 | The `Backend` workflow's `Go checks` and `Go vulnerability scan` jobs pass on the pull request that adds them. | CI | AC-02-5 |
 | F02-T6 | The `Frontend` workflow's `Frontend checks` job passes on the pull request that adds it. | CI | AC-02-6 |
 | F02-T7 | `redocly lint` passes on the contract and fails on a deliberately invalid contract (verified once during implementation); the `OpenAPI lint` job passes on the pull request that adds it. | CI | AC-02-7 (lint) |
+| F02-T8 | The `CodeQL Go` and `CodeQL TypeScript` jobs complete and upload results on the pull request that adds them. | CI | AC-02-9 |
+| F02-T9 | Every check name in the [required-check list](#required-checks) matches a job name reported on a pull request. | CI | AC-02-10 |
 
 ## Observability requirements
 
@@ -122,8 +124,10 @@ maintenance window to avoid blocking merges.
 4. **Implemented (partially):** OpenAPI workflow (`.github/workflows/openapi.yml`) and Redocly
    configuration (`redocly.yaml`).
    - **Deferred (A-18):** generated API client in `packages/api-client` and its drift check.
-5. Terraform workflow (with F-03).
-6. CodeQL workflow and required-check documentation.
+5. Terraform workflow, delivered in the same pull request as the first F-03 Terraform code, because
+   there is nothing to validate before `infra/` exists.
+6. **Implemented:** CodeQL workflow (`.github/workflows/codeql.yml`) and the
+   [required-check list](#required-checks).
 
 Implementation notes (unit 2):
 
@@ -159,6 +163,57 @@ Implementation notes (unit 4):
 - The generated client and drift check are deferred by A-18: the evaluated candidates conflict
   with TypeScript 6.0.3, introduce audit vulnerabilities, or need further evaluation. The
   TypeScript pin is unchanged and no npm `overrides` are added.
+
+Implementation notes (unit 6):
+
+- CodeQL runs as two jobs instead of a matrix, because a skipped matrix job reports an unexpanded
+  name that never satisfies a required check. `CodeQL Go` builds `services/api` manually;
+  `CodeQL TypeScript` uses `build-mode: none`. Both use the default query suite.
+- Path filtering follows units 2 to 4: analysis runs when Go, JavaScript, or TypeScript sources,
+  workspace directories, npm manifests, TypeScript configuration, or the workflow change. Pushes
+  to `main` and the weekly schedule (Mondays 06:30 UTC) always analyze.
+- Only the analysis jobs get `security-events: write`. `github/codeql-action` is pinned to the
+  v4.38.2 commit already used by the Scorecard workflow.
+- Code scanning default setup is not configured for the repository. Enabling it would conflict
+  with this workflow; keep it disabled.
+
+### Required checks
+
+Configuring the `main` ruleset is a manual administrator task; this list is the source of truth.
+Names are the job names that GitHub reports on pull requests.
+
+| Check | Workflow | Required since |
+| --- | --- | --- |
+| `Validate PR title format` | Lint PR Title | Instantiation |
+| `Validate repository template` | CI | Instantiation |
+| `GitHub Actions security lint` | CI | Instantiation |
+| `Secret scan` | CI | Instantiation |
+| `Dependency review` | CI | Instantiation |
+| `Dev Container build` | CI | A-14 |
+| `Detect backend changes` | Backend | To add |
+| `Go checks` | Backend | To add |
+| `Go vulnerability scan` | Backend | To add |
+| `Detect frontend changes` | Frontend | To add |
+| `Frontend checks` | Frontend | To add |
+| `Detect OpenAPI changes` | OpenAPI | To add |
+| `OpenAPI lint` | OpenAPI | To add |
+| `Detect CodeQL changes` | CodeQL | To add |
+| `CodeQL Go` | CodeQL | To add |
+| `CodeQL TypeScript` | CodeQL | To add |
+
+Notes for the administrator:
+
+- Jobs skipped by path filtering report success, so every check above can be required without
+  blocking documentation-only pull requests. Requiring the `Detect ...` jobs makes a detection
+  failure visible.
+- `Go vulnerability scan` queries the Go vulnerability database. A newly published advisory for the
+  pinned Go toolchain or a module blocks backend pull requests until the pin is updated; this is
+  intended.
+- A successful `CodeQL ...` job means the analysis completed, not that no alerts exist. Blocking
+  merges on code scanning alerts needs the ruleset's code scanning rule, which is a separate
+  decision.
+- `OpenSSF Scorecard`, `Release`, and checks from external GitHub Apps are not required.
+- Terraform checks are added to this list with unit 5.
 
 ## Open questions
 
