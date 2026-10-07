@@ -25,8 +25,16 @@ infrastructure, and pluggable electronic-signature integrations.
 
 ### Prerequisites
 
-There are no technical prerequisites for using or contributing to the repository.
-Environment-specific requirements are documented in the development and deployment guides.
+The recommended development environment is the repository Dev Container. It provides the pinned versions of Node.js, npm, Go, GNU Make, and the project tooling.
+
+To use it, install:
+
+* Docker Desktop or Docker Engine
+* Visual Studio Code
+* Dev Containers extension for VS Code
+* Git
+
+Alternatively, local development without the Dev Container requires Node.js 24, npm, Go, GNU Make, and the tools documented in the local setup guide.
 
 ### Installation and usage
 
