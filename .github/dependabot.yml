@@ -54,3 +54,21 @@ updates:
         update-types:
           - minor
           - patch
+
+  # Root modules commit provider lock files; reusable modules only declare constraints.
+  - package-ecosystem: terraform
+    directories:
+      - /infra/bootstrap
+      - /infra/environments/*
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "build"
+    groups:
+      terraform-providers:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch

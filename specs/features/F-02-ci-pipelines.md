@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; units 1 to 4 and 6 implemented (unit 4 partially: generated client deferred, A-18); unit 5 delivered with F-03 |
+| Status | Approved; all units implemented (unit 5 in review; unit 4 partially: generated client deferred, A-18) |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
@@ -84,7 +84,7 @@ None.
   generated-client drift check *(**deferred** by A-18; still required before any feature consumes
   API operations through `packages/api-client`)*.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a
-  configuration security scan, for every environment and module.
+  configuration security scan, for every environment and module. *(Unit 5)*
 - **AC-02-9** CodeQL analyzes Go and TypeScript on pull requests and weekly. *(Unit 6)*
 - **AC-02-10** The required-check names are documented for the ruleset administrator. *(Unit 6)*
 - **AC-02-11** The `CI` workflow's `Dev Container build` job builds `.devcontainer/` with a pinned
@@ -104,6 +104,7 @@ None.
 | F02-T7 | `redocly lint` passes on the contract and fails on a deliberately invalid contract (verified once during implementation); the `OpenAPI lint` job passes on the pull request that adds it. | CI | AC-02-7 (lint) |
 | F02-T8 | The `CodeQL Go` and `CodeQL TypeScript` jobs complete and upload results on the pull request that adds them. | CI | AC-02-9 |
 | F02-T9 | Every check name in the [required-check list](#required-checks) matches a job name reported on a pull request. | CI | AC-02-10 |
+| F02-T10 | The `Terraform` workflow's `Terraform checks`, `TFLint`, and `Terraform security scan` jobs pass on the pull request that adds them; Trivy fails on a deliberately weakened bucket module (verified once during implementation). | CI | AC-02-8 |
 
 ## Observability requirements
 
@@ -124,8 +125,7 @@ maintenance window to avoid blocking merges.
 4. **Implemented (partially):** OpenAPI workflow (`.github/workflows/openapi.yml`) and Redocly
    configuration (`redocly.yaml`).
    - **Deferred (A-18):** generated API client in `packages/api-client` and its drift check.
-5. Terraform workflow, delivered in the same pull request as the first F-03 Terraform code, because
-   there is nothing to validate before `infra/` exists.
+5. **Implemented:** Terraform workflow (`.github/workflows/terraform.yml`), delivered with F-03.
 6. **Implemented:** CodeQL workflow (`.github/workflows/codeql.yml`) and the
    [required-check list](#required-checks).
 
@@ -177,6 +177,19 @@ Implementation notes (unit 6):
 - Code scanning default setup is not configured for the repository. Enabling it would conflict
   with this workflow; keep it disabled.
 
+Implementation notes (unit 5):
+
+- `Terraform checks` runs `make fmt-terraform` and `make test-terraform` (init without a backend,
+  `validate`, and plan-only `terraform test` with mocked providers) for every module and root.
+  `TFLint` runs `make lint-terraform`; `Terraform security scan` runs `make scan-terraform`.
+- No job assumes an AWS role or reads credentials. Plans against real accounts belong to the
+  deployment workflow (F-03 step 5), which is not implemented.
+- Terraform 1.16.5 and TFLint 0.64.0 match the Dev Container. `hashicorp/setup-terraform` and
+  `terraform-linters/setup-tflint` are pinned by commit SHA. Trivy is downloaded by the `Makefile`
+  and verified against a pinned SHA-256; no third-party scanning action is used (A-19).
+- Path filtering follows the other workflows: the jobs run when `infra/`, `.tflint.hcl`, the
+  `Makefile`, or the workflow change.
+
 ### Required checks
 
 Configuring the `main` ruleset is a manual administrator task; this list is the source of truth.
@@ -190,16 +203,20 @@ Names are the job names that GitHub reports on pull requests.
 | `Secret scan` | CI | Instantiation |
 | `Dependency review` | CI | Instantiation |
 | `Dev Container build` | CI | A-14 |
-| `Detect backend changes` | Backend | To add |
-| `Go checks` | Backend | To add |
-| `Go vulnerability scan` | Backend | To add |
-| `Detect frontend changes` | Frontend | To add |
-| `Frontend checks` | Frontend | To add |
-| `Detect OpenAPI changes` | OpenAPI | To add |
-| `OpenAPI lint` | OpenAPI | To add |
-| `Detect CodeQL changes` | CodeQL | To add |
-| `CodeQL Go` | CodeQL | To add |
-| `CodeQL TypeScript` | CodeQL | To add |
+| `Detect backend changes` | Backend | 2026-10-07 |
+| `Go checks` | Backend | 2026-10-07 |
+| `Go vulnerability scan` | Backend | 2026-10-07 |
+| `Detect frontend changes` | Frontend | 2026-10-07 |
+| `Frontend checks` | Frontend | 2026-10-07 |
+| `Detect OpenAPI changes` | OpenAPI | 2026-10-07 |
+| `OpenAPI lint` | OpenAPI | 2026-10-07 |
+| `Detect CodeQL changes` | CodeQL | 2026-10-07 |
+| `CodeQL Go` | CodeQL | 2026-10-07 |
+| `CodeQL TypeScript` | CodeQL | 2026-10-07 |
+| `Detect Terraform changes` | Terraform | To add after unit 5 merges |
+| `Terraform checks` | Terraform | To add after unit 5 merges |
+| `TFLint` | Terraform | To add after unit 5 merges |
+| `Terraform security scan` | Terraform | To add after unit 5 merges |
 
 Notes for the administrator:
 
@@ -213,7 +230,8 @@ Notes for the administrator:
   merges on code scanning alerts needs the ruleset's code scanning rule, which is a separate
   decision.
 - `OpenSSF Scorecard`, `Release`, and checks from external GitHub Apps are not required.
-- Terraform checks are added to this list with unit 5.
+- Add a check to the ruleset only after the workflow that reports it is on `main`; otherwise
+  open pull requests based on an older `main` cannot satisfy it.
 
 ## Open questions
 

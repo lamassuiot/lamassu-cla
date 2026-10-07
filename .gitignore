@@ -13,6 +13,11 @@ coverage/
 *.tfstate.*
 *.tfplan
 crash.log
+# Local backend overrides used once during bootstrap (docs/operations/terraform-bootstrap.md)
+override.tf
+*_override.tf
+# Reusable modules do not pin providers; only root modules commit lock files
+infra/modules/**/.terraform.lock.hcl
 
 # Local environment files may contain secrets
 .env
