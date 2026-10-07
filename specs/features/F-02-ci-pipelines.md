@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; units 1 and 2 implemented |
+| Status | Approved; units 1 to 3 implemented |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
@@ -78,6 +78,7 @@ None.
   *(Unit 2)*
 - **AC-02-6** Frontend workflow: `npm ci`, type check, Biome (`biome ci`), the TypeScript
   directive check, Vitest, and build. Token-only CSS validation is added with F-04 (D-23, A-17).
+  *(Unit 3)*
 - **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration and a generated-client
   drift check.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a
@@ -97,6 +98,7 @@ None.
 | F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). | CI | AC-02-7 |
 | F02-T4 | The `Dev Container build` job passes on the pull request that adds it. | CI | AC-02-11 |
 | F02-T5 | The `Backend` workflow's `Go checks` and `Go vulnerability scan` jobs pass on the pull request that adds them. | CI | AC-02-5 |
+| F02-T6 | The `Frontend` workflow's `Frontend checks` job passes on the pull request that adds it. | CI | AC-02-6 |
 
 ## Observability requirements
 
@@ -113,7 +115,7 @@ maintenance window to avoid blocking merges.
    pin Node.js through `.nvmrc`.
    - **F-01 follow-up:** `Dev Container build` job in `CI` (AC-02-11), approved 2026-10-06.
 2. **Implemented:** backend workflow (`.github/workflows/backend.yml`).
-3. Frontend workflow.
+3. **Implemented:** frontend workflow (`.github/workflows/frontend.yml`).
 4. OpenAPI workflow and Redocly configuration.
 5. Terraform workflow (with F-03).
 6. CodeQL workflow and required-check documentation.
@@ -128,6 +130,14 @@ Implementation notes (unit 2):
   `govulncheck` is pinned to v1.8.0 in the `Makefile` (`make vuln-go`); it needs network access
   and is not part of `make check`.
 - The weekly schedule (Mondays 06:00 UTC) runs only `Go vulnerability scan`.
+
+Implementation notes (unit 3):
+
+- `Frontend checks` uses the same in-job path filtering as unit 2. Because Biome checks the whole
+  repository, it runs when `apps/`, `packages/`, `.biome/`, the TypeScript directive scripts,
+  `.npmrc`, `.nvmrc`, `.gitignore`, the workflow, or any JavaScript, TypeScript, JSON, CSS, or
+  HTML file changes.
+- Steps call the root npm scripts, as `make lint-web`, `make test-web`, and `make build-web` do.
 
 ## Open questions
 
