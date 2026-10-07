@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 implemented |
+| Status | Approved; units 1 and 2 implemented |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
@@ -75,6 +75,7 @@ None.
 - **AC-02-4** Every workflow that sets up Node.js uses `node-version-file: .nvmrc`, which contains
   `24`. *(Unit 1)*
 - **AC-02-5** Backend workflow: `go vet`, `golangci-lint`, `go test -race`, and `govulncheck`.
+  *(Unit 2)*
 - **AC-02-6** Frontend workflow: `npm ci`, type check, Biome (`biome ci`), the TypeScript
   directive check, Vitest, and build. Token-only CSS validation is added with F-04 (D-23, A-17).
 - **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration and a generated-client
@@ -95,6 +96,7 @@ None.
 | F02-T2 | `actionlint` and workflow schema validation. | CI | All workflows |
 | F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). | CI | AC-02-7 |
 | F02-T4 | The `Dev Container build` job passes on the pull request that adds it. | CI | AC-02-11 |
+| F02-T5 | The `Backend` workflow's `Go checks` and `Go vulnerability scan` jobs pass on the pull request that adds them. | CI | AC-02-5 |
 
 ## Observability requirements
 
@@ -110,11 +112,22 @@ maintenance window to avoid blocking merges.
 1. **Implemented:** refine the private-URL scan into a tested script with a reviewed allowlist;
    pin Node.js through `.nvmrc`.
    - **F-01 follow-up:** `Dev Container build` job in `CI` (AC-02-11), approved 2026-10-06.
-2. Backend workflow.
+2. **Implemented:** backend workflow (`.github/workflows/backend.yml`).
 3. Frontend workflow.
 4. OpenAPI workflow and Redocly configuration.
 5. Terraform workflow (with F-03).
 6. CodeQL workflow and required-check documentation.
+
+Implementation notes (unit 2):
+
+- Path filtering runs in a `Detect backend changes` job, not in `on.pull_request.paths`: a
+  workflow skipped by a path filter leaves required checks pending, while a job skipped by `if`
+  reports success. Backend jobs run when `services/api/`, the `Makefile`, or the workflow
+  changes, on every push to `main`, and whenever detection does not report `false`.
+- Jobs call the `make` targets, so CI and local runs share the Go toolchain and tool pins.
+  `govulncheck` is pinned to v1.8.0 in the `Makefile` (`make vuln-go`); it needs network access
+  and is not part of `make check`.
+- The weekly schedule (Mondays 06:00 UTC) runs only `Go vulnerability scan`.
 
 ## Open questions
 

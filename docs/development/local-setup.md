@@ -25,7 +25,8 @@ make check
 ```
 
 `make bootstrap` installs npm dependencies from `package-lock.json` (`npm ci`) and installs the
-pinned `golangci-lint` into `.tools/bin`. `make check` runs lint, tests, and builds as CI does.
+pinned `golangci-lint` and `govulncheck` into `.tools/bin`. `make check` runs lint, tests, and
+builds as CI does.
 
 ## Make targets
 
@@ -36,6 +37,7 @@ pinned `golangci-lint` into `.tools/bin`. `make check` runs lint, tests, and bui
 | `make tools` | Installs pinned Go tools into `.tools/bin` only. |
 | `make lint` | Biome lint and format check (`biome ci`), TypeScript type check, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, and the TypeScript directive check. |
 | `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, and layering rules). |
+| `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
 | `make build` | Builds the portal with Vite and the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
 | `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |
 | `make check` | `lint`, `test`, and `build`. |

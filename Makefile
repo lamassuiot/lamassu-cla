@@ -10,6 +10,8 @@ GO_TOOLCHAIN := go1.27.1
 GOLANGCI_LINT_VERSION := v2.14.0
 TOOLS_BIN := $(CURDIR)/.tools/bin
 GOLANGCI_LINT := $(TOOLS_BIN)/golangci-lint
+GOVULNCHECK_VERSION := v1.8.0
+GOVULNCHECK := $(TOOLS_BIN)/govulncheck
 LAMBDA_FUNCTIONS := api
 
 export GOTOOLCHAIN := $(GO_TOOLCHAIN)
@@ -24,10 +26,13 @@ bootstrap: tools ## Install npm dependencies from the lockfile and pinned Go too
 	cd $(GO_DIR) && go mod download
 
 .PHONY: tools
-tools: $(GOLANGCI_LINT) ## Install pinned Go tools into .tools/bin.
+tools: $(GOLANGCI_LINT) $(GOVULNCHECK) ## Install pinned Go tools into .tools/bin.
 
 $(GOLANGCI_LINT):
 	GOBIN=$(TOOLS_BIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION)
+
+$(GOVULNCHECK):
+	GOBIN=$(TOOLS_BIN) go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
 
 .PHONY: lint
 lint: lint-web lint-go lint-repo ## Run all linters.
@@ -57,6 +62,10 @@ test-web:
 .PHONY: test-go
 test-go:
 	cd $(GO_DIR) && go test -race ./...
+
+.PHONY: vuln-go
+vuln-go: $(GOVULNCHECK) ## Scan the Go module and toolchain for known vulnerabilities (needs network).
+	cd $(GO_DIR) && $(GOVULNCHECK) ./...
 
 .PHONY: test-scripts
 test-scripts: $(GOLANGCI_LINT)
