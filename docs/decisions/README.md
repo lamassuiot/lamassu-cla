@@ -33,6 +33,7 @@ Write an ADR when a decision:
 | [0008](0008-hexagonal-go-backend-on-lambda.md) | Hexagonal Go backend on Lambda with asynchronous workers | Accepted |
 | [0009](0009-dynamodb-table-layout.md) | DynamoDB table layout | Accepted |
 | [0010](0010-cloudfront-frontend-hosting.md) | CloudFront frontend hosting | Accepted |
+| [0011](0011-biome-for-javascript-and-typescript.md) | Biome for JavaScript and TypeScript formatting and linting | Accepted |
 
 ## ADR format
 

@@ -1,0 +1,7 @@
+`delete $object[$key]` as $expression where {
+  not $key <: or {
+    JsStringLiteralExpression(),
+    JsNumberLiteralExpression()
+  },
+  register_diagnostic(span=$expression, message="Do not delete dynamically computed keys. Use a Map or rebuild the object instead.")
+}

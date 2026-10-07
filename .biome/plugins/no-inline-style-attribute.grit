@@ -1,0 +1,4 @@
+JsxAttribute(name=$name) as $attribute where {
+  $name <: `style`,
+  register_diagnostic(span=$attribute, message="Use design-system components and tokens instead of inline styles.")
+}

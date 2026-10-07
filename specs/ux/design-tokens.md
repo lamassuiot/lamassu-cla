@@ -226,8 +226,8 @@ audit-event display, and hash display.
 
 | Rule | Enforcement |
 | --- | --- |
-| Components are implemented once and reused. Pages compose components and do not define one-off button, card, or form styles. | Code review; ESLint rule restricting style definitions to `packages/design-system`. |
-| Only tokens are used for visual values. | Stylelint rules rejecting raw color, spacing, radius, shadow, and duration values outside the tokens package, added with F-04 (D-23). Until then, ESLint forbids inline `style` attributes in `apps/web`. |
+| Components are implemented once and reused. Pages compose components and do not define one-off button, card, or form styles. | Code review; Biome rule and plugin forbidding inline `style` attributes in `apps/web` ([ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md)). |
+| Only tokens are used for visual values. | CSS rules rejecting raw color, spacing, radius, shadow, and duration values outside the tokens package, added with F-04 (D-23, A-17). Until then, Biome forbids inline `style` attributes in `apps/web`. |
 | A new color requires a token change and an update to this specification with a contrast check. | Change control in [the SDD workflow](../sdd-workflow.md#3-change-control). |
 | A new spacing value requires written justification in the PR and an update to this specification. | Code review. |
 | Every component has a preview story in light and dark themes, including loading, empty, error, and disabled states where applicable. | Storybook coverage check in CI. |
