@@ -1,0 +1,91 @@
+name: Frontend
+
+# Path filtering happens in the `changes` job: skipped jobs satisfy required checks, while
+# workflows skipped by `on.pull_request.paths` leave them pending.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect frontend changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Detect changed paths
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          frontend=true
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            # HEAD is the PR merge commit, so HEAD^1 is the base branch.
+            changed=$(git diff --name-only HEAD^1 HEAD)
+            # Biome checks these file types anywhere in the repository.
+            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
+            pattern+='|\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css|html)$'
+            if ! grep -qE "$pattern" <<<"$changed"; then
+              frontend=false
+            fi
+          fi
+          echo "frontend=$frontend" >> "$GITHUB_OUTPUT"
+          echo "Frontend checks required: $frontend" >> "$GITHUB_STEP_SUMMARY"
+
+  web:
+    name: Frontend checks
+    needs: changes
+    # Runs unless detection explicitly reported no frontend changes, so a detection failure
+    # cannot skip the checks.
+    if: ${{ always() && needs.changes.outputs.frontend != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Biome
+        run: npm run lint
+
+      - name: TypeScript directive check
+        run: |
+          scripts/check-ts-directives.test.sh
+          scripts/check-ts-directives.sh
+
+      - name: Vitest
+        run: npm test
+
+      - name: Build
+        run: npm run build
