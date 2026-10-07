@@ -43,6 +43,13 @@ builds as CI does.
 | `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |
 | `make check` | `lint`, `test`, and `build`. |
 | `make clean` | Removes build output. |
+| `make check-terraform` | `fmt-terraform`, `validate-terraform`, `test-terraform`, `lint-terraform`, and `scan-terraform`. Needs Terraform and TFLint (Dev Container) but no AWS access; not part of `make check`. |
+| `make test-terraform` | Validates every module and root without a backend and runs plan-only `terraform test` with mocked providers. |
+| `make lint-terraform` | TFLint with the pinned AWS ruleset (`.tflint.hcl`). |
+| `make scan-terraform` | Trivy configuration scan of `infra/`; installs the pinned, checksum-verified Trivy into `.tools/bin`. Fails on high and critical findings. |
+
+The [Terraform bootstrap guide](../operations/terraform-bootstrap.md) covers the platform-owner
+steps that precede any deployment.
 
 ## Workspaces
 

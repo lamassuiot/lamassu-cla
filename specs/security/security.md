@@ -143,7 +143,7 @@ Model choice is open (D-06). Regardless of the choice:
 - One IAM role per Lambda function with only the actions and resources it needs.
 - The `audit` table denies `UpdateItem` and `DeleteItem` to all application roles.
 - Object Lock bypass permission is not granted to application or deployment roles.
-- Terraform is scanned in CI (for example with Checkov or Trivy) and TFLint.
+- Terraform is scanned in CI with Trivy (A-19) and TFLint.
 
 ## 10. Supply chain
 
