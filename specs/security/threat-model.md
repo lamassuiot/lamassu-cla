@@ -17,6 +17,7 @@
 | GitHub App private key and webhook secret | Control over repositories where the App is installed. |
 | Signing-provider credentials | Ability to create envelopes and read signed documents. |
 | Published CLA text and hashes | Defines what contributors agreed to. |
+| Terraform state | Infrastructure configuration and resource metadata; unauthorized access or modification can expose environment details or alter deployments. |
 
 ## 2. Trust boundaries
 
@@ -52,6 +53,7 @@ service, **E**levation of privilege.
 | T-16 | Open redirect in sign-in or signing return | S | Exact redirect URI registration; relative-path allowlist for `return_to`; one-time return nonce bound to the signing session. | None significant. | Security tests |
 | T-17 | Compromised CI or deployment pipeline | E, T | OIDC trust restricted to repository and environment; production approval; SHA-pinned actions; protected branches with signed commits and Code Owner review. | Maintainer account compromise. | Configuration review |
 | T-18 | Disclosure through the public repository | I | Policy in `AGENTS.md`; gitleaks; private-URL scan; synthetic fixtures; no environment identifiers committed. | Human error. | CI |
+| T-19 | Disclosure or tampering of Terraform state | I, T, E | Private S3 state bucket with Block Public Access, SSE-KMS, versioning, and TLS-only access; GitHub OIDC trust restricted to this repository and environment; deployment role scoped to that environment's state objects and KMS key. | Privileged AWS or repository administrator compromise; state may contain sensitive provider values if future resources record them. | F-03 infrastructure tests; IAM policy review |
 
 ## 4. Review cadence
 
