@@ -29,10 +29,10 @@ The recommended development environment is the repository Dev Container. It prov
 
 To use it, install:
 
-- Docker Desktop or Docker Engine
-- Visual Studio Code
-- Dev Containers extension for VS Code
-- Git
+* Docker Desktop or Docker Engine
+* Visual Studio Code
+* Dev Containers extension for VS Code
+* Git
 
 Alternatively, local development without the Dev Container requires Node.js 24, npm, Go, GNU Make, and the tools documented in the local setup guide.
 
