@@ -1,0 +1,7 @@
+# Redocly CLI configuration for the OpenAPI contract (F-02 unit 4, A-18).
+telemetry: "off"
+apis:
+  main:
+    root: specs/api/openapi.yaml
+extends:
+  - recommended-strict

@@ -1,2 +1,2 @@
-// The typed client is generated from specs/api/openapi.yaml in F-02 (OpenAPI workflow).
+// Generating the typed client from specs/api/openapi.yaml is deferred (decision A-18).
 export const apiBasePath = '/v1';

@@ -1,0 +1,75 @@
+name: OpenAPI
+
+# Path filtering happens in the `changes` job: skipped jobs satisfy required checks, while
+# workflows skipped by `on.pull_request.paths` leave them pending.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect OpenAPI changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      openapi: ${{ steps.filter.outputs.openapi }}
+    steps:
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Detect changed paths
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          openapi=true
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            # HEAD is the PR merge commit, so HEAD^1 is the base branch.
+            changed=$(git diff --name-only HEAD^1 HEAD)
+            pattern='^(specs/api/|redocly\.yaml$|\.redocly\.lint-ignore\.yaml$|package(-lock)?\.json$|\.npmrc$|\.nvmrc$|\.github/workflows/openapi\.yml$)'
+            if ! grep -qE "$pattern" <<<"$changed"; then
+              openapi=false
+            fi
+          fi
+          echo "openapi=$openapi" >> "$GITHUB_OUTPUT"
+          echo "OpenAPI checks required: $openapi" >> "$GITHUB_STEP_SUMMARY"
+
+  lint:
+    name: OpenAPI lint
+    needs: changes
+    # Runs unless detection explicitly reported no OpenAPI changes, so a detection failure
+    # cannot skip the check.
+    if: ${{ always() && needs.changes.outputs.openapi != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Redocly lint
+        run: npm run lint:openapi

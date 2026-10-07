@@ -228,7 +228,7 @@ are supplied at `terraform init` time through partial configuration, not committ
 | `ci.yml` (existing) | PR, push to `main` | Repository governance checks. |
 | Backend | PR, push | `go vet`, `golangci-lint`, unit and integration tests, `govulncheck`. |
 | Frontend | PR, push | Type check, lint, unit and component tests, accessibility checks, build. |
-| OpenAPI | PR, push | Lint the contract; check generated client is up to date. |
+| OpenAPI | PR, push | Lint the contract with Redocly; check generated client is up to date (deferred, A-18). |
 | Terraform | PR, push | `fmt`, `validate`, TFLint, security scan, plan in protected environments. |
 | Security | PR, schedule | CodeQL (SAST), dependency review, secret scanning, Scorecard. |
 | Deploy | Merge, tag | Build, package, apply per environment with OIDC; production requires approval. |

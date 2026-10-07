@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; units 1 to 3 implemented |
+| Status | Approved; units 1 to 4 implemented (unit 4 partially: generated client deferred, A-18) |
 | Phase | 2 |
 | Owner | Repository owner |
-| Depends on | F-01 (units 2 onward); D-01; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
-| Approved by | Repository owner, 2026-10-05 (all units; unit 1 implementation approved) |
+| Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
+| Approved by | Repository owner, 2026-10-05 (all units; unit 1 implementation approved); 2026-10-07 (A-18: unit 4 without the generated client) |
 
 ## Problem statement
 
@@ -40,7 +40,8 @@ Contributors, maintainers, and repository administrators (who configure required
 | --- | --- | --- | --- |
 | Private hostname in a URL | `scripts/check-private-urls.sh` | Job fails | File, line, and allowlist guidance |
 | Allowlist entry without justification | Same script | Job fails (exit 2) | Allowlist line named |
-| Generated API client out of date | Regenerate and `git diff --exit-code` | Job fails | Diff shown |
+| Generated API client out of date | Regenerate and `git diff --exit-code` | Job fails | Diff shown (deferred, A-18) |
+| OpenAPI contract violates a lint rule | `redocly lint` with `redocly.yaml` | Job fails | Rule, location, and code frame |
 | Terraform not formatted | `terraform fmt -check` | Job fails | Files listed |
 
 ## Security considerations
@@ -79,8 +80,9 @@ None.
 - **AC-02-6** Frontend workflow: `npm ci`, type check, Biome (`biome ci`), the TypeScript
   directive check, Vitest, and build. Token-only CSS validation is added with F-04 (D-23, A-17).
   *(Unit 3)*
-- **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration and a generated-client
-  drift check.
+- **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration *(Unit 4)* and a
+  generated-client drift check *(**deferred** by A-18; still required before any feature consumes
+  API operations through `packages/api-client`)*.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a
   configuration security scan, for every environment and module.
 - **AC-02-9** CodeQL analyzes Go and TypeScript on pull requests and weekly.
@@ -95,10 +97,11 @@ None.
 | --- | --- | --- | --- |
 | F02-T1 | `scripts/check-private-urls.test.sh` (14 cases). | Script | AC-02-1 to AC-02-3 |
 | F02-T2 | `actionlint` and workflow schema validation. | CI | All workflows |
-| F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). | CI | AC-02-7 |
+| F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). **Deferred (A-18).** | CI | AC-02-7 |
 | F02-T4 | The `Dev Container build` job passes on the pull request that adds it. | CI | AC-02-11 |
 | F02-T5 | The `Backend` workflow's `Go checks` and `Go vulnerability scan` jobs pass on the pull request that adds them. | CI | AC-02-5 |
 | F02-T6 | The `Frontend` workflow's `Frontend checks` job passes on the pull request that adds it. | CI | AC-02-6 |
+| F02-T7 | `redocly lint` passes on the contract and fails on a deliberately invalid contract (verified once during implementation); the `OpenAPI lint` job passes on the pull request that adds it. | CI | AC-02-7 (lint) |
 
 ## Observability requirements
 
@@ -116,7 +119,9 @@ maintenance window to avoid blocking merges.
    - **F-01 follow-up:** `Dev Container build` job in `CI` (AC-02-11), approved 2026-10-06.
 2. **Implemented:** backend workflow (`.github/workflows/backend.yml`).
 3. **Implemented:** frontend workflow (`.github/workflows/frontend.yml`).
-4. OpenAPI workflow and Redocly configuration.
+4. **Implemented (partially):** OpenAPI workflow (`.github/workflows/openapi.yml`) and Redocly
+   configuration (`redocly.yaml`).
+   - **Deferred (A-18):** generated API client in `packages/api-client` and its drift check.
 5. Terraform workflow (with F-03).
 6. CodeQL workflow and required-check documentation.
 
@@ -139,6 +144,23 @@ Implementation notes (unit 3):
   HTML file changes.
 - Steps call the root npm scripts, as `make lint-web`, `make test-web`, and `make build-web` do.
 
+Implementation notes (unit 4):
+
+- Redocly CLI is pinned to 2.60.0 as a root development dependency. `npm run lint:openapi`
+  (`make lint-openapi`, part of `make lint`) runs `redocly lint --lint-config=error`, so an
+  invalid `redocly.yaml` also fails.
+- `redocly.yaml` extends `recommended-strict` and sets `telemetry: off`, which applies to local,
+  Dev Container, and CI runs.
+- `.redocly.lint-ignore.yaml` lists only the 16 `no-unused-components` findings for shared
+  components declared before any operation uses them. New unused components and every other rule
+  still fail. Remove an entry when an operation starts using the component.
+- `OpenAPI lint` uses the same in-job path filtering as units 2 and 3. It runs when
+  `specs/api/`, the Redocly files, npm manifests, `.npmrc`, `.nvmrc`, or the workflow change.
+- The generated client and drift check are deferred by A-18: the evaluated candidates conflict
+  with TypeScript 6.0.3, introduce audit vulnerabilities, or need further evaluation. The
+  TypeScript pin is unchanged and no npm `overrides` are added.
+
 ## Open questions
 
-None.
+- Generated API client tool and drift check: deferred by A-18 with a review point; owner
+  Maintainers.
