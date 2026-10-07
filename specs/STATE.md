@@ -3,7 +3,7 @@
 This file is the orchestrator's task-state record. Update it when a task starts, is blocked, or
 completes. See [the SDD workflow](sdd-workflow.md).
 
-Last updated: 2026-10-07
+Last updated: 2026-10-08
 
 ## Current position
 
@@ -13,16 +13,15 @@ Last updated: 2026-10-07
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
   merged (PR #15); unit 3 (frontend workflow) merged (PR #17). Unit 4 (OpenAPI lint; generated
   client deferred by A-18) merged (PR #18). Unit 6 (CodeQL and required-check list) merged
-  (PR #19). F-03 steps 1 to 4 with F-02 unit 5 (Terraform workflow) implemented on
-  `feat/terraform-foundation-main`, in review; no deployment. A-19 proposed.
+  (PR #19). F-03 steps 1 to 4 and F-02 unit 5 (Terraform workflow) merged (PR #20); no
+  deployment. A-19 remains proposed; Security-owner review of T-19 is pending.
 - **Ruleset:** the 10 Backend, Frontend, OpenAPI, and CodeQL checks were added to the `main`
-  ruleset on 2026-10-07 (16 required checks). The 4 Terraform checks are added after unit 5
-  merges.
+  ruleset on 2026-10-07; the 4 Terraform checks were added on 2026-10-08 (20 required checks).
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Approval of F-03 steps 1 to 4, F-02 unit 5, and A-19; then F-03 step 5
-  (deployment workflow), which stays disabled until the platform-owner prerequisites are met.
+- **Next gate:** A-19 approval and Security-owner review of T-19; then F-03 step 5 (deployment
+  workflow), which stays disabled until the platform-owner prerequisites are met.
 
 ## Approvals
 
@@ -71,8 +70,8 @@ Feature specifications are written at the start of the phase that implements the
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 merged (PR #19); unit 5 implemented with F-03, in review |
-| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 implemented, awaiting approval (no deployment); step 5 not started |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 merged (PR #19); unit 5 merged (PR #20) |
+| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); step 5 not started; A-19 and Security-owner review pending |
 | F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |

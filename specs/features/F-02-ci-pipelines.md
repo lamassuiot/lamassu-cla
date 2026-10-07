@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; all units implemented (unit 5 in review; unit 4 partially: generated client deferred, A-18) |
+| Status | Approved; all units implemented (unit 5 merged in PR #20; unit 4 partially: generated client deferred, A-18) |
 | Phase | 2 |
 | Owner | Repository owner |
 | Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
@@ -213,10 +213,10 @@ Names are the job names that GitHub reports on pull requests.
 | `Detect CodeQL changes` | CodeQL | 2026-10-07 |
 | `CodeQL Go` | CodeQL | 2026-10-07 |
 | `CodeQL TypeScript` | CodeQL | 2026-10-07 |
-| `Detect Terraform changes` | Terraform | To add after unit 5 merges |
-| `Terraform checks` | Terraform | To add after unit 5 merges |
-| `TFLint` | Terraform | To add after unit 5 merges |
-| `Terraform security scan` | Terraform | To add after unit 5 merges |
+| `Detect Terraform changes` | Terraform | 2026-10-08 |
+| `Terraform checks` | Terraform | 2026-10-08 |
+| `TFLint` | Terraform | 2026-10-08 |
+| `Terraform security scan` | Terraform | 2026-10-08 |
 
 Notes for the administrator:
 

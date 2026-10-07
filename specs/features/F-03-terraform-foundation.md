@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; steps 1 to 4 implemented (no deployment), in review; step 5 not started |
+| Status | Steps 1 to 4 merged in PR #20 (no deployment); step 5 not started; A-19 and Security-owner review pending |
 | Phase | 2 |
 | Owner | Repository owner; platform owner for provisioning |
 | Depends on | F-01; D-04, D-05; A-19; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
