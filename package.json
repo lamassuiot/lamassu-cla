@@ -13,6 +13,7 @@
   },
   "scripts": {
     "lint": "biome ci --error-on-warnings .",
+    "lint:openapi": "redocly lint --lint-config=error",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@redocly/cli": "2.60.0",
     "@types/node": "24.19.1",
     "typescript": "6.0.3",
     "vitest": "5.0.3"

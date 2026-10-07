@@ -1,0 +1,22 @@
+# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
+# See https://redocly.com/docs/cli/ for more information.
+# Shared components declared in Phase 1 before any operation references them (A-18).
+# Remove each entry when an operation starts using the component.
+specs/api/openapi.yaml:
+  no-unused-components:
+    - '#/components/parameters/RequestId'
+    - '#/components/parameters/IdempotencyKey'
+    - '#/components/parameters/IfMatch'
+    - '#/components/parameters/Limit'
+    - '#/components/parameters/Cursor'
+    - '#/components/schemas/PageInfo'
+    - '#/components/responses/BadRequest'
+    - '#/components/responses/Unauthorized'
+    - '#/components/responses/Forbidden'
+    - '#/components/responses/NotFound'
+    - '#/components/responses/Conflict'
+    - '#/components/responses/PreconditionFailed'
+    - '#/components/responses/IdempotencyKeyReused'
+    - '#/components/securitySchemes/csrfToken'
+    - '#/components/securitySchemes/githubWebhookSignature'
+    - '#/components/securitySchemes/signingProviderSignature'

@@ -35,12 +35,16 @@ $(GOVULNCHECK):
 	GOBIN=$(TOOLS_BIN) go install golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION)
 
 .PHONY: lint
-lint: lint-web lint-go lint-repo ## Run all linters.
+lint: lint-web lint-openapi lint-go lint-repo ## Run all linters.
 
 .PHONY: lint-web
 lint-web: ## Biome lint and format check, then the TypeScript type check.
 	npm run lint
 	npm run typecheck
+
+.PHONY: lint-openapi
+lint-openapi: ## Lint the OpenAPI contract with Redocly (redocly.yaml).
+	npm run lint:openapi
 
 .PHONY: lint-go
 lint-go: $(GOLANGCI_LINT)
