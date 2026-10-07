@@ -1,0 +1,101 @@
+name: Backend
+
+# Path filtering happens in the `changes` job: skipped jobs satisfy required checks, while
+# workflows skipped by `on.pull_request.paths` leave them pending.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect backend changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Checkout
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Detect changed paths
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          backend=true
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            # HEAD is the PR merge commit, so HEAD^1 is the base branch.
+            changed=$(git diff --name-only HEAD^1 HEAD)
+            if ! grep -qE '^(services/api/|Makefile$|\.github/workflows/backend\.yml$)' <<<"$changed"; then
+              backend=false
+            fi
+          fi
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "Backend checks required: $backend" >> "$GITHUB_STEP_SUMMARY"
+
+  go:
+    name: Go checks
+    needs: changes
+    # Runs unless detection explicitly reported no backend changes, so a detection failure
+    # cannot skip the checks.
+    if: ${{ always() && github.event_name != 'schedule' && needs.changes.outputs.backend != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: |
+            services/api/go.mod
+            Makefile
+
+      - name: go vet and golangci-lint
+        run: make lint-go
+
+      - name: go test -race
+        run: make test-go
+
+  govulncheck:
+    name: Go vulnerability scan
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.backend != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: |
+            services/api/go.mod
+            Makefile
+
+      - name: govulncheck
+        run: make vuln-go
