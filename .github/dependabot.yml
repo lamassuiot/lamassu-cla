@@ -30,7 +30,7 @@ updates:
         update-types:
           - minor
           - patch
-    # Deferred major upgrades that conflict with the A-13 pins (decision A-15).
+    # Deferred upgrades that conflict with the A-13 pins (decisions A-15, A-16).
     ignore:
       - dependency-name: eslint
         update-types:
@@ -38,9 +38,10 @@ updates:
       - dependency-name: "@eslint/js"
         update-types:
           - version-update:semver-major
+      # typescript-eslint supports TypeScript below 6.1; 6.0.x patches still update.
       - dependency-name: typescript
-        update-types:
-          - version-update:semver-major
+        versions:
+          - ">=6.1.0"
       - dependency-name: "@types/node"
         update-types:
           - version-update:semver-major
