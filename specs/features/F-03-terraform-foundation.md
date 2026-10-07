@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved |
+| Status | Approved; steps 1 to 4 implemented (no deployment), in review; step 5 not started |
 | Phase | 2 |
 | Owner | Repository owner; platform owner for provisioning |
-| Depends on | F-01; D-04, D-05; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
+| Depends on | F-01; D-04, D-05; A-19; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
 | Approved by | Repository owner, 2026-10-05 (implementation approved; no deployment) |
 
 ## Problem statement
@@ -120,6 +120,8 @@ None.
 | F03-T3 | `terraform test`: the OIDC role trust policy contains the repository and environment conditions. | Module test | AC-03-6 |
 | F03-T4 | Security scan reports no high findings. | Static | AC-03-4, AC-03-9 |
 | F03-T5 | `terraform test`: the production root fails validation without Object Lock values. | Module test | AC-03-10 |
+| F03-T6 | `terraform test`: the deployment role policy allows only state objects under `environment/` and the state key. | Module test | AC-03-6 |
+| F03-T7 | `terraform test`: non-production roots reject compliance-mode Object Lock. | Module test | ADR-0005 |
 
 ## Observability requirements
 
@@ -134,12 +136,34 @@ data stores, so rollback is a revert and apply. State buckets are never deleted 
 
 ## Implementation plan
 
-1. Modules: `kms-key`, `s3-bucket`, `github-oidc-role`, `log-group`, with tests.
-2. `infra/bootstrap`.
-3. Environment roots with variables, validation, and default tags.
-4. Bootstrap and deployment guide.
+1. **Implemented:** modules `kms-key`, `s3-bucket`, `github-oidc-role`, `log-group`, with tests.
+2. **Implemented:** `infra/bootstrap`.
+3. **Implemented:** environment roots with variables, validation, and default tags.
+4. **Implemented:** [bootstrap and deployment guide](../../docs/operations/terraform-bootstrap.md).
 5. Deployment workflow with OIDC and production approval. It is enabled only after the platform
    owner completes the prerequisites; production remains blocked until D-10 is confirmed.
+   **Not started.**
+
+Implementation notes (steps 1 to 4):
+
+- Tests are plan-only (`command = plan`) with `mock_provider "aws"`; they need no credentials
+  and never contact AWS. 28 runs cover the modules, the bootstrap root, and the three
+  environment roots.
+- No retention value is committed. Object Lock mode and days, log retention, and state
+  non-current version expiry are required inputs supplied at deployment (ADR-0005, D-10).
+  Non-production roots accept only governance mode; the production root fails without values.
+- The deployment role created by `infra/bootstrap` may only read and write state objects under
+  `environment/` and use the state KMS key. The `bootstrap/` state is out of its reach. Each
+  feature that adds resources extends the policy with the permissions it needs (least privilege).
+- The bootstrap root migrates from local to S3 state with a Git-ignored `backend_override.tf`.
+- Environment roots compose no modules yet: Phase 2 creates no resources in them. The
+  `evidence_object_lock` variable is validated now and consumed when the evidence bucket is added.
+- Tool pins (A-19): AWS provider `>= 6.67.0, < 7.0.0` in every module, locked to 6.68.0 for
+  `linux` and `darwin` on `amd64` and `arm64` in each root; TFLint AWS ruleset 0.49.0; Trivy
+  0.75.0. Reusable modules do not commit lock files. Dependabot updates root lock files.
+- `make check-terraform` runs every check locally without AWS access. It is not part of
+  `make check`, so contributors without Terraform are not blocked; CI runs it in the `Terraform`
+  workflow (F-02 unit 5).
 
 ## Open questions
 

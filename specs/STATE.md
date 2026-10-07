@@ -12,13 +12,17 @@ Last updated: 2026-10-07
   PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
   merged (PR #15); unit 3 (frontend workflow) merged (PR #17). Unit 4 (OpenAPI lint; generated
-  client deferred by A-18) merged (PR #18). Unit 6 (CodeQL and required-check list) in review on
-  `ci/codeql-required-checks`. Unit 5 (Terraform workflow) ships with the first F-03 code.
+  client deferred by A-18) merged (PR #18). Unit 6 (CodeQL and required-check list) in review
+  (PR #19). F-03 steps 1 to 4 with F-02 unit 5 (Terraform workflow) implemented on
+  `feat/terraform-foundation`, awaiting approval; not committed. A-19 proposed.
+- **Ruleset:** the 10 Backend, Frontend, OpenAPI, and CodeQL checks were added to the `main`
+  ruleset on 2026-10-07 (16 required checks). The 4 Terraform checks are added after unit 5
+  merges.
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Review of F-02 unit 6; then F-03 with F-02 unit 5 (approved 2026-10-05; no
-  deployment).
+- **Next gate:** Approval of F-03 steps 1 to 4, F-02 unit 5, and A-19; then F-03 step 5
+  (deployment workflow), which stays disabled until the platform-owner prerequisites are met.
 
 ## Approvals
 
@@ -32,6 +36,7 @@ Last updated: 2026-10-07
 | 2026-10-07 | Repository owner | A-16 (Dependabot defers TypeScript `>=6.1.0` until `typescript-eslint` supports it; 6.0 patch updates continue). |
 | 2026-10-07 | Repository owner | A-17 (migrate from ESLint and Prettier to Biome if the required controls can be implemented; TypeScript stays at 6.0.3). Implemented in PR #14. |
 | 2026-10-07 | Repository owner | A-18 (F-02 unit 4: Redocly 2.60.0 OpenAPI lint in CI; generated client and drift check deferred, not removed; TypeScript pin unchanged, no npm overrides, no Orval). |
+| 2026-10-07 | Repository owner | Add the 10 Backend, Frontend, OpenAPI, and CodeQL checks to the `main` ruleset; implement F-03 with F-02 unit 5 without AWS deployment. |
 
 ## Phases
 
@@ -66,8 +71,8 @@ Feature specifications are written at the start of the phase that implements the
 | ID | Feature | Phase | Depends on | Status |
 | --- | --- | --- | --- | --- |
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
-| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 in review; unit 5 with F-03 |
-| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Approved (no deployment) |
+| F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 in review (PR #19); unit 5 implemented with F-03, awaiting approval |
+| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 implemented, awaiting approval (no deployment); step 5 not started |
 | F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
