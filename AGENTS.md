@@ -133,6 +133,12 @@ The `CI` workflow enforces, among other checks:
   only to `.github/private-url-allowlist.txt`, each with a justification comment, through review.
 - Secret scanning of the full Git history with gitleaks.
 
+`make check` additionally runs Biome (`biome ci`) for JavaScript, TypeScript, JSX, JSON, CSS, and
+HTML formatting and linting, `tsc --noEmit`, Vitest, Go tooling, and the repository scripts in
+`scripts/`. Do not reintroduce ESLint or Prettier, and do not weaken a Biome rule, plugin in
+`.biome/plugins/`, or repository check, without an ADR
+([ADR-0011](docs/decisions/0011-biome-for-javascript-and-typescript.md)).
+
 The default branch is `main`. Workflows trigger on pushes to `main`.
 
 ## CODEOWNERS and review protection

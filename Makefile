@@ -33,7 +33,7 @@ $(GOLANGCI_LINT):
 lint: lint-web lint-go lint-repo ## Run all linters.
 
 .PHONY: lint-web
-lint-web:
+lint-web: ## Biome lint and format check, then the TypeScript type check.
 	npm run lint
 	npm run typecheck
 
@@ -45,6 +45,7 @@ lint-go: $(GOLANGCI_LINT)
 .PHONY: lint-repo
 lint-repo:
 	scripts/check-private-urls.sh
+	scripts/check-ts-directives.sh
 
 .PHONY: test
 test: test-web test-go test-scripts ## Run all tests.
@@ -60,6 +61,7 @@ test-go:
 .PHONY: test-scripts
 test-scripts: $(GOLANGCI_LINT)
 	scripts/check-private-urls.test.sh
+	scripts/check-ts-directives.test.sh
 	GOLANGCI_LINT=$(GOLANGCI_LINT) scripts/check-go-layering.test.sh
 
 .PHONY: build
@@ -77,7 +79,7 @@ build-go:
 	done
 
 .PHONY: format
-format: ## Format TypeScript, JSON, CSS, HTML, and Go sources.
+format: ## Format and apply safe Biome fixes to web sources; format Go sources.
 	npm run format
 	cd $(GO_DIR) && $(GOLANGCI_LINT) fmt ./...
 

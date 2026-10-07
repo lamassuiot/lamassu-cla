@@ -28,8 +28,7 @@
     "vscode": {
       "extensions": [
         "golang.go",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
+        "biomejs.biome",
         "hashicorp.terraform",
         "editorconfig.editorconfig"
       ]

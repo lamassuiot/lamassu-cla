@@ -1,0 +1,4 @@
+`$left ?? $right` as $expression where {
+  $left <: TsNonNullAssertionExpression(),
+  register_diagnostic(span=$left, message="A non-null assertion before `??` is contradictory. Remove the `!`.")
+}

@@ -34,10 +34,10 @@ pinned `golangci-lint` into `.tools/bin`. `make check` runs lint, tests, and bui
 | `make help` | Lists targets. |
 | `make bootstrap` | Installs npm dependencies and pinned Go tools. |
 | `make tools` | Installs pinned Go tools into `.tools/bin` only. |
-| `make lint` | ESLint, Prettier check, TypeScript type check, `go vet`, `golangci-lint` (including hexagonal-layering rules), and the private-URL scan. |
-| `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan and layering rules). |
+| `make lint` | Biome lint and format check (`biome ci`), TypeScript type check, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, and the TypeScript directive check. |
+| `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, and layering rules). |
 | `make build` | Builds the portal with Vite and the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
-| `make format` | Formats TypeScript, JSON, CSS, HTML, and Go sources. |
+| `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |
 | `make check` | `lint`, `test`, and `build`. |
 | `make clean` | Removes build output. |
 

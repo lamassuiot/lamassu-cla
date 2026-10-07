@@ -116,6 +116,10 @@ and publishes the draft.
 
 - Add or update tests for any behavioral change.
 - Update relevant documentation (README, code comments, etc.) alongside code changes.
+- Run `make check` before opening a pull request. JavaScript, TypeScript, JSX, JSON, CSS, and
+  HTML are formatted and linted with [Biome](./biome.json); run `make format` to apply its
+  formatting. Type checking uses `tsc --noEmit` and tests use Vitest. See the
+  [local setup guide](./docs/development/local-setup.md).
 
 ## Avoiding secrets and confidential information
 
