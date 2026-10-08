@@ -1,2 +1,15 @@
-// Tokens and components are added in Phase 3 (F-04, F-05) per specs/ux/design-tokens.md.
-export const tokenPrefix = '--cla-';
+export { colorPrimitives } from './tokens/primitives.ts';
+export type { ColorPrimitive } from './tokens/primitives.ts';
+export { gradients, semanticColors, shadows, themes } from './tokens/semantic.ts';
+export type { Gradient, SemanticColor, Theme } from './tokens/semantic.ts';
+export {
+  borderWidths,
+  breakpoints,
+  fontFamilies,
+  motion,
+  radii,
+  spacing,
+  typography,
+} from './tokens/scales.ts';
+export type { TextStyle } from './tokens/scales.ts';
+export { cssVar, renderTokensCss, tokenPrefix } from './tokens/css.ts';

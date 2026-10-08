@@ -79,6 +79,9 @@ jobs:
       - name: Biome
         run: npm run lint
 
+      - name: Design-token drift check
+        run: npm run tokens:check -w @lamassu-cla/design-system
+
       - name: TypeScript directive check
         run: |
           scripts/check-ts-directives.test.sh

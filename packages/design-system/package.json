@@ -4,11 +4,14 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/styles/tokens.css"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "tokens": "node scripts/generate-tokens.ts",
+    "tokens:check": "node scripts/generate-tokens.ts --check"
   },
   "devDependencies": {
     "vitest": "5.0.3"
