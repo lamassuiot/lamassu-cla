@@ -35,9 +35,9 @@ builds as CI does.
 | `make help` | Lists targets. |
 | `make bootstrap` | Installs npm dependencies and pinned Go tools. |
 | `make tools` | Installs pinned Go tools into `.tools/bin` only. |
-| `make lint` | Biome lint and format check (`biome ci`), TypeScript type check, the design-token drift check, Redocly lint of the OpenAPI contract, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, and the TypeScript directive check. |
+| `make lint` | Biome lint and format check (`biome ci`, including the token-only CSS plugin), TypeScript type check, the design-token drift check, Redocly lint of the OpenAPI contract, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, the TypeScript directive check, and the CSS suppression check. |
 | `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`. |
-| `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, and layering rules). |
+| `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, token-only CSS check, and layering rules). |
 | `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
 | `make build` | Builds the portal with Vite and the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
 | `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |

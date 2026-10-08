@@ -75,6 +75,7 @@ lint-go: $(GOLANGCI_LINT)
 lint-repo:
 	scripts/check-private-urls.sh
 	scripts/check-ts-directives.sh
+	scripts/check-css-suppressions.sh
 
 .PHONY: test
 test: test-web test-go test-scripts ## Run all tests.
@@ -95,6 +96,7 @@ vuln-go: $(GOVULNCHECK) ## Scan the Go module and toolchain for known vulnerabil
 test-scripts: $(GOLANGCI_LINT)
 	scripts/check-private-urls.test.sh
 	scripts/check-ts-directives.test.sh
+	scripts/check-css-tokens.test.sh
 	GOLANGCI_LINT=$(GOLANGCI_LINT) scripts/check-go-layering.test.sh
 
 .PHONY: build

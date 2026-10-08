@@ -41,7 +41,7 @@ jobs:
             # HEAD is the PR merge commit, so HEAD^1 is the base branch.
             changed=$(git diff --name-only HEAD^1 HEAD)
             # Biome checks these file types anywhere in the repository.
-            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
+            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
             pattern+='|\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css|html)$'
             if ! grep -qE "$pattern" <<<"$changed"; then
               frontend=false
@@ -86,6 +86,12 @@ jobs:
         run: |
           scripts/check-ts-directives.test.sh
           scripts/check-ts-directives.sh
+
+      # Biome runs the no-raw-css-values plugin; these test it and forbid suppressions in CSS.
+      - name: Token-only CSS check
+        run: |
+          scripts/check-css-tokens.test.sh
+          scripts/check-css-suppressions.sh
 
       - name: Vitest
         run: npm test
