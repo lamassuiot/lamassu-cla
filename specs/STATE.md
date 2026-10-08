@@ -14,8 +14,10 @@ Last updated: 2026-10-08
   merged (PR #15); unit 3 (frontend workflow) merged (PR #17). Unit 4 (OpenAPI lint; generated
   client deferred by A-18) merged (PR #18). Unit 6 (CodeQL and required-check list) merged
   (PR #19). F-03 steps 1 to 4 and F-02 unit 5 (Terraform workflow) merged (PR #20); no
-  deployment. A-19 approved conditionally on 2026-10-08: Checkov replaces Trivy (ADR-0012) on
-  `ci/checkov-terraform-scan`. A-19, ADR-0012, and T-19 remain proposed.
+  deployment. A-19 approved conditionally on 2026-10-08: Checkov replaces Trivy (ADR-0012), merged
+  in PR #22; the scan runs without network access in CI (PR #23). The three Checkov dependency
+  alerts were dismissed in Dependabot as tolerable risk, referencing ADR-0012, on 2026-10-08.
+  A-19, ADR-0012, and T-19 remain proposed.
 - **Ruleset:** the 10 Backend, Frontend, OpenAPI, and CodeQL checks were added to the `main`
   ruleset on 2026-10-07; the 4 Terraform checks were added on 2026-10-08 (20 required checks).
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
@@ -74,7 +76,7 @@ Feature specifications are written at the start of the phase that implements the
 | --- | --- | --- | --- | --- |
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 merged (PR #19); unit 5 merged (PR #20) |
-| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan in progress (ADR-0012); step 5 blocked; A-19, T-19, and D-24 pending |
+| F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |

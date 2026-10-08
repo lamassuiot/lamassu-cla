@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Steps 1 to 4 merged in PR #20 (no deployment); Checkov replaces Trivy (ADR-0012, proposed); step 5 blocked (see Preconditions); bootstrap rework pending D-24 (C-01) |
+| Status | Steps 1 to 4 merged in PR #20 (no deployment); Checkov replaces Trivy (PRs #22, #23; ADR-0012 proposed); step 5 blocked (see Preconditions); bootstrap rework pending D-24 (C-01) |
 | Phase | 2 |
 | Owner | Repository owner; platform owner for provisioning |
 | Depends on | F-01; D-04, D-05, D-24; A-19; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md), [ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md) |
