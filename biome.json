@@ -171,6 +171,12 @@
   },
   "overrides": [
     {
+      "includes": ["**/packages/design-system/src/styles/tokens.css"],
+      "formatter": {
+        "enabled": false
+      }
+    },
+    {
       "includes": ["**/package.json"],
       "json": {
         "formatter": {

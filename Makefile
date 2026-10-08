@@ -57,9 +57,10 @@ $(GOVULNCHECK):
 lint: lint-web lint-openapi lint-go lint-repo ## Run all linters.
 
 .PHONY: lint-web
-lint-web: ## Biome lint and format check, then the TypeScript type check.
+lint-web: ## Biome lint and format check, the TypeScript type check, and the design-token drift check.
 	npm run lint
 	npm run typecheck
+	npm run tokens:check -w @lamassu-cla/design-system
 
 .PHONY: lint-openapi
 lint-openapi: ## Lint the OpenAPI contract with Redocly (redocly.yaml).

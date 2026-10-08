@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | In review (specification only) |
+| Status | Approved; unit 1 (tokens and generation) in progress |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-01; A-11, A-17, D-12, D-23; [design tokens](../ux/design-tokens.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
-| Approved by | Phase 3 start approved by the repository owner, 2026-10-08; specification pending approval |
+| Approved by | Repository owner, 2026-10-08 (Phase 3 start; specification, PR #25) |
 
 ## Problem statement
 
@@ -33,15 +33,19 @@ No authorization roles are involved.
 ## Main flow
 
 1. Token definitions are written as typed TypeScript objects in
-   `packages/design-system/src/tokens/`, in three tiers (primitive, semantic, component), exactly as
-   listed in sections 2 to 8 of the [design tokens](../ux/design-tokens.md).
+   `packages/design-system/src/tokens/`, exactly as listed in sections 2 to 7 of the
+   [design tokens](../ux/design-tokens.md). The design tokens define no component tokens yet;
+   F-05 adds them with the components that use them.
 2. A generator script, run with Node.js 24 type stripping and no new dependency, renders the tokens
    to `packages/design-system/src/styles/tokens.css` as CSS custom properties prefixed `--cla-`.
    The generated file is committed.
 3. The CSS defines the light theme on `:root` and `[data-theme="light"]`, the dark theme on
    `[data-theme="dark"]`, and the dark theme on `:root:not([data-theme])` inside
-   `@media (prefers-color-scheme: dark)`. Semantic and component tokens reference primitives
-   through `var()`; only primitives contain raw values.
+   `@media (prefers-color-scheme: dark)`. Semantic colors and gradients reference color primitives
+   through `var()`. Color primitives, including the status colors, and the tokens without a
+   primitive tier (shadows, typography, spacing, radius, border width, and motion) contain raw
+   values. Breakpoints are exported only as TypeScript constants, because CSS custom properties
+   cannot be used in media queries.
 4. `packages/design-system` exports the token objects, the generated CSS, and a theme module with
    `getThemePreference()`, `setThemePreference(theme)`, and `applyTheme()`.
 5. At start-up, `apps/web/src/main.tsx` imports the token CSS and the base styles, then calls
@@ -106,8 +110,8 @@ F-05; the app shell is F-06.
   spacing, radius, border, shadow, motion, and breakpoint token in the
   [design tokens](../ux/design-tokens.md) exists with the specified value, and no other token
   exists.
-- **AC-04-2** Every CSS custom property in `tokens.css` starts with `--cla-`. Semantic and
-  component tokens reference other tokens through `var()`; only primitives contain raw values.
+- **AC-04-2** Every CSS custom property in `tokens.css` starts with `--cla-`. Semantic colors and
+  gradients reference only color primitives through `var()` and contain no raw color.
 - **AC-04-3** Given each theme, every pair in section 2.4 of the design tokens meets its WCAG 2.2
   threshold (4.5:1 for text, 3:1 for control borders and focus indicators), and its computed ratio
   is within 0.01 of the table value.
@@ -134,7 +138,7 @@ F-05; the app shell is F-06.
 | ID | Scenario | Level | Covers |
 | --- | --- | --- | --- |
 | F04-T1 | The token objects match the values listed in the design tokens, and no extra token exists. | Unit | AC-04-1 |
-| F04-T2 | Parsing the generated CSS: every property has the `--cla-` prefix, and non-primitive tokens use `var()`. | Unit | AC-04-2 |
+| F04-T2 | Parsing the generated CSS: every property has the `--cla-` prefix, and semantic colors and gradients use only `var()` references to color primitives. | Unit | AC-04-2 |
 | F04-T3 | WCAG contrast is computed for every pair in section 2.4 in both themes. | Unit | AC-04-3 |
 | F04-T4 | Theme module with mocked storage and `matchMedia`: stored, system, invalid, and throwing-storage cases. | Unit | AC-04-4, AC-04-5 |
 | F04-T5 | Token-only check fixtures: at least one violation per value category fails with the expected rule, and token-only fixtures pass. A suppression comment fails. | Lint, Script | AC-04-6 |
@@ -163,6 +167,21 @@ The `cla-theme` value left in a visitor's browser is ignored by older builds.
    tests F04-T4, F04-T7, and F04-T8.
 
 Each unit is one pull request and depends on the previous one.
+
+Implementation notes (unit 1):
+
+- Tokens live in `primitives.ts`, `semantic.ts`, and `scales.ts`; `css.ts` renders them, and
+  `scripts/generate-tokens.ts` writes or checks `src/styles/tokens.css`
+  (`npm run tokens` and `npm run tokens:check` in `@lamassu-cla/design-system`).
+- CSS names follow the token path: `bg.canvas` becomes `--cla-color-bg-canvas`, a status primitive
+  becomes `--cla-color-status-success-dark-text`, and typography styles expand to `-size`,
+  `-line-height`, `-weight`, `-letter-spacing`, and `-transform` properties.
+- Typography sizes are converted from the specified pixels to `rem` with a 16 px root.
+- Biome formatting is disabled for the generated `tokens.css` only (`biome.json` override); Biome
+  still lints it, and the drift check guards its content.
+- `make lint` and the Frontend workflow run the drift check. The package's `tsconfig.json` enables
+  `allowImportingTsExtensions` (required for Node.js type stripping) and the `node` types.
+- The contrast test recomputed every pair in section 2.4; all match the table within 0.01.
 
 ## Open questions
 

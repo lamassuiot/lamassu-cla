@@ -35,7 +35,7 @@ builds as CI does.
 | `make help` | Lists targets. |
 | `make bootstrap` | Installs npm dependencies and pinned Go tools. |
 | `make tools` | Installs pinned Go tools into `.tools/bin` only. |
-| `make lint` | Biome lint and format check (`biome ci`), TypeScript type check, Redocly lint of the OpenAPI contract, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, and the TypeScript directive check. |
+| `make lint` | Biome lint and format check (`biome ci`), TypeScript type check, the design-token drift check, Redocly lint of the OpenAPI contract, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, and the TypeScript directive check. |
 | `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`. |
 | `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, and layering rules). |
 | `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
@@ -58,7 +58,7 @@ steps that precede any deployment.
 | Path | Contents |
 | --- | --- |
 | `apps/web` | Portal (Vite, React, TypeScript). Run `npm run dev -w apps/web` and open <http://localhost:5173>. |
-| `packages/design-system` | Design tokens and components (Phase 3). |
+| `packages/design-system` | Design tokens (F-04) and components (F-05). Tokens are defined in `src/tokens/`; after changing them, run `npm run tokens -w @lamassu-cla/design-system` and commit the regenerated `src/styles/tokens.css`. `make lint` fails while the file is out of date. |
 | `packages/api-client` | Typed API client generated from OpenAPI (F-02; generation deferred by A-18). |
 | `packages/shared-types` | Types shared across workspaces. |
 | `services/api` | Go module for the Lambda functions. Run `go test ./...` from this directory. |
