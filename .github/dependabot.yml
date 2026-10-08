@@ -30,12 +30,9 @@ updates:
         update-types:
           - minor
           - patch
-    # Deferred upgrades that conflict with the A-13 pins (decisions A-15, A-16, A-17).
+    # TypeScript upgrades are proposed and tested, but the 6.0.3 pin (A-13) changes only in a
+    # reviewed PR (A-21). @types/node majors follow the Node.js 24 runtime (ADR-0007).
     ignore:
-      # TypeScript stays on 6.0 until a separate decision changes the A-13 pin.
-      - dependency-name: typescript
-        versions:
-          - ">=6.1.0"
       - dependency-name: "@types/node"
         update-types:
           - version-update:semver-major
