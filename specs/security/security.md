@@ -143,13 +143,16 @@ Model choice is open (D-06). Regardless of the choice:
 - One IAM role per Lambda function with only the actions and resources it needs.
 - The `audit` table denies `UpdateItem` and `DeleteItem` to all application roles.
 - Object Lock bypass permission is not granted to application or deployment roles.
-- Terraform is scanned in CI with Trivy (A-19) and TFLint.
+- Terraform is scanned in CI with Checkov (A-19, [ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md)) and TFLint. Any failed Checkov check fails the scan; exceptions are justified inline skips.
 
 ## 10. Supply chain
 
 - GitHub Actions pinned by commit SHA (existing practice).
-- Dependabot for GitHub Actions, Go modules, npm, and Terraform providers, added as manifests appear.
-- `govulncheck`, dependency review, CodeQL, gitleaks, and OpenSSF Scorecard in CI.
+- Dependabot for GitHub Actions, Go modules, npm, Terraform providers, and the Checkov pip lock,
+  added as manifests appear.
+- `govulncheck`, dependency review, CodeQL, gitleaks, and OpenSSF Scorecard in CI. Dependency
+  review has a temporary, documented exception for three advisories in Checkov's dependencies
+  ([ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md)).
 - Lockfiles committed; installs in CI use frozen lockfiles.
 
 ## 11. Pull-request security checklist

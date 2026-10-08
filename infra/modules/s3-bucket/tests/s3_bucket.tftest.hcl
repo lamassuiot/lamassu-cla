@@ -91,6 +91,11 @@ run "object_lock_and_lifecycle" {
     condition     = length(aws_s3_bucket_lifecycle_configuration.this) == 1
     error_message = "The non-current version expiry rule must be created when configured."
   }
+
+  assert {
+    condition     = aws_s3_bucket_lifecycle_configuration.this[0].rule[0].abort_incomplete_multipart_upload[0].days_after_initiation == 7
+    error_message = "The lifecycle rule must abort incomplete multipart uploads."
+  }
 }
 
 run "rejects_invalid_object_lock_mode" {

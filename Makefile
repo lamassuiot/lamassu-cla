@@ -16,11 +16,20 @@ LAMBDA_FUNCTIONS := api
 
 # Terraform (F-03). Terraform and TFLint come from the Dev Container (versions in .devcontainer).
 TF_DIRS := $(sort $(wildcard infra/modules/*)) infra/bootstrap $(sort $(wildcard infra/environments/*))
-TRIVY_VERSION := 0.75.0
-TRIVY_SHA256_amd64 := c6e65abddb348e25f10549df887045629cf28cc72453cd1c63acb717316b3f3f
-TRIVY_SHA256_arm64 := a1ee9f6ffb7d112b64ff726a2a0717c21175c1114361391f4a132956751a13b3
-TRIVY := $(TOOLS_BIN)/trivy-$(TRIVY_VERSION)
 TF_PLUGIN_CACHE := $(CURDIR)/.tools/terraform-plugin-cache
+
+# Checkov (A-19, ADR-0012), installed only from the hash-locked requirements with Python 3.12.
+CHECKOV_PYTHON ?= python3
+CHECKOV_LOCK := scripts/checkov/requirements.txt
+CHECKOV_VENV := $(CURDIR)/.tools/checkov
+CHECKOV_BIN := $(CHECKOV_VENV)/bin/checkov
+CHECKOV_HOME := $(CURDIR)/.tools/checkov-home
+# An empty environment keeps AWS and Prisma Cloud credentials away from Checkov.
+CHECKOV_ENV := env -i PATH=$(CHECKOV_VENV)/bin:/usr/bin:/bin HOME=$(CHECKOV_HOME) LC_ALL=C.UTF-8
+# Offline, findings carry no severity, so any failed check fails the scan (no --soft-fail or
+# --hard-fail-on). Exceptions are inline `checkov:skip=<ID>:<reason>` comments.
+CHECKOV_FLAGS := --compact --framework terraform --download-external-modules false --skip-download --output cli
+PIP_TOOLS_VERSION := 7.5.1
 
 export GOTOOLCHAIN := $(GO_TOOLCHAIN)
 
@@ -108,7 +117,7 @@ format: ## Format and apply safe Biome fixes to web sources; format Go sources.
 check: lint test build ## Run lint, test, and build, as CI does.
 
 .PHONY: check-terraform
-check-terraform: fmt-terraform validate-terraform test-terraform lint-terraform scan-terraform ## Terraform fmt, validate, tests, TFLint, and Trivy (no AWS access).
+check-terraform: fmt-terraform validate-terraform test-terraform lint-terraform scan-terraform ## Terraform fmt, validate, tests, TFLint, and Checkov (no AWS access).
 
 .PHONY: fmt-terraform
 fmt-terraform: ## Check Terraform formatting.
@@ -132,23 +141,32 @@ test-terraform: validate-terraform ## Run plan-only Terraform tests with mocked 
 	done
 
 .PHONY: lint-terraform
-lint-terraform: ## Run TFLint with the pinned AWS ruleset.
+lint-terraform: ## Run TFLint with the pinned AWS ruleset on infra/.
 	tflint --init --config $(CURDIR)/.tflint.hcl
-	tflint --recursive --config $(CURDIR)/.tflint.hcl --format compact
+	cd infra && tflint --recursive --config $(CURDIR)/.tflint.hcl --format compact
 
 .PHONY: scan-terraform
-scan-terraform: $(TRIVY) ## Scan Terraform configuration with Trivy (fails on high and critical findings).
-	$(TRIVY) config --quiet --disable-telemetry --skip-version-check --skip-dirs '**/.terraform' --severity HIGH,CRITICAL --exit-code 1 infra
+scan-terraform: test-terraform-scan ## Scan infra/ with Checkov; any failed check fails (no AWS access).
+	$(CHECKOV_ENV) $(CHECKOV_BIN) $(CHECKOV_FLAGS) --directory infra
 
-$(TRIVY):
-	@arch=$$(uname -m); case $$arch in x86_64) arch=amd64; asset=64bit;; aarch64|arm64) arch=arm64; asset=ARM64;; *) echo "unsupported architecture $$arch"; exit 1;; esac; \
-	[[ $$(uname -s) == Linux ]] || { echo "Trivy install supports Linux only; use the Dev Container"; exit 1; }; \
-	sha=$$( [[ $$arch == amd64 ]] && echo $(TRIVY_SHA256_amd64) || echo $(TRIVY_SHA256_arm64) ); \
-	tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
-	curl -fsSLo "$$tmp/trivy.tgz" "https://github.com/aquasecurity/trivy/releases/download/v$(TRIVY_VERSION)/trivy_$(TRIVY_VERSION)_Linux-$$asset.tar.gz"; \
-	echo "$$sha  $$tmp/trivy.tgz" | sha256sum --check --strict; \
-	tar -xzf "$$tmp/trivy.tgz" -C "$$tmp" trivy; \
-	mkdir -p $(TOOLS_BIN); install -m 0755 "$$tmp/trivy" $@
+.PHONY: test-terraform-scan
+test-terraform-scan: $(CHECKOV_BIN) ## Check that Checkov fails on the insecure fixtures in scripts/testdata/checkov.
+	@mkdir -p $(CHECKOV_HOME)
+	$(CHECKOV_ENV) CHECKOV_BIN=$(CHECKOV_BIN) CHECKOV_FLAGS="$(CHECKOV_FLAGS)" scripts/check-terraform-scan.test.sh
+
+$(CHECKOV_BIN): $(CHECKOV_LOCK)
+	@$(CHECKOV_PYTHON) -c 'import sys; sys.exit(sys.version_info[:2] != (3, 12))' || { echo "Checkov needs Python 3.12 as $(CHECKOV_PYTHON); use the Dev Container"; exit 1; }
+	rm -rf $(CHECKOV_VENV)
+	$(CHECKOV_PYTHON) -m venv $(CHECKOV_VENV)
+	$(CHECKOV_VENV)/bin/pip install --quiet --disable-pip-version-check --no-deps --require-hashes --only-binary=:all: -r $(CHECKOV_LOCK)
+	$(CHECKOV_VENV)/bin/pip check
+
+.PHONY: lock-checkov
+lock-checkov: ## Regenerate the hash-locked Checkov requirements (Python 3.12, network).
+	rm -rf $(CURDIR)/.tools/pip-tools
+	$(CHECKOV_PYTHON) -m venv $(CURDIR)/.tools/pip-tools
+	$(CURDIR)/.tools/pip-tools/bin/pip install --quiet --disable-pip-version-check pip-tools==$(PIP_TOOLS_VERSION)
+	cd scripts/checkov && CUSTOM_COMPILE_COMMAND="pip-compile --allow-unsafe --generate-hashes --output-file=requirements.txt --strip-extras requirements.in" $(CURDIR)/.tools/pip-tools/bin/pip-compile --quiet --generate-hashes --allow-unsafe --strip-extras --output-file requirements.txt requirements.in
 
 .PHONY: clean
 clean: ## Remove build output.

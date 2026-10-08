@@ -155,6 +155,9 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Temporary exception for Checkov's pinned dependencies (ADR-0012); remove when resolved.
+          allow-ghsas: GHSA-9w56-46f6-3qhx, GHSA-89v8-rhwq-hf77, GHSA-wj6h-64fc-37mp
 
   actions-security:
     name: GitHub Actions security lint
