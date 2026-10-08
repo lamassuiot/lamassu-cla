@@ -124,8 +124,9 @@ Implementation notes:
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 - The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
   section.
-- Dependabot ignores major upgrades of `@types/node` and every `typescript` version `>=6.1.0`
-  until the A-15 and A-16 review points; other minor and patch updates continue.
+- Dependabot ignores major upgrades of `@types/node` (Node.js 24, ADR-0007); other minor and patch
+  updates continue. Since A-21, Dependabot also proposes TypeScript upgrades; the 6.0.3 pin
+  changes only through a reviewed PR that passes the frontend checks and updates this section.
 - The Dev Container configuration was validated syntactically (`devcontainer read-configuration`
   and Feature resolution) but not built locally: the host's Docker daemon could not resolve
   package hosts. The configuration is not changed for this host issue (A-14); the
