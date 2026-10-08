@@ -229,7 +229,7 @@ audit-event display, and hash display.
 | Rule | Enforcement |
 | --- | --- |
 | Components are implemented once and reused. Pages compose components and do not define one-off button, card, or form styles. | Code review; Biome rule and plugin forbidding inline `style` attributes in `apps/web` ([ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md)). |
-| Only tokens are used for visual values. | CSS rules rejecting raw color, spacing, radius, shadow, and duration values outside the tokens package, added with F-04 (D-23, A-17). Until then, Biome forbids inline `style` attributes in `apps/web`. |
+| Only tokens are used for visual values. | Biome GritQL plugin `.biome/plugins/no-raw-css-values.grit` rejects raw colors, color functions, named colors, raw spacing, radius, border-width, font-size, and shadow lengths, and raw durations in every CSS file except the generated `tokens.css`; `scripts/check-css-suppressions.sh` rejects Biome suppressions in CSS ([F-04](../features/F-04-design-tokens-and-themes.md), D-23, A-17). Biome also forbids inline `style` attributes in `apps/web`. |
 | A new color requires a token change and an update to this specification with a contrast check. | Change control in [the SDD workflow](../sdd-workflow.md#3-change-control). |
 | A new spacing value requires written justification in the PR and an update to this specification. | Code review. |
 | Every component has a preview story in light and dark themes, including loading, empty, error, and disabled states where applicable. | Storybook coverage check in CI. |

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tokens and generation) in progress |
+| Status | Approved; unit 1 merged (PR #26); unit 2 (token-only CSS check) in progress |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-01; A-11, A-17, D-12, D-23; [design tokens](../ux/design-tokens.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -182,6 +182,31 @@ Implementation notes (unit 1):
 - `make lint` and the Frontend workflow run the drift check. The package's `tsconfig.json` enables
   `allowImportingTsExtensions` (required for Node.js type stripping) and the `node` types.
 - The contrast test recomputed every pair in section 2.4; all match the table within 0.01.
+
+Implementation notes (unit 2):
+
+- Biome 2.5.15 expresses every category in AC-04-6, so Stylelint is not added (D-23). The plugin
+  `.biome/plugins/no-raw-css-values.grit` applies to `**/*.css` except the generated `tokens.css`
+  (`biome.json`). It reports:
+  - every hex color (`CssColor`) and color function (`rgb()`, `hsl()`, `hwb()`, `lab()`, `lch()`,
+    `oklab()`, `oklch()`, `color()`, `color-mix()`, `light-dark()`, `device-cmyk()`), anywhere;
+  - the 148 CSS named colors in color, background, border, outline, decoration, shadow, `fill`,
+    `stroke`, and custom properties;
+  - raw lengths in margin, padding, inset, gap, position offsets, border width and radius,
+    outline, column rule, `font`, `font-size`, `line-height`, `letter-spacing`, shadows, and custom
+    properties;
+  - raw durations (`ms`, `s`) anywhere.
+- Named colors and lengths are scoped by property, because checking every identifier or dimension
+  flagged grid areas, animation names, font families, `max-width: 72ch`, and media-query
+  breakpoints. Layout sizes outside the token categories (for example `width`) are not checked.
+- Biome suppression comments disable plugin diagnostics in every form (`biome-ignore`,
+  `-all`, `-start`/`-end`), so `scripts/check-css-suppressions.sh` rejects any `biome-ignore`
+  comment in CSS (`make lint`).
+- Biome GritQL regexes match the whole text, and capturing groups `( )` silently match nothing;
+  the plugin uses only non-capturing groups `(?: )`. A generic `$property: $value` snippet does not
+  compile for CSS; the plugin matches `CssGenericProperty(name, value)` nodes instead.
+- `scripts/check-css-tokens.test.sh` (29 cases) lints each case in a temporary repository with a
+  copy of the real `biome.json` and `.biome/`, and runs in `make test` and the Frontend workflow.
 
 ## Open questions
 

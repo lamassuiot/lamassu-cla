@@ -50,6 +50,10 @@
     {
       "path": "./.biome/plugins/no-inline-style-attribute.grit",
       "includes": ["**/apps/web/**/*.{jsx,tsx}"]
+    },
+    {
+      "path": "./.biome/plugins/no-raw-css-values.grit",
+      "includes": ["**/*.css", "!**/packages/design-system/src/styles/tokens.css"]
     }
   ],
   "linter": {
