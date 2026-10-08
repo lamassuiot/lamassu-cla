@@ -24,8 +24,10 @@ CHECKOV_LOCK := scripts/checkov/requirements.txt
 CHECKOV_VENV := $(CURDIR)/.tools/checkov
 CHECKOV_BIN := $(CHECKOV_VENV)/bin/checkov
 CHECKOV_HOME := $(CURDIR)/.tools/checkov-home
-# An empty environment keeps AWS and Prisma Cloud credentials away from Checkov.
-CHECKOV_ENV := env -i PATH=$(CHECKOV_VENV)/bin:/usr/bin:/bin HOME=$(CHECKOV_HOME) LC_ALL=C.UTF-8
+# An empty environment keeps AWS and Prisma Cloud credentials away from Checkov. CI sets
+# CHECKOV_NETNS to a command that runs it in a network namespace without interfaces.
+CHECKOV_NETNS ?=
+CHECKOV_ENV := $(CHECKOV_NETNS) env -i PATH=$(CHECKOV_VENV)/bin:/usr/bin:/bin HOME=$(CHECKOV_HOME) LC_ALL=C.UTF-8
 # Offline, findings carry no severity, so any failed check fails the scan (no --soft-fail or
 # --hard-fail-on). Exceptions are inline `checkov:skip=<ID>:<reason>` comments.
 CHECKOV_FLAGS := --compact --framework terraform --download-external-modules false --skip-download --output cli
@@ -148,6 +150,9 @@ lint-terraform: ## Run TFLint with the pinned AWS ruleset on infra/.
 .PHONY: scan-terraform
 scan-terraform: test-terraform-scan ## Scan infra/ with Checkov; any failed check fails (no AWS access).
 	$(CHECKOV_ENV) $(CHECKOV_BIN) $(CHECKOV_FLAGS) --directory infra
+
+.PHONY: install-checkov
+install-checkov: $(CHECKOV_BIN) ## Install Checkov from the hash-locked requirements (network).
 
 .PHONY: test-terraform-scan
 test-terraform-scan: $(CHECKOV_BIN) ## Check that Checkov fails on the insecure fixtures in scripts/testdata/checkov.
