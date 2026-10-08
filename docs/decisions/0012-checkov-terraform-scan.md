@@ -47,6 +47,11 @@ Python 3.12. Checkov 3.3.26 declares support for Python 3.9 to 3.12. The evaluat
 - The scan runs with an empty environment (`env -i`), so no AWS or Prisma Cloud credentials reach
   it. It uses `--skip-download` and `--download-external-modules false`. The CI job has no
   secrets and no `id-token` permission.
+- **Network isolation in CI.** The install step (`make install-checkov`) has network access; the
+  scan does not. The scan steps run through `CHECKOV_NETNS` (`sudo unshare --net`, then `setpriv`
+  back to the runner user), so Checkov sees no network interface. The job first checks that the
+  sandbox cannot open a connection and fails if it can. Local runs are not isolated, so
+  `make scan-terraform` needs no `sudo`.
 - **Failure policy.** Severity gating is not possible offline, so every failed check fails the
   scan. This is stricter than failing on high and critical findings. `--soft-fail` and
   `--hard-fail-on` are not used. Exceptions are inline `checkov:skip=<ID>:<reason>` comments,

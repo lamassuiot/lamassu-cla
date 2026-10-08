@@ -122,6 +122,16 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      # Fixture test first, then infra/. No AWS credentials exist in this workflow.
+      # Install with network access, then scan in an empty network namespace as the runner user.
+      - name: Install Checkov
+        run: make install-checkov
+
       - name: Checkov configuration scan
-        run: make scan-terraform
+        run: |
+          netns="sudo unshare --net -- setpriv --reuid=$(id -u) --regid=$(id -g) --clear-groups"
+          # The sandbox itself must have no network, or the scan is not isolated.
+          if $netns python3 -c 'import socket; socket.create_connection(("1.1.1.1", 53), 3)' 2>/dev/null; then
+            echo "::error::scan sandbox has network access"; exit 1
+          fi
+          # Fixture test first, then infra/. No AWS credentials exist in this workflow.
+          make scan-terraform CHECKOV_NETNS="$netns"
