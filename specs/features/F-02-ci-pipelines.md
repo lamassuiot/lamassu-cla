@@ -104,7 +104,7 @@ None.
 | F02-T7 | `redocly lint` passes on the contract and fails on a deliberately invalid contract (verified once during implementation); the `OpenAPI lint` job passes on the pull request that adds it. | CI | AC-02-7 (lint) |
 | F02-T8 | The `CodeQL Go` and `CodeQL TypeScript` jobs complete and upload results on the pull request that adds them. | CI | AC-02-9 |
 | F02-T9 | Every check name in the [required-check list](#required-checks) matches a job name reported on a pull request. | CI | AC-02-10 |
-| F02-T10 | The `Terraform` workflow's `Terraform checks`, `TFLint`, and `Terraform security scan` jobs pass on the pull request that adds them; Trivy fails on a deliberately weakened bucket module (verified once during implementation). | CI | AC-02-8 |
+| F02-T10 | The `Terraform` workflow's `Terraform checks`, `TFLint`, and `Terraform security scan` jobs pass. On every run, `make test-terraform-scan` fails unless Checkov reports the expected findings in the insecure fixtures under `scripts/testdata/checkov/`. | CI | AC-02-8 |
 
 ## Observability requirements
 
@@ -184,11 +184,13 @@ Implementation notes (unit 5):
   `TFLint` runs `make lint-terraform`; `Terraform security scan` runs `make scan-terraform`.
 - No job assumes an AWS role or reads credentials. Plans against real accounts belong to the
   deployment workflow (F-03 step 5), which is not implemented.
-- Terraform 1.16.5 and TFLint 0.64.0 match the Dev Container. `hashicorp/setup-terraform` and
-  `terraform-linters/setup-tflint` are pinned by commit SHA. Trivy is downloaded by the `Makefile`
-  and verified against a pinned SHA-256; no third-party scanning action is used (A-19).
+- Terraform 1.16.5 and TFLint 0.64.0 match the Dev Container. `hashicorp/setup-terraform`,
+  `terraform-linters/setup-tflint`, and `actions/setup-python` are pinned by commit SHA. Checkov
+  is installed by the `Makefile` from a hash-locked requirements file, and runs with an empty
+  environment and no AWS credentials. No third-party scanning action is used
+  ([ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md)).
 - Path filtering follows the other workflows: the jobs run when `infra/`, `.tflint.hcl`, the
-  `Makefile`, or the workflow change.
+  `Makefile`, the workflow, or the Checkov lock, fixtures, or fixture test change.
 
 ### Required checks
 

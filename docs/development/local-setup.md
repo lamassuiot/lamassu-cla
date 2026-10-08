@@ -13,8 +13,8 @@ See [`specs/features/F-01-monorepo-tooling.md`](../../specs/features/F-01-monore
 | GNU Make | Any recent version | |
 | Docker | Any recent version | Only for the Dev Container and local emulators. |
 
-Terraform 1.16 and TFLint are needed only for infrastructure work (F-03); the Dev Container
-includes them.
+Terraform 1.16, TFLint, and Python 3.12 (for Checkov) are needed only for infrastructure work
+(F-03); the Dev Container includes them.
 
 ## First run
 
@@ -46,7 +46,9 @@ builds as CI does.
 | `make check-terraform` | `fmt-terraform`, `validate-terraform`, `test-terraform`, `lint-terraform`, and `scan-terraform`. Needs Terraform and TFLint (Dev Container) but no AWS access; not part of `make check`. |
 | `make test-terraform` | Validates every module and root without a backend and runs plan-only `terraform test` with mocked providers. |
 | `make lint-terraform` | TFLint with the pinned AWS ruleset (`.tflint.hcl`). |
-| `make scan-terraform` | Trivy configuration scan of `infra/`; installs the pinned, checksum-verified Trivy into `.tools/bin`. Fails on high and critical findings. |
+| `make scan-terraform` | Runs `test-terraform-scan`, then scans `infra/` with Checkov. Any failed check fails the scan; exceptions are inline `checkov:skip=<ID>:<reason>` comments. Installs Checkov into `.tools/checkov` from the hash-locked `scripts/checkov/requirements.txt`, and runs it with an empty environment (no AWS credentials). |
+| `make test-terraform-scan` | Checks that Checkov reports the expected findings in the insecure fixtures under `scripts/testdata/checkov/`, and that every inline skip has a reason. |
+| `make lock-checkov` | Regenerates `scripts/checkov/requirements.txt` from `requirements.in` with pip-tools. Needs Python 3.12 and network access. |
 
 The [Terraform bootstrap guide](../operations/terraform-bootstrap.md) covers the platform-owner
 steps that precede any deployment.

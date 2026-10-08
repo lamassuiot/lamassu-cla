@@ -7,6 +7,12 @@ automated, and no workflow in this repository creates AWS resources.
 Do not commit account IDs, ARNs, bucket names, role names, or any other environment identifier.
 Record them only in GitHub environment variables and in the platform owner's private records.
 
+> **Do not run this procedure yet.** It describes the merged per-account bootstrap. The proposed
+> central state account (D-24) changes it (contradiction C-01 in
+> [`STATE.md`](../../specs/STATE.md#contradictions)). No bootstrap, plan against AWS, or apply may
+> run until the platform owner confirms the Infrastructure/Tooling account, the workload accounts,
+> the Control Tower controls, and the GitHub deployment environments.
+
 ## 1. Prerequisites per environment
 
 Complete and record each item for `dev`, `staging`, and `production` (D-04).
@@ -135,5 +141,5 @@ make check-terraform
 ```
 
 This runs `terraform fmt`, `validate` with `-backend=false`, plan-only `terraform test` with mocked
-providers, TFLint, and the Trivy configuration scan. The Dev Container provides Terraform and
-TFLint.
+providers, TFLint, and the Checkov configuration scan with its insecure-fixture test. The Dev
+Container provides Terraform, TFLint, and Python 3.12.

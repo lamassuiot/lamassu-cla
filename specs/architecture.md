@@ -221,6 +221,11 @@ and no DynamoDB lock table. Each account has its own versioned, encrypted state 
 Block Public Access, created once by the platform owner with `infra/bootstrap`. Backend settings
 are supplied at `terraform init` time through partial configuration, not committed.
 
+**Proposed change (D-24):** state moves to a dedicated Infrastructure/Tooling account, with one
+bucket and one customer-managed KMS key per environment, and separate state and deployment roles.
+See [T-19](security/threat-model.md#3-threats-and-mitigations) and contradiction C-01 in
+[`STATE.md`](STATE.md#contradictions). This section is updated when D-24 is approved.
+
 ## 10. CI/CD
 
 | Workflow | Trigger | Purpose |
@@ -229,7 +234,7 @@ are supplied at `terraform init` time through partial configuration, not committ
 | Backend | PR, push | `go vet`, `golangci-lint`, unit and integration tests, `govulncheck`. |
 | Frontend | PR, push | Type check, lint, unit and component tests, accessibility checks, build. |
 | OpenAPI | PR, push | Lint the contract with Redocly; check generated client is up to date (deferred, A-18). |
-| Terraform | PR, push | `fmt`, `validate`, plan-only tests with mocked providers, TFLint, Trivy. Plans against real accounts run only in the deployment workflow, in protected environments. |
+| Terraform | PR, push | `fmt`, `validate`, plan-only tests with mocked providers, TFLint, Checkov (with an insecure-fixture test). Plans against real accounts run only in the deployment workflow, in protected environments. |
 | Security | PR, schedule | CodeQL (SAST), dependency review, secret scanning, Scorecard. |
 | Deploy | Merge, tag | Build, package, apply per environment with OIDC; production requires approval. |
 

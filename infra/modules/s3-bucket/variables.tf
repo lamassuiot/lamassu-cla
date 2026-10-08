@@ -24,6 +24,17 @@ variable "noncurrent_version_expiration_days" {
   }
 }
 
+variable "abort_incomplete_multipart_upload_days" {
+  description = "Days after which incomplete multipart uploads are aborted, in the lifecycle rule. Uploaded objects are not affected."
+  type        = number
+  default     = 7
+
+  validation {
+    condition     = var.abort_incomplete_multipart_upload_days >= 1 && floor(var.abort_incomplete_multipart_upload_days) == var.abort_incomplete_multipart_upload_days
+    error_message = "abort_incomplete_multipart_upload_days must be a whole number of at least 1."
+  }
+}
+
 variable "object_lock" {
   description = "Default Object Lock retention (ADR-0005). Null creates the bucket without Object Lock. Object Lock can only be enabled at creation."
   type = object({

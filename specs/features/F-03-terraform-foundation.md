@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Steps 1 to 4 merged in PR #20 (no deployment); step 5 not started; A-19 and Security-owner review pending |
+| Status | Steps 1 to 4 merged in PR #20 (no deployment); Checkov replaces Trivy (ADR-0012, proposed); step 5 blocked (see Preconditions); bootstrap rework pending D-24 (C-01) |
 | Phase | 2 |
 | Owner | Repository owner; platform owner for provisioning |
-| Depends on | F-01; D-04, D-05; A-19; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
+| Depends on | F-01; D-04, D-05, D-24; A-19; [ADR-0005](../../docs/decisions/0005-configurable-object-lock-retention.md), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md), [ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md) |
 | Approved by | Repository owner, 2026-10-05 (implementation approved; no deployment) |
 
 ## Problem statement
@@ -30,14 +30,22 @@ environment deployment:
 4. Account-level S3 Block Public Access status is verified per account. An AWS Organizations
    baseline is **not** assumed.
 5. The platform owner has run `infra/bootstrap` in each account.
+6. A dedicated Infrastructure/Tooling account for Terraform state exists and is confirmed by the
+   platform owner (D-24). Its existence is not assumed.
+7. The Control Tower controls that apply to the tooling and workload accounts are confirmed by the
+   platform owner.
+8. The GitHub deployment environments (`dev`, `staging`, `production`) exist and are confirmed.
 
 Production additionally requires Legal confirmation of the Object Lock configuration (D-10).
 
 Implementing and validating the Terraform code (static checks and tests with mocked providers) does
-not require these prerequisites. No branch deploys infrastructure or creates AWS resources until
-they are met.
+not require these prerequisites. No branch bootstraps an account, plans against AWS, applies, or
+creates AWS resources until they are met.
 
 ## Main flow
+
+This flow describes the merged per-account bootstrap. It changes when D-24 is approved
+(contradiction C-01 in [`STATE.md`](../STATE.md#contradictions)); do not run it before then.
 
 1. The platform owner runs `infra/bootstrap` once per account with administrator credentials. It
    creates the state bucket and the GitHub OIDC deployment role for that environment.
@@ -159,13 +167,19 @@ Implementation notes (steps 1 to 4):
 - Environment roots compose no modules yet: Phase 2 creates no resources in them. The
   `evidence_object_lock` variable is validated now and consumed when the evidence bucket is added.
 - Tool pins (A-19): AWS provider `>= 6.67.0, < 7.0.0` in every module, locked to 6.68.0 for
-  `linux` and `darwin` on `amd64` and `arm64` in each root; TFLint AWS ruleset 0.49.0; Trivy
-  0.75.0. Reusable modules do not commit lock files. Dependabot updates root lock files.
+  `linux` and `darwin` on `amd64` and `arm64` in each root; TFLint AWS ruleset 0.49.0; Checkov
+  3.3.26 from a hash-locked requirements file ([ADR-0012](../../docs/decisions/0012-checkov-terraform-scan.md)).
+  Reusable modules do not commit lock files. Dependabot updates root lock files and the Checkov
+  lock.
+- Checkov fails on every failed check. The S3 module aborts incomplete multipart uploads after
+  7 days (`abort_incomplete_multipart_upload_days`). The bootstrap state bucket skips CKV_AWS_144,
+  CKV_AWS_18, and CKV2_AWS_62 inline, pending D-24.
 - `make check-terraform` runs every check locally without AWS access. It is not part of
   `make check`, so contributors without Terraform are not blocked; CI runs it in the `Terraform`
   workflow (F-02 unit 5).
 
 ## Open questions
 
-None for implementation. Deployment is blocked on the platform-owner prerequisites and, for
-production, on D-10.
+- D-24: central state account (platform owner, Security owner). Its approval resolves C-01 and
+  defines the bootstrap rework.
+- Deployment is blocked on the platform-owner prerequisites and, for production, on D-10.

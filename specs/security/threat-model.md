@@ -27,6 +27,8 @@
 4. Lambda functions to AWS services.
 5. Lambda functions to GitHub and provider APIs.
 6. GitHub Actions to AWS (deployment).
+7. GitHub Actions and operators to the Terraform state backend in the Infrastructure/Tooling
+   account (target state, D-24).
 
 ## 3. Threats and mitigations
 
@@ -53,7 +55,7 @@ service, **E**levation of privilege.
 | T-16 | Open redirect in sign-in or signing return | S | Exact redirect URI registration; relative-path allowlist for `return_to`; one-time return nonce bound to the signing session. | None significant. | Security tests |
 | T-17 | Compromised CI or deployment pipeline | E, T | OIDC trust restricted to repository and environment; production approval; SHA-pinned actions; protected branches with signed commits and Code Owner review. | Maintainer account compromise. | Configuration review |
 | T-18 | Disclosure through the public repository | I | Policy in `AGENTS.md`; gitleaks; private-URL scan; synthetic fixtures; no environment identifiers committed. | Human error. | CI |
-| T-19 | Disclosure or tampering of Terraform state | I, T, E | Private S3 state bucket with Block Public Access, SSE-KMS, versioning, and TLS-only access; GitHub OIDC trust restricted to this repository and environment; deployment role scoped to that environment's state objects and KMS key. | Privileged AWS or repository administrator compromise; state may contain sensitive provider values if future resources record them. | F-03 infrastructure tests; IAM policy review |
+| T-19 | Disclosure or tampering of Terraform state *(proposed; target state, D-24)* | I, T, E | State is stored in a dedicated Infrastructure/Tooling account: never in application workload accounts, and never in the Control Tower management, Log Archive, or Audit accounts. Separate state buckets and separate customer-managed KMS keys for `dev`, `staging`, and `production`, each with Block Public Access, SSE-KMS, versioning, and a TLS-only policy. Unique state keys per repository, environment, and stack (`lamassu-cla/<environment>/<stack>/terraform.tfstate`), with S3-native locking through the corresponding `.tflock` object. Separate roles for backend state access and for workload-account deployment, assumed through GitHub OIDC; each is restricted to its environment and state prefix. The current `infra/bootstrap` keeps state in each workload account (C-01 in `specs/STATE.md`). | A compromise of the tooling account, or of an identity with administrative access to it, could expose or alter the state of several environments. State may contain sensitive values if future resources record them. | F-03 mocked-provider tests; Checkov (ADR-0012); IAM policy review |
 
 ## 4. Review cadence
 

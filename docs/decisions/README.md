@@ -34,6 +34,7 @@ Write an ADR when a decision:
 | [0009](0009-dynamodb-table-layout.md) | DynamoDB table layout | Accepted |
 | [0010](0010-cloudfront-frontend-hosting.md) | CloudFront frontend hosting | Accepted |
 | [0011](0011-biome-for-javascript-and-typescript.md) | Biome for JavaScript and TypeScript formatting and linting | Accepted |
+| [0012](0012-checkov-terraform-scan.md) | Checkov for the Terraform security scan | Proposed |
 
 ## ADR format
 

@@ -40,6 +40,9 @@ module "state_key" {
 }
 
 module "state_bucket" {
+  # checkov:skip=CKV_AWS_144:State bucket replication is decided with the state-account design (D-24).
+  # checkov:skip=CKV_AWS_18:State bucket access logging is decided with the state-account design (D-24).
+  # checkov:skip=CKV2_AWS_62:State bucket event notifications are decided with the state-account design (D-24).
   source = "../modules/s3-bucket"
 
   bucket_name                        = var.state_bucket_name
