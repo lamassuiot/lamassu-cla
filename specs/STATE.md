@@ -7,7 +7,8 @@ Last updated: 2026-10-08
 
 ## Current position
 
-- **Phase:** 1 complete (PR #4). Phase 2 in progress.
+- **Phase:** 1 complete (PR #4). Phase 2 in progress (remaining items blocked; see Blocked items).
+  Phase 3 started on 2026-10-08 with the F-04 specification.
 - **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6), approved, and completed by
   PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
@@ -23,9 +24,10 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** Security-owner and platform-owner review of the final A-19, ADR-0012, and T-19
-  wording; approval of D-24 (central state account). F-03 step 5 (deployment workflow) stays
-  blocked until the platform-owner prerequisites are met (see Blocked items).
+- **Next gate:** approval of the [F-04 specification](features/F-04-design-tokens-and-themes.md)
+  before its implementation. Phase 2: Security-owner and platform-owner review of the final A-19,
+  ADR-0012, and T-19 wording; approval of D-24 (central state account). F-03 step 5 (deployment
+  workflow) stays blocked until the platform-owner prerequisites are met (see Blocked items).
 
 ## Approvals
 
@@ -41,6 +43,7 @@ Last updated: 2026-10-08
 | 2026-10-07 | Repository owner | A-18 (F-02 unit 4: Redocly 2.60.0 OpenAPI lint in CI; generated client and drift check deferred, not removed; TypeScript pin unchanged, no npm overrides, no Orval). |
 | 2026-10-07 | Repository owner | Add the 10 Backend, Frontend, OpenAPI, and CodeQL checks to the `main` ruleset; implement F-03 with F-02 unit 5 without AWS deployment. |
 | 2026-10-08 | Repository owner | A-19 approved conditionally: Checkov replaces Trivy, evaluated, pinned, and integrity-verified; runs without AWS credentials; `terraform validate`, TFLint, and plan tests remain independent controls; A-19 updated only after Checkov detects the insecure fixtures. Every failed Checkov check fails the scan, because severities are unavailable offline; exceptions only as justified inline skips. Hash-locked pip install with a temporary dependency-review exception for GHSA-9w56-46f6-3qhx, GHSA-89v8-rhwq-hf77, and GHSA-wj6h-64fc-37mp (ADR-0012). Fix CKV_AWS_300; skip CKV_AWS_144, CKV_AWS_18, and CKV2_AWS_62 on the state bucket pending D-24. T-19 describes the target state architecture; D-24 is added as a platform-owner prerequisite. A-19, ADR-0012, and T-19 stay proposed until Checkov is validated and the Security owner and platform owner review the final wording. Terraform work may continue with plan-only, mocked-provider tests only. |
+| 2026-10-08 | Repository owner | Start Phase 3 while the remaining Phase 2 items stay blocked; write the F-04 specification (specification-only PR). Final visual values remain pending D-12. |
 
 ## Phases
 
@@ -48,7 +51,7 @@ Last updated: 2026-10-08
 | --- | --- | --- | --- |
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
-| 3 | Frontend shell and design system | Not started | Phase 2; final visual values D-12. |
+| 3 | Frontend shell and design system | In progress (F-04 specification) | Final visual values: D-12. |
 | 4 | Authentication and user profile | Not started | Phase 2; D-02, D-06, D-13, D-19 (DPO), D-20. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
@@ -77,7 +80,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 merged (PR #19); unit 5 merged (PR #20) |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
-| F-04 | Design tokens and themes, including token-only CSS validation (D-23) | 3 | F-01 | Not started |
+| F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Specification in review |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |

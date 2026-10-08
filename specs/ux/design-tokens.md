@@ -4,7 +4,7 @@
 | --- | --- |
 | Status | Draft — values proposed; final brand assets and fonts pending D-12 |
 | Visual direction | Decision A-11 in the [decision log](../../docs/decisions/decision-log.md) |
-| Implementation | `packages/design-system` (Phase 3) |
+| Implementation | `packages/design-system` (Phase 3, [F-04](../features/F-04-design-tokens-and-themes.md)) |
 
 The visual language is a professional enterprise SaaS style: deep navy or blue-green backgrounds,
 warm orange accents, white typography, rounded cards, subtle borders and gradients, strong
@@ -126,7 +126,9 @@ Text over gradients must meet the contrast of the darkest or lightest stop, whic
 
 ## 3. Typography
 
-Font families are proposed pending D-12. Only open-licensed fonts may be bundled.
+Font families are proposed pending D-12. Only open-licensed fonts may be bundled. Until D-12 is
+confirmed, no font files are bundled and both font tokens resolve to their fallback stacks
+([F-04](../features/F-04-design-tokens-and-themes.md)).
 
 | Token | Value |
 | --- | --- |
