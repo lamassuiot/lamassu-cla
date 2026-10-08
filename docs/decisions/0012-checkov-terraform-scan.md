@@ -89,6 +89,25 @@ that job through the `Makefile`, so the `asteval` sandbox escape adds no new cap
 - Dependabot alerts for these advisories are dismissed as tolerable risk with a reference to this
   ADR. This is a manual repository setting.
 
+### Review 2026-10-08 (A-20)
+
+Scheduled review at the start of Phase 3. Full evidence is in decision-log entry A-20.
+
+| Advisory | Patched upstream | Usable with Checkov | Reachable in this scan |
+| --- | --- | --- | --- |
+| GHSA-9w56-46f6-3qhx (`asteval`) | 1.0.9 | No: Checkov 3.3.26 and its `main` branch pin `asteval==1.0.6`; a 1.0.10 override fails `pip check` | No: the interpreter is created with `use_numpy=False` and `minimal=True`; the chain fails with `NameError` |
+| GHSA-89v8-rhwq-hf77 (`asteval`) | 1.0.9 | No (same pin) | No: the `BaseException` subclasses are not in the minimal symbol table, and `raise` is rejected |
+| GHSA-wj6h-64fc-37mp (`ecdsa`) | None | Not applicable | No: `ecdsa` only verifies external-check signatures, which run only with public-key paths; the scan passes none, and nothing is signed |
+
+CI isolation was verified in the `main` run of PR #23 before relying on it: read-only token, and
+fixture test and scan inside `sudo unshare --net` as the runner user. The pre-scan probe is
+strengthened in a separate PR to assert that only the loopback interface is visible.
+
+Outcome (proposed, pending Security-owner review): the exception stays exactly as defined above;
+`asteval` is not overridden. The next review is when a Checkov release allows `asteval>=1.0.9`,
+when `ecdsa` publishes a fix or Checkov uses it for signing, when the scan uses external checks or
+keys, or at the start of Phase 4, whichever comes first.
+
 ## Consequences
 
 - The scan fails on findings that a severity threshold would ignore. Each exception needs a
