@@ -1,0 +1,40 @@
+/* Base document styles (F-04). Token values only; components belong in the `components` layer
+   (F-05), so that the unlayered reduced-motion rules below take precedence over them. */
+@layer base, components;
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--cla-color-bg-canvas);
+    color: var(--cla-color-text-primary);
+    font-family: var(--cla-font-family-sans);
+    font-size: var(--cla-text-body-size);
+    line-height: var(--cla-text-body-line-height);
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--cla-font-family-mono);
+  }
+
+  :focus-visible {
+    outline: var(--cla-border-width-strong) solid var(--cla-color-focus-ring);
+    outline-offset: var(--cla-border-width-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cla-motion-duration-base: var(--cla-motion-duration-fast);
+    --cla-motion-duration-slow: var(--cla-motion-duration-fast);
+  }
+
+  *,
+  ::before,
+  ::after {
+    transition-property: opacity;
+    scroll-behavior: auto;
+  }
+}

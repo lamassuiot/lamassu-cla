@@ -39,7 +39,7 @@ builds as CI does.
 | `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`. |
 | `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, token-only CSS check, and layering rules). |
 | `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
-| `make build` | Builds the portal with Vite and the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
+| `make build` | Builds the portal with Vite, checks the build output for bundled fonts and third-party load points (`scripts/check-web-build.sh`), and builds the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
 | `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |
 | `make check` | `lint`, `test`, and `build`. |
 | `make clean` | Removes build output. |

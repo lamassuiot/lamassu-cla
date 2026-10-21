@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 merged (PR #26); unit 2 (token-only CSS check) in progress |
+| Status | Approved; units 1 and 2 merged (PRs #26, #30); unit 3 (themes and base styles) in progress |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-01; A-11, A-17, D-12, D-23; [design tokens](../ux/design-tokens.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -140,11 +140,11 @@ F-05; the app shell is F-06.
 | F04-T1 | The token objects match the values listed in the design tokens, and no extra token exists. | Unit | AC-04-1 |
 | F04-T2 | Parsing the generated CSS: every property has the `--cla-` prefix, and semantic colors and gradients use only `var()` references to color primitives. | Unit | AC-04-2 |
 | F04-T3 | WCAG contrast is computed for every pair in section 2.4 in both themes. | Unit | AC-04-3 |
-| F04-T4 | Theme module with mocked storage and `matchMedia`: stored, system, invalid, and throwing-storage cases. | Unit | AC-04-4, AC-04-5 |
+| F04-T4 | Theme module with injected storage and root element: stored, system, invalid, unavailable, and throwing-storage cases. The system preference itself is applied by `prefers-color-scheme` in `tokens.css`, so the module does not query `matchMedia`. | Unit | AC-04-4, AC-04-5 |
 | F04-T5 | Token-only check fixtures: at least one violation per value category fails with the expected rule, and token-only fixtures pass. A suppression comment fails. | Lint, Script | AC-04-6 |
 | F04-T6 | The drift check fails after a token edit without regeneration (verified once during implementation) and passes on the committed files. | Script | AC-04-7 |
 | F04-T7 | The reduced-motion rule exists in the base styles and uses only motion tokens. | Unit | AC-04-8 |
-| F04-T8 | The build output contains no font files and no third-party URLs. | Script | AC-04-9 |
+| F04-T8 | `scripts/check-web-build.sh` finds no font files and no load point for another origin (HTML `src`/`href`, CSS `url()`, `@import`, `@font-face`, dynamic `import()`) in the build output. | Script | AC-04-9 |
 | F04-T9 | CI runs `make check` (Frontend and Dev Container jobs). | CI | AC-04-10 |
 
 ## Observability requirements
@@ -207,6 +207,29 @@ Implementation notes (unit 2):
   compile for CSS; the plugin matches `CssGenericProperty(name, value)` nodes instead.
 - `scripts/check-css-tokens.test.sh` (29 cases) lints each case in a temporary repository with a
   copy of the real `biome.json` and `.biome/`, and runs in `make test` and the Frontend workflow.
+
+Implementation notes (unit 3):
+
+- `src/theme.ts` exports `getThemePreference()`, `setThemePreference()`, `applyTheme()`, and
+  `themeStorageKey` (`cla-theme`). Storage and the root element are optional parameters, so the
+  unit tests need no DOM. Accessing `localStorage` is itself wrapped, because it throws when
+  storage is blocked. Only `light` and `dark` are stored or applied; anything else is `system`.
+- `apps/web/src/main.tsx` imports `@lamassu-cla/design-system/tokens.css` and `base.css`, then
+  calls `applyTheme()` before the first render. No inline script is used, so the Content Security
+  Policy is unaffected; until the bundle runs, `prefers-color-scheme` selects the theme.
+- `src/styles/base.css` puts the document styles in the `base` cascade layer and declares a
+  `components` layer for F-05. The reduced-motion rules are unlayered, so they override both
+  layers without `!important` (Biome `noImportantStyles`). They set `transition-property: opacity`
+  and redefine `--cla-motion-duration-base` and `-slow` as `--cla-motion-duration-fast`; because
+  the token-only check forbids raw durations, every duration is capped. F-05 components must be
+  declared in the `components` layer for this to hold.
+- The focus ring uses `border.width-strong` (2 px) for both its width and its offset, as the
+  design tokens specify 2 px for each and define no separate offset token.
+- `allowImportingTsExtensions` moved to `tsconfig.base.json`, because `apps/web` type-checks the
+  design-system source, which uses `.ts` import extensions for Node.js type stripping.
+- `scripts/check-web-build.sh` runs after `npm run build` in `make build` and the Frontend
+  workflow; `scripts/check-web-build.test.sh` (13 cases) runs in `make test`. URL strings that are
+  never fetched (React's XML namespaces and error-documentation link) are not load points.
 
 ## Open questions
 
