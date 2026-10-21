@@ -1,0 +1,37 @@
+@layer components {
+  .badge {
+    display: inline-block;
+    padding: var(--cla-space-1) var(--cla-space-2);
+    border-radius: var(--cla-radius-sm);
+    font-size: var(--cla-text-label-size);
+    font-weight: var(--cla-text-label-weight);
+    line-height: var(--cla-text-label-line-height);
+    letter-spacing: var(--cla-text-label-letter-spacing);
+    text-transform: var(--cla-text-label-transform);
+  }
+
+  .success {
+    background: var(--cla-color-status-success-bg);
+    color: var(--cla-color-status-success-text);
+  }
+
+  .warning {
+    background: var(--cla-color-status-warning-bg);
+    color: var(--cla-color-status-warning-text);
+  }
+
+  .danger {
+    background: var(--cla-color-status-danger-bg);
+    color: var(--cla-color-status-danger-text);
+  }
+
+  .info {
+    background: var(--cla-color-status-info-bg);
+    color: var(--cla-color-status-info-text);
+  }
+
+  .neutral {
+    background: var(--cla-color-status-neutral-bg);
+    color: var(--cla-color-status-neutral-text);
+  }
+}

@@ -1,0 +1,10 @@
+@layer components {
+  .card {
+    padding: var(--cla-space-5);
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-radius: var(--cla-radius-lg);
+    background: var(--cla-color-bg-surface);
+    box-shadow: var(--cla-shadow-sm);
+    color: var(--cla-color-text-primary);
+  }
+}

@@ -101,6 +101,7 @@ test-scripts: $(GOLANGCI_LINT)
 	scripts/check-css-tokens.test.sh
 	scripts/check-web-build.test.sh
 	scripts/check-design-system-components.test.sh
+	scripts/check-component-copy.test.sh
 	GOLANGCI_LINT=$(GOLANGCI_LINT) scripts/check-go-layering.test.sh
 
 .PHONY: build

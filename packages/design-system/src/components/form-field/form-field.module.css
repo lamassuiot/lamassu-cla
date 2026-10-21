@@ -1,0 +1,26 @@
+@layer components {
+  .field {
+    display: grid;
+    gap: var(--cla-space-1);
+  }
+
+  .label {
+    color: var(--cla-color-text-primary);
+    font-weight: var(--cla-text-label-weight);
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .error {
+    margin: 0;
+    color: var(--cla-color-status-danger-text);
+    font-size: var(--cla-text-body-sm-size);
+    font-weight: var(--cla-text-label-weight);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+}

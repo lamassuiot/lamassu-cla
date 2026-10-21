@@ -28,8 +28,8 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** F-05 unit 2. Its first PR adds the A-23 tooling, the browser-test CI job, and the
-  button; the rest of the foundations and forms follow. D-25 was decided by the repository owner on
+- **Next gate:** F-05 unit 3 (states and feedback). Unit 2 (tooling, foundations, and forms) is
+  complete: PR #47 and the foundations-and-forms PR. D-25 was decided by the repository owner on
   2026-10-21 (development-only, notices kept, caniuse.com attribution on redistribution, excluded
   from the portal bundle). The browser-test check was added to the
   `main` ruleset after its first successful run (PR #47). The Phase 3 reviews were recorded in PR #27 (decision-log
@@ -103,7 +103,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18; Orval client and drift check merged, A-22 (PR #41)); unit 6 merged (PR #19); unit 5 merged (PR #20) |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
-| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 in progress |
+| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and the foundations-and-forms PR); unit 3 next |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |

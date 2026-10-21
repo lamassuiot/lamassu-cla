@@ -54,6 +54,14 @@
     {
       "path": "./.biome/plugins/no-raw-css-values.grit",
       "includes": ["**/*.css", "!**/packages/design-system/src/styles/tokens.css"]
+    },
+    {
+      "path": "./.biome/plugins/no-component-copy.grit",
+      "includes": [
+        "**/packages/design-system/src/components/**/*.tsx",
+        "!**/*.stories.tsx",
+        "!**/*.test.tsx"
+      ]
     }
   ],
   "linter": {

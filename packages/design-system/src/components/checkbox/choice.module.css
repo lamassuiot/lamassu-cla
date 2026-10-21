@@ -1,0 +1,53 @@
+@layer components {
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cla-space-2);
+    color: var(--cla-color-text-primary);
+  }
+
+  .text {
+    display: inline-block;
+    min-height: var(--cla-space-5);
+    cursor: pointer;
+  }
+
+  .input {
+    width: var(--cla-space-4);
+    height: var(--cla-space-4);
+    margin: var(--cla-space-1) 0 0;
+    accent-color: var(--cla-color-action-primary-bg);
+    cursor: pointer;
+  }
+
+  .input:disabled,
+  .input:disabled + div .text {
+    cursor: not-allowed;
+  }
+
+  .input:disabled + div .text {
+    color: var(--cla-color-text-secondary);
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .group {
+    display: grid;
+    gap: var(--cla-space-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .legend {
+    margin-bottom: var(--cla-space-1);
+    padding: 0;
+    color: var(--cla-color-text-primary);
+    font-weight: var(--cla-text-label-weight);
+  }
+}

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 in progress (tooling and button first) |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and this PR; unit 3 next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -247,6 +247,33 @@ Implementation notes (unit 2, first pull request: tooling and button):
   runs the same tests (Chromium from `npx playwright install chromium`).
 - Button: `primary`, `secondary`, `ghost`, and `danger` variants from semantic tokens only; a token-
   styled disabled state; `type="button"` by default; no `className` or `style` props.
+
+Implementation notes (unit 2, second pull request: foundations and forms):
+
+- Section label, card, status badge, theme toggle, form field, input, select, checkbox, radio
+  group, and textarea, each with stories in both themes and no `className` or `style` props.
+- The status badge's state map is a pure module (`status.ts`) with a unit test copied from section
+  2.3 of the design tokens; unknown states, including `Object` prototype names, render as
+  `neutral` (F05-T6). The badge always renders its label, and accepts either a domain `state` or an
+  explicit `status` for informational notices.
+- `FormField` renders the label, hint, and error and passes `id`, `required`,
+  `aria-describedby`, and `aria-invalid` to its control through a render function. Input, select,
+  and textarea share one stylesheet; an invalid control gets a strong danger border, and the error
+  text uses `status.danger.text` (contrast at least 5.80:1 on canvas, surface, and subtle
+  backgrounds in both themes, computed during implementation).
+- Radios are rendered by `RadioGroup` (a `fieldset` with a `legend`), so native arrow-key and Tab
+  behavior applies. Hints sit outside the `<label>` and are referenced by `aria-describedby`; a
+  keyboard test found that a hint inside the label became part of the accessible name, which axe
+  does not report.
+- The theme toggle offers `light`, `dark`, and `system` through `RadioGroup` and the F-04
+  `setThemePreference()`; it does not touch storage directly.
+- `.biome/plugins/no-component-copy.grit` rejects literal JSX text, string or template children, and
+  literal `alt`, `title`, `placeholder`, and `aria-*` text in component source (stories and tests
+  excluded), so all user-visible text comes from props (F05-T9, AC-05-9).
+  `scripts/check-component-copy.test.sh` (12 cases) runs it with the real configuration.
+- The Frontend workflow now runs the component-convention check, its test, and the copy-plugin
+  test. Browser tests: 78 (22 story files in two themes, 4 component test files); deliberately
+  removing the form-field description wiring or the theme-toggle update failed the tests.
 
 ## Open questions
 

@@ -41,7 +41,7 @@ jobs:
             # HEAD is the PR merge commit, so HEAD^1 is the base branch.
             changed=$(git diff --name-only HEAD^1 HEAD)
             # Biome checks these file types anywhere in the repository.
-            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|scripts/check-web-build|scripts/check-design-system-components|scripts/check-portal-dev-deps|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
+            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|scripts/check-web-build|scripts/check-design-system-components|scripts/check-component-copy|scripts/check-portal-dev-deps|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
             pattern+='|\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css|html)$'
             if ! grep -qE "$pattern" <<<"$changed"; then
               frontend=false
@@ -92,6 +92,13 @@ jobs:
         run: |
           scripts/check-css-tokens.test.sh
           scripts/check-css-suppressions.sh
+
+      # Biome runs the no-component-copy plugin; these test it and the component conventions (F-05).
+      - name: Design-system component checks
+        run: |
+          scripts/check-component-copy.test.sh
+          scripts/check-design-system-components.test.sh
+          scripts/check-design-system-components.sh
 
       - name: Vitest
         run: npm test
