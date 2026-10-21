@@ -27,9 +27,10 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** repository-owner approval of A-23 (F-05 tooling: Storybook, axe-core, Vitest
-  browser mode, and pinned-image visual regression). F-05 dependencies and units 2 to 6 wait for
-  it. The Phase 3 reviews were recorded in PR #27 (decision-log
+- **Next gate:** Legal confirmation of D-25 (MPL-2.0 `axe-core` and CC-BY-4.0 `caniuse-lite`, both
+  development-only and excluded from the portal build). A-23 was approved on 2026-10-21 subject to
+  it; F-05 dependencies and units 2 to 6 wait for it. The browser-test check is added to the
+  `main` ruleset after its first successful run. The Phase 3 reviews were recorded in PR #27 (decision-log
   entries A-20 to A-22). A-20: the repository owner decided on 2026-10-21 to keep the ADR-0012
   exception unchanged; Security-owner confirmation is still pending (Checkov 3.3.30 still pins
   `asteval==1.0.6`, and no release avoids the advisories). A-21 was confirmed on 2026-10-21 and
@@ -61,6 +62,7 @@ Last updated: 2026-10-08
 | 2026-10-21 | Repository owner | A-20 decided: keep the ADR-0012 dependency-review exception exactly as defined (three GHSA identifiers; `asteval` not overridden), after confirming that no Checkov release from 3.2.159 to 3.3.30 avoids the advisories. Security-owner confirmation is still pending; the review triggers in ADR-0012 stand. |
 | 2026-10-21 | Repository owner | PR #41 (Orval implementation of A-22) merged; this closes the A-18 implementation deferral. |
 | 2026-10-21 | Repository owner | F-05 specification approved (PR #43). Start unit 1: evaluate the preview, accessibility, and visual-regression tools and return the proposed choices and decision record for review before adding dependencies or starting component implementation. |
+| 2026-10-21 | Repository owner | A-23 approved for the proposed tools (Storybook 10.6.3, `@storybook/addon-a11y` with axe-core, Vitest browser mode with Playwright 1.64.1, and pinned-image visual regression), subject to Legal confirming that the MPL-2.0 and CC-BY-4.0 dependencies are acceptable (D-25) before they are added. They are development-only and excluded from the portal build. Add the browser-test check to the `main` ruleset after it has run successfully. |
 
 ## Phases
 
@@ -98,7 +100,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18; Orval client and drift check merged, A-22 (PR #41)); unit 6 merged (PR #19); unit 5 merged (PR #20) |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
-| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 proposed, awaiting approval |
+| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 approved subject to Legal (D-25); units 2 to 6 blocked until D-25 |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
@@ -129,3 +131,6 @@ continue with plan-only, mocked-provider tests.
   workload accounts, the Control Tower controls, and the GitHub deployment environments, together
   with the other [F-03 prerequisites](features/F-03-terraform-foundation.md#preconditions).
   Production also requires D-10.
+- **F-05 units 2 to 6.** No A-23 dependency is added until Legal confirms D-25. Unit 2 adds the
+  dependencies and the browser-test CI job; its check name is added to the `main` ruleset only
+  after the job has run successfully (administrator action).

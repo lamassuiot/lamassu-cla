@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done, A-23 proposed; units 2 to 6 wait for A-23 |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 approved subject to Legal (D-25); units 2 to 6 wait for D-25 |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
-| Depends on | F-04; A-11, A-17, A-23, D-12, D-21; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
+| Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
 | Approved by | Repository owner, 2026-10-21 (specification, PR #43) |
 
 ## Problem statement
@@ -202,9 +202,13 @@ for their own components.
 
 Implementation notes (unit 1):
 
-- The evaluation and the proposed choices are recorded as A-23 in the
-  [decision log](../../docs/decisions/decision-log.md). No dependency is added until A-23 is
-  approved.
+- The evaluation and the choices are recorded as A-23 in the
+  [decision log](../../docs/decisions/decision-log.md), approved on 2026-10-21 subject to D-25: no
+  dependency is added until Legal confirms that `axe-core` (MPL-2.0) and `caniuse-lite`
+  (CC-BY-4.0) are acceptable. All A-23 tools are development dependencies only and are excluded
+  from the portal build; unit 2 extends the build check to confirm this (F05-T12).
+- After the browser-test CI job added in unit 2 has run successfully, its check name is added to
+  the `main` ruleset.
 - Proposed: Storybook 10.6.3 for previews; `@storybook/addon-a11y` with axe-core run on every story
   in both themes through `@storybook/addon-vitest`; Vitest browser mode with Playwright 1.64.1
   (Chromium) for keyboard and focus tests; and `toMatchScreenshot` baselines created only in the
@@ -220,5 +224,5 @@ Implementation notes (unit 1):
 - D-12: final brand assets, logos, and fonts (the app shell shows no logo until it is confirmed).
 - D-21: portal languages; components take all text through props, so no translation mechanism is
   chosen in F-05.
-- The preview, accessibility, and visual-regression tools: evaluated in unit 1; A-23 awaits
-  repository-owner approval.
+- The preview, accessibility, and visual-regression tools: A-23, approved subject to Legal
+  confirmation of the MPL-2.0 and CC-BY-4.0 dependencies (D-25).
