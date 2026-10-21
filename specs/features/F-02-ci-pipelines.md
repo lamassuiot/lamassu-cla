@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; all units implemented (unit 5 merged in PR #20; unit 4 partially: generated client deferred, A-18) |
+| Status | Approved; all units implemented (unit 5 merged in PR #20; unit 4 completed by the generated client and drift check, A-22) |
 | Phase | 2 |
 | Owner | Repository owner |
-| Depends on | F-01 (units 2 onward); D-01; A-18; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
-| Approved by | Repository owner, 2026-10-05 (all units; unit 1 implementation approved); 2026-10-07 (A-18: unit 4 without the generated client) |
+| Depends on | F-01 (units 2 onward); D-01; A-18, A-22; [ADR-0003](../../docs/decisions/0003-refine-private-url-scan.md), [ADR-0007](../../docs/decisions/0007-pin-nodejs-24.md) |
+| Approved by | Repository owner, 2026-10-05 (all units; unit 1 implementation approved); 2026-10-07 (A-18: unit 4 without the generated client); 2026-10-21 (A-22: Orval for the generated client) |
 
 ## Problem statement
 
@@ -81,7 +81,7 @@ None.
   directive check, Vitest, and build. Token-only CSS validation is added with F-04 (D-23, A-17).
   *(Unit 3)*
 - **AC-02-7** OpenAPI workflow: Redocly lint with a committed configuration *(Unit 4)* and a
-  generated-client drift check *(**deferred** by A-18; still required before any feature consumes
+  generated-client drift check *(added with Orval by A-22; required before any feature consumes
   API operations through `packages/api-client`)*.
 - **AC-02-8** Terraform workflow: `fmt -check`, `validate` without a backend, TFLint, and a
   configuration security scan, for every environment and module. *(Unit 5)*
@@ -97,7 +97,7 @@ None.
 | --- | --- | --- | --- |
 | F02-T1 | `scripts/check-private-urls.test.sh` (14 cases). | Script | AC-02-1 to AC-02-3 |
 | F02-T2 | `actionlint` and workflow schema validation. | CI | All workflows |
-| F02-T3 | A deliberately stale generated client fails the drift check (verified once during implementation). **Deferred (A-18).** | CI | AC-02-7 |
+| F02-T3 | A deliberately stale generated client fails the drift check (verified during the A-22 implementation: a contract edit, and a staged hand edit to the generated file, both fail; the regenerated client passes). | CI | AC-02-7 |
 | F02-T4 | The `Dev Container build` job passes on the pull request that adds it. | CI | AC-02-11 |
 | F02-T5 | The `Backend` workflow's `Go checks` and `Go vulnerability scan` jobs pass on the pull request that adds them. | CI | AC-02-5 |
 | F02-T6 | The `Frontend` workflow's `Frontend checks` job passes on the pull request that adds it. | CI | AC-02-6 |
@@ -163,6 +163,23 @@ Implementation notes (unit 4):
 - The generated client and drift check are deferred by A-18: the evaluated candidates conflict
   with TypeScript 6.0.3, introduce audit vulnerabilities, or need further evaluation. The
   TypeScript pin is unchanged and no npm `overrides` are added.
+- **Completed by A-22 (2026-10-21).** Orval 8.40.0 (exact pin, development dependency of
+  `packages/api-client`) generates `src/generated/client.ts` from `specs/api/openapi.yaml`
+  (`orval.config.ts`, `client: 'fetch'`, single file). The output is committed; Biome lints it but
+  does not format it, so the drift check compares Orval's own output.
+- Generated calls go through the mutator `src/fetcher.ts` (`apiFetch`): only same-origin paths
+  (`/...`), `credentials: 'same-origin'` so the `__Host-` session cookie stays on the portal's
+  origin, `redirect: 'error'`, `Accept: application/json, application/problem+json`, and
+  `X-CSRF-Token` on `POST`, `PUT`, `PATCH`, and `DELETE`. A state-changing request without a token
+  is refused before it is sent. The token source is set with `setCsrfTokenProvider()` once the
+  session model is decided (D-06). Response bodies are typed, not validated at runtime. A
+  separate API origin needs a decision first (D-02, D-16).
+- `scripts/check-api-client-drift.sh` regenerates the client and fails if it differs from the Git
+  index or adds untracked files. It runs in `make lint-openapi` and as a step of the `OpenAPI lint`
+  job (check name unchanged; the path filter now includes `packages/api-client/` and the script).
+- Orval adds 84 packages (`npm audit`: 0 vulnerabilities); no existing package version changed.
+  `esbuild`'s install script is not run (npm `allowScripts`); `esbuild` works from its platform
+  package.
 
 Implementation notes (unit 6):
 

@@ -36,7 +36,7 @@ builds as CI does.
 | `make bootstrap` | Installs npm dependencies and pinned Go tools. |
 | `make tools` | Installs pinned Go tools into `.tools/bin` only. |
 | `make lint` | Biome lint and format check (`biome ci`, including the token-only CSS plugin), TypeScript type check, the design-token drift check, Redocly lint of the OpenAPI contract, `go vet`, `golangci-lint` (including hexagonal-layering rules), the private-URL scan, the TypeScript directive check, and the CSS suppression check. |
-| `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`. |
+| `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`, then regenerates the API client and fails if it differs from the committed one (`scripts/check-api-client-drift.sh`). |
 | `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, token-only CSS check, and layering rules). |
 | `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
 | `make build` | Builds the portal with Vite, checks the build output for bundled fonts and third-party load points (`scripts/check-web-build.sh`), and builds the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
@@ -59,7 +59,7 @@ steps that precede any deployment.
 | --- | --- |
 | `apps/web` | Portal (Vite, React, TypeScript). Run `npm run dev -w apps/web` and open <http://localhost:5173>. |
 | `packages/design-system` | Design tokens (F-04) and components (F-05). Tokens are defined in `src/tokens/`; after changing them, run `npm run tokens -w @lamassu-cla/design-system` and commit the regenerated `src/styles/tokens.css`. `make lint` fails while the file is out of date. |
-| `packages/api-client` | Typed API client generated from OpenAPI (F-02; generation deferred by A-18). |
+| `packages/api-client` | Typed API client generated from `specs/api/openapi.yaml` with Orval 8.40.0 (A-22). After changing the contract, run `npm run generate -w @lamassu-cla/api-client` and commit `src/generated/`; `make lint-openapi` fails while it is out of date. Requests go through `src/fetcher.ts` (same-origin paths, `X-CSRF-Token` on state-changing methods). |
 | `packages/shared-types` | Types shared across workspaces. |
 | `services/api` | Go module for the Lambda functions. Run `go test ./...` from this directory. |
 
