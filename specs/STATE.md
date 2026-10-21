@@ -39,7 +39,8 @@ Last updated: 2026-10-08
   from the portal bundle). The browser-test check was added to the
   `main` ruleset after its first successful run (PR #47). The Phase 3 reviews were recorded in PR #27 (decision-log
   entries A-20 to A-22). A-20: the repository owner decided on 2026-10-21 to keep the ADR-0012
-  exception unchanged; Security-owner confirmation is still pending (Checkov 3.3.30 still pins
+  exception unchanged, and reported the Security owner's confirmation of that review on the same
+  day (Checkov 3.3.30 still pins
   `asteval==1.0.6`, and no release avoids the advisories). A-21 was confirmed on 2026-10-21 and
   implemented in merged PR #29: Dependabot may propose TypeScript upgrades, while TypeScript 6.0.3
   remains pinned pending a separate reviewed upgrade. A-22 (Orval 8.40.0) was confirmed on
@@ -66,7 +67,7 @@ Last updated: 2026-10-08
 | 2026-10-08 | Repository owner | F-04 specification approved (merged as PR #25; "continue" given as approval in chat); implementation may start with unit 1. |
 | 2026-10-08 | Repository owner | Carry out the Phase 3 reviews of ADR-0012, A-15 and A-16, and A-18 alongside F-04, recording evidence and outcomes; propose dependency or policy changes in separate PRs; Security-owner review required for the ADR-0012 outcome. Outcomes A-20 to A-22 were proposed at the time; their later decisions are recorded in the rows below. |
 | 2026-10-21 | Repository owner | A-21 decided: PR #29 implements it; Dependabot may propose TypeScript upgrades, TypeScript 6.0.3 stays pinned until a separate upgrade PR passes review and CI, and the `@types/node` major-version hold remains. A-22 decided as the choice of generator: a separate PR implements Orval 8.40.0 (exact pin) with a reviewed fetch wrapper and a generated-client drift check; the A-18 implementation deferral stays open until that PR merges. |
-| 2026-10-21 | Repository owner | A-20 decided: keep the ADR-0012 dependency-review exception exactly as defined (three GHSA identifiers; `asteval` not overridden), after confirming that no Checkov release from 3.2.159 to 3.3.30 avoids the advisories. Security-owner confirmation is still pending; the review triggers in ADR-0012 stand. |
+| 2026-10-21 | Repository owner | A-20 decided: keep the ADR-0012 dependency-review exception exactly as defined (three GHSA identifiers; `asteval` not overridden), after confirming that no Checkov release from 3.2.159 to 3.3.30 avoids the advisories. Security-owner confirmation of this review was reported by the repository owner on 2026-10-21; the review triggers in ADR-0012 stand. |
 | 2026-10-21 | Repository owner | PR #41 (Orval implementation of A-22) merged; this closes the A-18 implementation deferral. |
 | 2026-10-21 | Repository owner | F-05 specification approved (PR #43). Start unit 1: evaluate the preview, accessibility, and visual-regression tools and return the proposed choices and decision record for review before adding dependencies or starting component implementation. |
 | 2026-10-21 | Repository owner | A-23 approved for the proposed tools (Storybook 10.6.3, `@storybook/addon-a11y` with axe-core, Vitest browser mode with Playwright 1.64.1, and pinned-image visual regression), subject to Legal confirming that the MPL-2.0 and CC-BY-4.0 dependencies are acceptable (D-25) before they are added. They are development-only and excluded from the portal build. Add the browser-test check to the `main` ruleset after it has run successfully. |

@@ -104,7 +104,7 @@ CI isolation was verified in the `main` run of PR #23 before relying on it: read
 fixture test and scan inside `sudo unshare --net` as the runner user. The pre-scan probe is
 strengthened in a separate PR to assert that only the loopback interface is visible.
 
-Outcome (decided by the repository owner on 2026-10-21; Security-owner confirmation pending): the
+Outcome (decided by the repository owner on 2026-10-21; Security-owner confirmation reported by the repository owner on the same day): the
 exception stays exactly as defined above; `asteval` is not overridden. The next review is when a
 Checkov release allows `asteval>=1.0.9`, when `ecdsa` publishes a fix or Checkov uses it for
 signing, when the scan uses external checks or keys, or at the start of Phase 4, whichever comes
