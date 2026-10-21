@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) in progress: table, pagination, timeline item, and step indicator in this PR; hash display, agreement status display, and audit-event display next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -345,6 +345,31 @@ Implementation notes (unit 5, first pull request: generic data display):
   Removing the pagination focus move, or making the table container never or always a tab stop,
   failed the tests. The table and container observers overlap in practice; the tests cannot tell
   them apart.
+
+Implementation notes (unit 5, second pull request: domain data display):
+
+- `HashDisplay` is a `figure` named by its visible `figcaption` (also linked with
+  `aria-labelledby`), with the full value in a `code` element in the monospace font. The value wraps
+  instead of being truncated and is selected with one click (`user-select: all`), so it can be
+  copied manually. The copy button is described by the label. A successful copy is announced
+  politely; a rejected copy, or a missing Clipboard API outside secure contexts, is announced
+  assertively with the caller's failure message (AC-05-7, error case "copy to clipboard fails").
+  It requires a surrounding `LiveRegionProvider`.
+- `AgreementStatusDisplay` is a named `section` with a heading, a status badge for the domain state,
+  and a description list. The signature level is the caller's text, rendered exactly as supplied;
+  the component has no signature-level vocabulary of its own, so it cannot add or upgrade a
+  "qualified" claim (ADR-0004, AC-05-8). Other details are optional term and description pairs.
+- `AuditEventDisplay` is a named `article` with the event title, the dotted event type, a `time`
+  element, and only the fields it is given, in order; it never fetches data. Callers must keep
+  personal data out of the fields (domain model, audit event metadata).
+- Stories and tests use synthetic values only; the example hash is the public SHA-256 of empty
+  input.
+- The agreement state `VOIDED` (domain model, section 3.2) has no status color in the design
+  tokens (section 2.3); the badge renders it as `neutral` through the unknown-state fallback. This
+  is recorded as C-02 in `specs/STATE.md`; the code is unchanged.
+- Browser tests: 181 (25 story files, each run in both themes, and 15 component test files).
+  Removing either copy announcement, announcing the failure politely, removing `user-select`, or
+  appending a qualified claim to the signature level failed the tests.
 
 ## Open questions
 

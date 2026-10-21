@@ -1,0 +1,50 @@
+@layer components {
+  .event {
+    display: grid;
+    gap: var(--cla-space-3);
+    padding: var(--cla-space-4);
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-radius: var(--cla-radius-md);
+    background: var(--cla-color-bg-surface);
+    color: var(--cla-color-text-primary);
+  }
+
+  .title {
+    margin: 0;
+    color: var(--cla-color-text-heading);
+    font-size: var(--cla-text-body-size);
+    font-weight: var(--cla-text-h3-weight);
+    line-height: var(--cla-text-body-line-height);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cla-space-1) var(--cla-space-3);
+    margin: 0;
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .meta code {
+    font-size: var(--cla-text-code-size);
+  }
+
+  .fields {
+    display: grid;
+    gap: var(--cla-space-2);
+    margin: 0;
+  }
+
+  .field dt {
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .field dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
