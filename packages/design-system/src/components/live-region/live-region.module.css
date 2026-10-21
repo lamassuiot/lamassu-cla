@@ -1,0 +1,14 @@
+@layer components {
+  /* Visually hidden but read by assistive technology. */
+  .region {
+    position: absolute;
+    width: var(--cla-border-width);
+    height: var(--cla-border-width);
+    margin: calc(-1 * var(--cla-border-width));
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+  }
+}
