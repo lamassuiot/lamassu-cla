@@ -9,7 +9,8 @@ Last updated: 2026-10-08
 
 - **Phase:** 1 complete (PR #4). Phase 2 in progress (remaining items blocked; see Blocked items).
   Phase 3 started on 2026-10-08 with the F-04 specification (PR #25), approved the same day.
-  F-04 unit 1 (tokens and generation) merged (PR #26); unit 2 (token-only CSS check) is next.
+  F-04 units 1 (tokens and generation) and 2 (token-only CSS check) merged (PRs #26, #30); unit 3
+  (themes and base styles) is in progress.
 - **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6), approved, and completed by
   PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
@@ -25,12 +26,14 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** F-04 units 2 (token-only CSS check) and 3 (themes and base styles). The Phase 3
-  decision reviews were carried out on 2026-10-08 (decision-log entries A-20 to A-22): A-20 keeps
-  the ADR-0012 exception unchanged and awaits Security-owner review; A-21 (Dependabot proposes
-  TypeScript upgrades; TypeScript stays at 6.0.3) was decided on 2026-10-21 and is implemented
-  (PR #29); A-22 was decided on 2026-10-21 as the choice of generator (Orval 8.40.0), and its
-  implementation PR is next; the A-18 deferral stays open until that PR merges. Phase 2:
+- **Next gate:** F-04 unit 3 (themes and base styles), then the F-05 specification. The Phase 3
+  reviews were recorded in PR #27 (decision-log entries A-20 to A-22). A-20 keeps the ADR-0012
+  exception unchanged and awaits Security-owner review; Checkov 3.3.29 still pins
+  `asteval==1.0.6`. A-21 was confirmed by the repository owner on 2026-10-21 and implemented
+  in merged PR #29: Dependabot may propose TypeScript upgrades, while TypeScript 6.0.3 remains
+  pinned pending a separate reviewed upgrade. A-22 was confirmed on 2026-10-21 as the choice
+  of Orval 8.40.0; its implementation PR is next. The A-18 deferral remains open until that
+  PR merges. Phase 2:
   Security-owner and platform-owner review of the final A-19, ADR-0012, and T-19 wording; approval
   of D-24 (central state account). F-03 step 5 (deployment workflow) stays blocked until the
   platform-owner prerequisites are met (see Blocked items).
@@ -60,7 +63,7 @@ Last updated: 2026-10-08
 | --- | --- | --- | --- |
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
-| 3 | Frontend shell and design system | In progress (F-04 unit 2) | Final visual values: D-12. |
+| 3 | Frontend shell and design system | In progress (F-04 unit 3) | Final visual values: D-12. |
 | 4 | Authentication and user profile | Not started | Phase 2; D-02, D-06, D-13, D-19 (DPO), D-20. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
@@ -89,7 +92,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-01 | [Monorepo and tooling foundation](features/F-01-monorepo-tooling.md) | 2 | Phase 1 | Done (PRs #6, #11); Biome migration (A-17) merged (PR #14) |
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18); unit 6 merged (PR #19); unit 5 merged (PR #20) |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
-| F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); unit 1 merged (PR #26); unit 2 next |
+| F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 and 2 merged (PRs #26, #30); unit 3 in progress |
 | F-05 | Component library and preview | 3 | F-04 | Not started |
 | F-06 | App shell and static screens | 3 | F-05 | Not started |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |

@@ -41,7 +41,7 @@ jobs:
             # HEAD is the PR merge commit, so HEAD^1 is the base branch.
             changed=$(git diff --name-only HEAD^1 HEAD)
             # Biome checks these file types anywhere in the repository.
-            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
+            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|scripts/check-web-build|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
             pattern+='|\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css|html)$'
             if ! grep -qE "$pattern" <<<"$changed"; then
               frontend=false
@@ -98,3 +98,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # No bundled fonts and no third-party load points until D-12 (F-04 AC-04-9).
+      - name: Build output check
+        run: |
+          scripts/check-web-build.test.sh
+          scripts/check-web-build.sh apps/web/dist

@@ -13,3 +13,10 @@ export {
 } from './tokens/scales.ts';
 export type { TextStyle } from './tokens/scales.ts';
 export { cssVar, renderTokensCss, tokenPrefix } from './tokens/css.ts';
+export {
+  applyTheme,
+  getThemePreference,
+  setThemePreference,
+  themeStorageKey,
+} from './theme.ts';
+export type { ThemePreference } from './theme.ts';

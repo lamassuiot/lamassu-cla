@@ -97,6 +97,7 @@ test-scripts: $(GOLANGCI_LINT)
 	scripts/check-private-urls.test.sh
 	scripts/check-ts-directives.test.sh
 	scripts/check-css-tokens.test.sh
+	scripts/check-web-build.test.sh
 	GOLANGCI_LINT=$(GOLANGCI_LINT) scripts/check-go-layering.test.sh
 
 .PHONY: build
@@ -105,6 +106,7 @@ build: build-web build-go ## Build the portal and Lambda binaries.
 .PHONY: build-web
 build-web:
 	npm run build
+	scripts/check-web-build.sh apps/web/dist
 
 .PHONY: build-go
 build-go:
