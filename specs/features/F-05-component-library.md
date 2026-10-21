@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 (layout and visual baseline) implemented: app shell, navigation, and page header in PR #54; visual regression, the 320 px and 200% zoom runs, and the local-setup documentation in this PR; all units implemented |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 (layout and visual baseline) implemented: app shell, navigation, and page header in PR #54; visual regression, the 320 px and 200% zoom runs, and the local-setup documentation in PR #55; all units implemented |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
