@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 approved subject to Legal (D-25); units 2 to 6 wait for D-25 |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 in progress (tooling and button first) |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -203,10 +203,12 @@ for their own components.
 Implementation notes (unit 1):
 
 - The evaluation and the choices are recorded as A-23 in the
-  [decision log](../../docs/decisions/decision-log.md), approved on 2026-10-21 subject to D-25: no
-  dependency is added until Legal confirms that `axe-core` (MPL-2.0) and `caniuse-lite`
-  (CC-BY-4.0) are acceptable. All A-23 tools are development dependencies only and are excluded
-  from the portal build; unit 2 extends the build check to confirm this (F05-T12).
+  [decision log](../../docs/decisions/decision-log.md), approved on 2026-10-21 subject to D-25. D-25
+  was decided by the repository owner on 2026-10-21: `axe-core` (MPL-2.0) and `caniuse-lite`
+  (CC-BY-4.0) may be added as development-only dependencies, with their license notices kept,
+  caniuse.com attributed if an artifact including its data is redistributed, and both excluded
+  from the portal bundle. D-25 is reopened if Storybook, the development container, or that data
+  starts being distributed.
 - After the browser-test CI job added in unit 2 has run successfully, its check name is added to
   the `main` ruleset.
 - Proposed: Storybook 10.6.3 for previews; `@storybook/addon-a11y` with axe-core run on every story
@@ -219,10 +221,37 @@ Implementation notes (unit 1):
 - Visual baselines differ between a developer host and the container, so they are created and
   compared only in the pinned image. Each screenshot test cleans up the previous render.
 
+Implementation notes (unit 2, first pull request: tooling and button):
+
+- Unit 2 is split into two pull requests to keep each reviewable: this one adds the A-23 tooling,
+  the checks, and the button; the next adds the other foundations and forms.
+- `packages/design-system` gains the A-23 development dependencies (exact pins) and declares React
+  19 as a peer dependency. `npm audit` reports 0 vulnerabilities; no existing package version
+  changed; no new install script.
+- `.storybook/` configures Storybook with telemetry disabled. A `theme` global switches themes in
+  the preview. `vitest.browser.config.ts` runs every story in two projects, `stories-light` and
+  `stories-dark` (axe checks fail on any WCAG 2.0 to 2.2 A or AA violation), and the
+  `*.browser.test.tsx` component tests with real key presses. `vitest.config.ts` keeps the Node
+  unit tests separate. Verified: each project renders its theme (canvas `rgb(247, 245, 242)` and
+  `rgb(11, 22, 34)`), and a deliberate contrast regression failed `color-contrast` in both.
+- `scripts/check-design-system-components.sh` (8-case test) requires, for each component directory,
+  the component, a story, an export from `src/index.ts`, and CSS Modules with every rule inside a
+  single `@layer components` block (F05-T1, AC-05-2). Biome's inline-style rules now also cover
+  `packages/design-system`.
+- `scripts/check-portal-dev-deps.sh` (F05-T12, D-25) fails if the portal's production dependencies,
+  or the modules in a source-mapped portal build, include `axe-core`, `caniuse-lite`, Storybook,
+  Playwright, or Vitest. It runs in `make build` and the Frontend workflow. Verified: importing
+  either package into the portal fails the check.
+- The `Design system browser tests` job runs in the digest-pinned Playwright 1.64.1 image and
+  fails if the installed `playwright` version differs from the image. Locally, `make test-browser`
+  runs the same tests (Chromium from `npx playwright install chromium`).
+- Button: `primary`, `secondary`, `ghost`, and `danger` variants from semantic tokens only; a token-
+  styled disabled state; `type="button"` by default; no `className` or `style` props.
+
 ## Open questions
 
 - D-12: final brand assets, logos, and fonts (the app shell shows no logo until it is confirmed).
 - D-21: portal languages; components take all text through props, so no translation mechanism is
   chosen in F-05.
-- The preview, accessibility, and visual-regression tools: A-23, approved subject to Legal
-  confirmation of the MPL-2.0 and CC-BY-4.0 dependencies (D-25).
+- The preview, accessibility, and visual-regression tools: A-23, with D-25 (licenses) decided on
+  2026-10-21.

@@ -77,6 +77,7 @@ lint-repo:
 	scripts/check-private-urls.sh
 	scripts/check-ts-directives.sh
 	scripts/check-css-suppressions.sh
+	scripts/check-design-system-components.sh
 
 .PHONY: test
 test: test-web test-go test-scripts ## Run all tests.
@@ -99,6 +100,7 @@ test-scripts: $(GOLANGCI_LINT)
 	scripts/check-ts-directives.test.sh
 	scripts/check-css-tokens.test.sh
 	scripts/check-web-build.test.sh
+	scripts/check-design-system-components.test.sh
 	GOLANGCI_LINT=$(GOLANGCI_LINT) scripts/check-go-layering.test.sh
 
 .PHONY: build
@@ -108,6 +110,11 @@ build: build-web build-go ## Build the portal and Lambda binaries.
 build-web:
 	npm run build
 	scripts/check-web-build.sh apps/web/dist
+	scripts/check-portal-dev-deps.sh
+
+.PHONY: test-browser
+test-browser: ## Story accessibility and component tests in Chromium (F-05); not part of `make check`.
+	STORYBOOK_DISABLE_TELEMETRY=1 npm run test:browser -w @lamassu-cla/design-system
 
 .PHONY: build-go
 build-go:

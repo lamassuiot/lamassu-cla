@@ -6,6 +6,8 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+storybook-static/
+.vitest/
 
 # Terraform local state and plans
 .terraform/

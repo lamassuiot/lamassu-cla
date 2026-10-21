@@ -39,7 +39,8 @@ builds as CI does.
 | `make lint-openapi` | Lints `specs/api/openapi.yaml` with Redocly using `redocly.yaml`, then regenerates the API client and fails if it differs from the committed one (`scripts/check-api-client-drift.sh`). |
 | `make test` | Vitest in every workspace, `go test -race`, and the script tests (private-URL scan, TypeScript directives, token-only CSS check, and layering rules). |
 | `make vuln-go` | Runs the pinned `govulncheck` against the Go module and toolchain. Needs network access to the Go vulnerability database; not part of `make check`. |
-| `make build` | Builds the portal with Vite, checks the build output for bundled fonts and third-party load points (`scripts/check-web-build.sh`), and builds the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
+| `make build` | Builds the portal with Vite, checks the build output for bundled fonts and third-party load points (`scripts/check-web-build.sh`), checks that development-only tooling (axe-core, caniuse-lite, Storybook, Playwright, Vitest) is not in the portal bundle (`scripts/check-portal-dev-deps.sh`, D-25), and builds the Lambda binaries (`linux/arm64`) into `services/api/dist/`. |
+| `make test-browser` | Runs every design-system story in Chromium in light and dark themes with axe accessibility checks, plus the component keyboard tests (F-05). Needs `npx playwright install chromium` once; not part of `make check`. CI runs it in the pinned Playwright image. |
 | `make format` | Formats web sources and applies safe Biome fixes (`biome check --write`), and formats Go sources. |
 | `make check` | `lint`, `test`, and `build`. |
 | `make clean` | Removes build output. |

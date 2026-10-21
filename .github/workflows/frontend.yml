@@ -41,7 +41,7 @@ jobs:
             # HEAD is the PR merge commit, so HEAD^1 is the base branch.
             changed=$(git diff --name-only HEAD^1 HEAD)
             # Biome checks these file types anywhere in the repository.
-            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|scripts/check-web-build|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
+            pattern='^(apps/|packages/|\.biome/|scripts/check-ts-directives|scripts/check-css-|scripts/check-web-build|scripts/check-design-system-components|scripts/check-portal-dev-deps|\.github/workflows/frontend\.yml$|\.npmrc$|\.nvmrc$|\.gitignore$)'
             pattern+='|\.(js|jsx|mjs|cjs|ts|tsx|mts|cts|json|jsonc|css|html)$'
             if ! grep -qE "$pattern" <<<"$changed"; then
               frontend=false
@@ -104,3 +104,39 @@ jobs:
         run: |
           scripts/check-web-build.test.sh
           scripts/check-web-build.sh apps/web/dist
+
+      # Development-only tooling (axe-core, caniuse-lite, Storybook) stays out of the portal (D-25).
+      - name: Portal dependency check
+        run: scripts/check-portal-dev-deps.sh
+
+  browser:
+    name: Design system browser tests
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.frontend != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Pinned image (A-23); its version must equal the `playwright` package version.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+    env:
+      PLAYWRIGHT_VERSION: 1.64.1
+      STORYBOOK_DISABLE_TELEMETRY: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the image matches the playwright package
+        run: |
+          installed=$(node -p "require('./node_modules/playwright/package.json').version")
+          if [[ "$installed" != "$PLAYWRIGHT_VERSION" ]]; then
+            echo "::error::playwright $installed does not match the container image $PLAYWRIGHT_VERSION"; exit 1
+          fi
+        shell: bash
+
+      - name: Story accessibility and component tests
+        run: npm run test:browser -w @lamassu-cla/design-system
