@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) completed in this PR; unit 4 next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
