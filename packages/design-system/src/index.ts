@@ -47,6 +47,7 @@ export {
   type Politeness,
   useAnnounce,
 } from './components/live-region/live-region.tsx';
+export { Pagination, type PaginationProps } from './components/pagination/pagination.tsx';
 export {
   type RadioGroupProps,
   RadioGroup,
@@ -68,8 +69,18 @@ export {
   statusForState,
 } from './components/status-badge/status.ts';
 export { StatusBadge, type StatusBadgeProps } from './components/status-badge/status-badge.tsx';
+export {
+  StepIndicator,
+  type StepIndicatorProps,
+} from './components/step-indicator/step-indicator.tsx';
+export { Table, type TableColumn, type TableProps } from './components/table/table.tsx';
 export { Textarea, type TextareaProps } from './components/textarea/textarea.tsx';
 export { ThemeToggle, type ThemeToggleProps } from './components/theme-toggle/theme-toggle.tsx';
+export {
+  Timeline,
+  TimelineItem,
+  type TimelineItemProps,
+} from './components/timeline-item/timeline-item.tsx';
 export {
   type ToastInput,
   type ToastLabels,

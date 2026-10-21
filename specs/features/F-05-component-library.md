@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in this PR; unit 5 next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) in progress: table, pagination, timeline item, and step indicator in this PR; hash display, agreement status display, and audit-event display next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -322,6 +322,29 @@ Implementation notes (unit 4: overlays):
   Removing `showModal()`, the focus return on unmount, the name check, or the cancel-first order, or
   wiring Escape to confirm, failed the tests. Chromium already returns focus to the opener on
   `close()`, so the explicit return is kept for browsers that do not.
+
+Implementation notes (unit 5, first pull request: generic data display):
+
+- Unit 5 is split into two pull requests: this one adds the table, pagination, timeline item, and
+  step indicator; the next adds the hash display, agreement status display, and audit-event display
+  (F05-T7, F05-T8).
+- `Table` is a native `table` with a visible caption that also names its container. Column headers
+  have `scope="col"`; a column marked `rowHeader` renders `th scope="row"`. Only the table scrolls
+  horizontally (AC-05-11). Its container becomes a tab stop only while the table overflows it, so
+  keyboard users can scroll it, and it is not an empty tab stop otherwise. Overflow is measured with
+  a `ResizeObserver` on the container and the table.
+- `Pagination` follows the API's cursor pagination (`next_cursor` only): previous and next buttons
+  in a labelled `nav`, with no page numbers; the caller keeps earlier cursors. When the pressed
+  button becomes disabled, focus moves to the other button instead of the document.
+- `Timeline` (a labelled `ol`) and `TimelineItem` render a title, a `time` element with a
+  machine-readable `dateTime` and a caller-formatted label (D-21), and an optional description. The
+  status color is on a decorative marker only; the title states the outcome.
+- `StepIndicator` is a labelled `ol`; the current step has `aria-current="step"`, and completed
+  steps add a visually hidden `completedLabel`, so progress is not shown by style alone.
+- Browser tests: 160 (21 story files, each run in both themes, and 14 component test files).
+  Removing the pagination focus move, or making the table container never or always a tab stop,
+  failed the tests. The table and container observers overlap in practice; the tests cannot tell
+  them apart.
 
 ## Open questions
 
