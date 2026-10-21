@@ -28,8 +28,10 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** F-06 specification (app shell and static screens), after F-05 completes. F-05
-  unit 6 is implemented in PR #54 (app shell, navigation, and page header, with A-26) and PR #55 (visual regression, the 320 px and 200% zoom runs, and the local-setup
+- **Next gate:** approval of the [F-06 specification](features/F-06-app-shell-and-static-screens.md)
+  (app shell and static screens; in review, with D-26 and D-27 opened). F-05 is done: unit 6
+  merged in PR #54 (app shell, navigation, and page header, with A-26) and PR #55 (visual
+  regression, the 320 px and 200% zoom runs, and the local-setup
   documentation). C-02 (`VOIDED` status color) awaits the repository owner. Unit 5 (data display)
   is complete in PR #51
   and PR #52. Unit 4 (overlays) is complete in PR #50,
@@ -81,7 +83,7 @@ Last updated: 2026-10-08
 | --- | --- | --- | --- |
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
-| 3 | Frontend shell and design system | In progress (F-04 done; F-05 specification next) | Final visual values: D-12. |
+| 3 | Frontend shell and design system | In progress (F-04 and F-05 done; F-06 specification in review) | Final visual values: D-12. |
 | 4 | Authentication and user profile | Not started | Phase 2; D-02, D-06, D-13, D-19 (DPO), D-20. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
@@ -111,8 +113,8 @@ Feature specifications are written at the start of the phase that implements the
 | F-02 | [CI pipelines for backend, frontend, OpenAPI, and Terraform](features/F-02-ci-pipelines.md) | 2 | F-01 | Unit 1 merged (PR #5); Dev Container job merged (PR #11); unit 2 merged (PR #15); unit 3 merged (PR #17); unit 4 merged (PR #18; generated client deferred, A-18; Orval client and drift check merged, A-22 (PR #41)); unit 6 merged (PR #19); unit 5 merged (PR #20) |
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
-| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 implemented (PR #54 and PR #55, with A-26 decided); all units implemented |
-| F-06 | App shell and static screens | 3 | F-05 | Not started |
+| F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
+| F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Specification in review |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
