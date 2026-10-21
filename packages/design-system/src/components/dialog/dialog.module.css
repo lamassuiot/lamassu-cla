@@ -1,0 +1,37 @@
+@layer components {
+  .dialog {
+    inline-size: min(60ch, 100% - 2 * var(--cla-space-5));
+    max-block-size: calc(100% - 2 * var(--cla-space-5));
+    padding: var(--cla-space-5);
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-radius: var(--cla-radius-lg);
+    background: var(--cla-color-bg-raised);
+    box-shadow: var(--cla-shadow-lg);
+    color: var(--cla-color-text-primary);
+  }
+
+  .dialog::backdrop {
+    background: var(--cla-color-overlay-scrim);
+  }
+
+  .title {
+    margin: 0 0 var(--cla-space-3);
+    color: var(--cla-color-text-heading);
+    font-size: var(--cla-text-h3-size);
+    font-weight: var(--cla-text-h3-weight);
+    line-height: var(--cla-text-h3-line-height);
+  }
+
+  .description {
+    margin: 0 0 var(--cla-space-4);
+    color: var(--cla-color-text-secondary);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--cla-space-3);
+    margin-block-start: var(--cla-space-5);
+  }
+}

@@ -125,6 +125,7 @@
   --cla-color-status-info-bg: var(--cla-color-status-info-light-bg);
   --cla-color-status-neutral-text: var(--cla-color-status-neutral-light-text);
   --cla-color-status-neutral-bg: var(--cla-color-status-neutral-light-bg);
+  --cla-color-overlay-scrim: rgb(11 22 34 / 0.50);
   --cla-gradient-hero: linear-gradient(180deg, var(--cla-color-gray-50), var(--cla-color-gray-100));
   --cla-shadow-sm: 0 1px 2px rgb(11 22 34 / 0.08);
   --cla-shadow-md: 0 4px 12px rgb(11 22 34 / 0.10);
@@ -159,6 +160,7 @@
   --cla-color-status-info-bg: var(--cla-color-status-info-dark-bg);
   --cla-color-status-neutral-text: var(--cla-color-status-neutral-dark-text);
   --cla-color-status-neutral-bg: var(--cla-color-status-neutral-dark-bg);
+  --cla-color-overlay-scrim: rgb(0 0 0 / 0.60);
   --cla-gradient-hero: linear-gradient(135deg, var(--cla-color-navy-950), var(--cla-color-teal-950));
   --cla-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
   --cla-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);
@@ -194,6 +196,7 @@
     --cla-color-status-info-bg: var(--cla-color-status-info-dark-bg);
     --cla-color-status-neutral-text: var(--cla-color-status-neutral-dark-text);
     --cla-color-status-neutral-bg: var(--cla-color-status-neutral-dark-bg);
+    --cla-color-overlay-scrim: rgb(0 0 0 / 0.60);
     --cla-gradient-hero: linear-gradient(135deg, var(--cla-color-navy-950), var(--cla-color-teal-950));
     --cla-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.40);
     --cla-shadow-md: 0 4px 12px rgb(0 0 0 / 0.45);

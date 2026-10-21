@@ -60,3 +60,8 @@ export const shadows = {
     light: '0 12px 32px rgb(11 22 34 / 0.14)',
   },
 } as const satisfies Record<string, Themed<string>>;
+
+// Design tokens, section 2.6.
+export const overlayColors = {
+  'overlay.scrim': { dark: 'rgb(0 0 0 / 0.60)', light: 'rgb(11 22 34 / 0.50)' },
+} as const satisfies Record<string, Themed<string>>;

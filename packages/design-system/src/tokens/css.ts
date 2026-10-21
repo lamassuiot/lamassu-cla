@@ -1,6 +1,6 @@
 import { colorPrimitives } from './primitives.ts';
 import type { Gradient, Theme } from './semantic.ts';
-import { gradients, semanticColors, shadows } from './semantic.ts';
+import { gradients, overlayColors, semanticColors, shadows } from './semantic.ts';
 import { borderWidths, fontFamilies, motion, radii, spacing, typography } from './scales.ts';
 
 export const tokenPrefix = '--cla-';
@@ -42,6 +42,9 @@ function themed(theme: Theme): string[] {
   const lines = [`color-scheme: ${theme};`];
   for (const [name, value] of Object.entries(semanticColors)) {
     lines.push(`${cssVar(name, 'color')}: ${colorRef(value[theme])};`);
+  }
+  for (const [name, value] of Object.entries(overlayColors)) {
+    lines.push(`${cssVar(name, 'color')}: ${value[theme]};`);
   }
   for (const [name, value] of Object.entries(gradients)) {
     lines.push(`${cssVar(name)}: ${gradientValue(value[theme])};`);

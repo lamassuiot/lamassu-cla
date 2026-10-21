@@ -124,6 +124,18 @@ Restrained, for hero areas and page headers only:
 
 Text over gradients must meet the contrast of the darkest or lightest stop, whichever is worse.
 
+### 2.6 Overlay
+
+| Token | Dark theme | Light theme |
+| --- | --- | --- |
+| `overlay.scrim` | `rgb(0 0 0 / 0.60)` | `rgb(11 22 34 / 0.50)` |
+
+The scrim is the backdrop behind modal dialogs, confirmation dialogs, and drawers. It shows that
+the page behind is unavailable while a modal overlay is open. It uses the same base colors as the
+shadows (section 5). It carries no text and is never the boundary of a control, so no contrast
+minimum applies; overlay content sits on `bg.raised`. Added in F-05 unit 4 (A-24); like the other
+visual values, it is proposed pending D-12.
+
 ## 3. Typography
 
 Font families are proposed pending D-12. Only open-licensed fonts may be bundled. Until D-12 is
