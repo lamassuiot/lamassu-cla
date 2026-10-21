@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; units 1 and 2 merged (PRs #26, #30); unit 3 (themes and base styles) in progress |
+| Status | Done: units 1 to 3 merged (PRs #26, #30, #39) |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-01; A-11, A-17, D-12, D-23; [design tokens](../ux/design-tokens.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |

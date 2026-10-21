@@ -104,10 +104,16 @@ CI isolation was verified in the `main` run of PR #23 before relying on it: read
 fixture test and scan inside `sudo unshare --net` as the runner user. The pre-scan probe is
 strengthened in a separate PR to assert that only the loopback interface is visible.
 
-Outcome (proposed, pending Security-owner review): the exception stays exactly as defined above;
-`asteval` is not overridden. The next review is when a Checkov release allows `asteval>=1.0.9`,
-when `ecdsa` publishes a fix or Checkov uses it for signing, when the scan uses external checks or
-keys, or at the start of Phase 4, whichever comes first.
+Outcome (decided by the repository owner on 2026-10-21; Security-owner confirmation pending): the
+exception stays exactly as defined above; `asteval` is not overridden. The next review is when a
+Checkov release allows `asteval>=1.0.9`, when `ecdsa` publishes a fix or Checkov uses it for
+signing, when the scan uses external checks or keys, or at the start of Phase 4, whichever comes
+first.
+
+Alternatives checked on 2026-10-21: no Checkov release from 3.2.159 to 3.3.30 avoids the
+advisories. Releases up to 3.2.414 (May 2025) do not use `asteval`, but evaluate expressions with
+Python `eval()` and lack a year of checks; 3.2.415 to 3.3.30 pin `asteval` 1.0.5 or 1.0.6; `ecdsa`
+has no patched release in any version.
 
 ## Consequences
 

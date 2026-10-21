@@ -40,7 +40,7 @@ Contributors, maintainers, and repository administrators (who configure required
 | --- | --- | --- | --- |
 | Private hostname in a URL | `scripts/check-private-urls.sh` | Job fails | File, line, and allowlist guidance |
 | Allowlist entry without justification | Same script | Job fails (exit 2) | Allowlist line named |
-| Generated API client out of date | Regenerate and `git diff --exit-code` | Job fails | Diff shown (deferred, A-18) |
+| Generated API client out of date | Regenerate and compare with the Git index (`scripts/check-api-client-drift.sh`) | Job fails | Diff shown |
 | OpenAPI contract violates a lint rule | `redocly lint` with `redocly.yaml` | Job fails | Rule, location, and code frame |
 | Terraform not formatted | `terraform fmt -check` | Job fails | Files listed |
 
@@ -160,7 +160,7 @@ Implementation notes (unit 4):
   still fail. Remove an entry when an operation starts using the component.
 - `OpenAPI lint` uses the same in-job path filtering as units 2 and 3. It runs when
   `specs/api/`, the Redocly files, npm manifests, `.npmrc`, `.nvmrc`, or the workflow change.
-- The generated client and drift check are deferred by A-18: the evaluated candidates conflict
+- Originally deferred by A-18 (completed by A-22, below): the evaluated candidates conflict
   with TypeScript 6.0.3, introduce audit vulnerabilities, or need further evaluation. The
   TypeScript pin is unchanged and no npm `overrides` are added.
 - **Completed by A-22 (2026-10-21).** Orval 8.40.0 (exact pin, development dependency of
@@ -254,5 +254,4 @@ Notes for the administrator:
 
 ## Open questions
 
-- Generated API client tool and drift check: deferred by A-18 with a review point; owner
-  Maintainers.
+- Generated API client tool and drift check: resolved by A-22 (Orval 8.40.0, merged in PR #41).
