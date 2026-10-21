@@ -216,7 +216,8 @@ With `prefers-reduced-motion: reduce`, transitions are limited to opacity and du
 
 ## 9. Components
 
-Each component is implemented once in `packages/design-system` and reused:
+Each component is implemented once in `packages/design-system` and reused
+([F-05](../features/F-05-component-library.md)):
 
 App shell, navigation, page header, section label, button (primary, secondary, ghost, danger),
 input, select, checkbox, radio, textarea, form field, dialog, confirmation dialog, drawer, card,
