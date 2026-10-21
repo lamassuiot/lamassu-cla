@@ -140,10 +140,12 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 | D-22 | When a new CLA version is published, must contributors with an active agreement on an older version re-sign, and by when? | Open (recommendation recorded) | Phase 5, Phase 8 | **Legal** | Substantive legal or scope changes require re-signing; purely editorial changes do not. Each published version records its change classification, set by Legal. Subject to Legal approval. |
 | D-24 | Centralized Terraform state. Store the state of every environment in a dedicated Infrastructure/Tooling account: never in application workload accounts, and never in the Control Tower management, Log Archive, or Audit accounts. Use one state bucket and one customer-managed KMS key per environment (`dev`, `staging`, `production`). Use state keys `lamassu-cla/<environment>/<stack>/terraform.tfstate`, with S3-native locking through the corresponding `.tflock` object. Use separate roles for backend state access and for workload-account deployment, each restricted to its environment and state prefix. **Platform-owner prerequisite:** the tooling account must exist and be confirmed by the platform owner; its existence is not assumed. Amends D-05 and the F-03 bootstrap design (contradiction C-01 in `specs/STATE.md`). | Proposed | F-03 step 5; any bootstrap, plan against AWS, or apply | **Platform owner**, Security owner | Target state in [T-19](../../specs/security/threat-model.md#3-threats-and-mitigations). Accept the residual risk that a tooling-account compromise exposes several environment states. |
 | D-25 | Are the F-05 development dependencies `axe-core` 4.14.0 (MPL-2.0, via `@storybook/addon-a11y`) and `caniuse-lite` (CC-BY-4.0, browser-support data) acceptable for this AGPL-3.0-only repository? Both are development dependencies only, used unmodified for previews and tests; neither is part of the portal build, which `scripts/check-web-build.sh` and the F-05 build check verify. | Decided by the repository owner, 2026-10-21: both may be added as development-only dependencies, on four conditions. (1) Their license notices and metadata are kept (no files stripped from the installed packages; lockfile license fields unchanged). (2) If an artifact that includes `caniuse-lite` data is ever redistributed, the third-party notices attribute caniuse.com. (3) Neither is in the portal bundle; `scripts/check-portal-dev-deps.sh` verifies this in `make build` and CI. (4) The decision is reopened if Storybook, the development container, or that data starts being distributed. | F-05 units 2 to 6 (adding the A-23 dependencies) | Repository owner (decided); originally routed to **Legal** | Recorded as decided by the repository owner; Legal did not separately confirm. |
+| D-26 | Should the portal link to its corresponding source code, and where? The repository is AGPL-3.0-only, and section 13 concerns users who interact with the software over a network. | Open | F-06 (shell content); production launch | Repository owner, **Legal** | None. Do not assume; the link target and wording need confirmation. |
+| D-27 | What text does the public landing page show (title, description, and whether it mentions that signing is not yet available)? | Open | F-06 unit 2 | Repository owner | Short, factual text based on the purpose in the requirements (section 1); no legal statements and no claim that CLA verification is automated. |
 
 ## Summary of decisions awaiting confirmation
 
-- **Legal:** D-03, D-09, D-10, D-14, D-15, D-20, D-21, D-22.
+- **Legal:** D-03, D-09, D-10, D-14, D-15, D-20, D-21, D-22, D-26.
 - **Platform owner:** D-16, D-24; creation and confirmation of the Infrastructure/Tooling account
   (D-24) and the three workload accounts, confirmation of the Control Tower controls, verification
   of CloudTrail and account-level S3 Block Public Access, and execution of the Terraform bootstrap
@@ -151,6 +153,6 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 - **DPO:** D-10, D-19, D-20.
 - **Security owner:** D-06, D-13, D-19, D-24; review of A-19, ADR-0012 (including the temporary
   dependency-review exception), and T-19.
-- **Repository owner:** D-02, D-11, D-15, D-21.
+- **Repository owner:** D-02, D-11, D-15, D-21, D-26, D-27.
 - **Organization admins:** D-08.
 - **Design:** D-12.
