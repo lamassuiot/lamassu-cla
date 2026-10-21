@@ -23,15 +23,16 @@ Last updated: 2026-10-08
   alerts were dismissed in Dependabot as tolerable risk, referencing ADR-0012, on 2026-10-08.
   A-19, ADR-0012, and T-19 remain proposed.
 - **Ruleset:** the 10 Backend, Frontend, OpenAPI, and CodeQL checks were added to the `main`
-  ruleset on 2026-10-07; the 4 Terraform checks were added on 2026-10-08 (20 required checks).
+  ruleset on 2026-10-07; the 4 Terraform checks were added on 2026-10-08; `Design system browser
+  tests` was added on 2026-10-21 after it passed on PR #47 (21 required checks).
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
 - **Next gate:** F-05 unit 2. Its first PR adds the A-23 tooling, the browser-test CI job, and the
   button; the rest of the foundations and forms follow. D-25 was decided by the repository owner on
   2026-10-21 (development-only, notices kept, caniuse.com attribution on redistribution, excluded
-  from the portal bundle). The browser-test check is added to the
-  `main` ruleset after its first successful run. The Phase 3 reviews were recorded in PR #27 (decision-log
+  from the portal bundle). The browser-test check was added to the
+  `main` ruleset after its first successful run (PR #47). The Phase 3 reviews were recorded in PR #27 (decision-log
   entries A-20 to A-22). A-20: the repository owner decided on 2026-10-21 to keep the ADR-0012
   exception unchanged; Security-owner confirmation is still pending (Checkov 3.3.30 still pins
   `asteval==1.0.6`, and no release avoids the advisories). A-21 was confirmed on 2026-10-21 and
@@ -133,5 +134,3 @@ continue with plan-only, mocked-provider tests.
   workload accounts, the Control Tower controls, and the GitHub deployment environments, together
   with the other [F-03 prerequisites](features/F-03-terraform-foundation.md#preconditions).
   Production also requires D-10.
-- **F-05 browser-test check.** The `Design system browser tests` check is added to the `main`
-  ruleset only after the job has run successfully (administrator action).
