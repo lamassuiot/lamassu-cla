@@ -1,0 +1,61 @@
+@layer components {
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--cla-space-2);
+    padding: var(--cla-space-2) var(--cla-space-4);
+    border: var(--cla-border-width) solid transparent;
+    border-radius: var(--cla-radius-md);
+    font: inherit;
+    font-size: var(--cla-text-body-size);
+    font-weight: var(--cla-text-label-weight);
+    line-height: var(--cla-text-body-line-height);
+    cursor: pointer;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--cla-motion-duration-fast);
+    transition-timing-function: var(--cla-motion-easing-standard);
+  }
+
+  .primary {
+    background: var(--cla-color-action-primary-bg);
+    color: var(--cla-color-text-on-accent);
+  }
+
+  .primary:hover:enabled {
+    background: var(--cla-color-action-primary-bg-hover);
+  }
+
+  .secondary {
+    border-color: var(--cla-color-border-control);
+    background: var(--cla-color-bg-surface);
+    color: var(--cla-color-text-primary);
+  }
+
+  .secondary:hover:enabled,
+  .ghost:hover:enabled {
+    background: var(--cla-color-bg-subtle);
+  }
+
+  .ghost {
+    background: transparent;
+    color: var(--cla-color-text-primary);
+  }
+
+  .danger {
+    border-color: var(--cla-color-status-danger-text);
+    background: var(--cla-color-status-danger-bg);
+    color: var(--cla-color-status-danger-text);
+  }
+
+  .danger:hover:enabled {
+    text-decoration: underline;
+  }
+
+  .button:disabled {
+    border-color: var(--cla-color-border-subtle);
+    background: var(--cla-color-bg-subtle);
+    color: var(--cla-color-text-secondary);
+    cursor: not-allowed;
+  }
+}

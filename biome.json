@@ -49,7 +49,7 @@
     "./.biome/plugins/no-non-null-asserted-nullish-coalescing.grit",
     {
       "path": "./.biome/plugins/no-inline-style-attribute.grit",
-      "includes": ["**/apps/web/**/*.{jsx,tsx}"]
+      "includes": ["**/apps/web/**/*.{jsx,tsx}", "**/packages/design-system/**/*.{jsx,tsx}"]
     },
     {
       "path": "./.biome/plugins/no-raw-css-values.grit",
@@ -200,6 +200,16 @@
           },
           "style": {
             "useComponentExportOnlyModules": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/packages/design-system/**/*.{jsx,tsx}"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "noInlineStyles": "error"
           }
         }
       }

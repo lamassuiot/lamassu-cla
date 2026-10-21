@@ -236,6 +236,7 @@ Names are the job names that GitHub reports on pull requests.
 | `Terraform checks` | Terraform | 2026-10-08 |
 | `TFLint` | Terraform | 2026-10-08 |
 | `Terraform security scan` | Terraform | 2026-10-08 |
+| `Design system browser tests` | Frontend | 2026-10-21 (F-05, A-23; added after it passed on PR #47) |
 
 Notes for the administrator:
 

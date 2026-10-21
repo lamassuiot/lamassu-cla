@@ -20,3 +20,4 @@ export {
   themeStorageKey,
 } from './theme.ts';
 export type { ThemePreference } from './theme.ts';
+export { Button, type ButtonProps, type ButtonVariant } from './components/button/button.tsx';
