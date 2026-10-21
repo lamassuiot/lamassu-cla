@@ -109,6 +109,12 @@ in disposable worktrees of `main` at ddc1e4b, outside the repository. No depende
 | A-24 | Add the `overlay.scrim` color token for the backdrop of modal overlays: dark `rgb(0 0 0 / 0.60)`, light `rgb(11 22 34 / 0.50)`, on the same base colors as the shadows. It carries no text and is not a control boundary, so no contrast minimum applies. Alternatives: no scrim (only `shadow.lg` separates the overlay) or an opaque `bg.canvas` backdrop. Like the other visual values, it is proposed pending D-12. | Decided by the repository owner, 2026-10-21 | [Design tokens](../../specs/ux/design-tokens.md#26-overlay), [F-05](../../specs/features/F-05-component-library.md) |
 | A-25 | Clarify AC-05-5: while a modal overlay is open, focus cannot reach any element of the page content behind it; the browser's native behavior is allowed. In a native modal `dialog`, Tab past the last control can reach the browser's own controls before returning to the dialog. No custom focus trap is added only to keep focus away from the browser's controls. | Decided by the repository owner, 2026-10-21 | [F-05](../../specs/features/F-05-component-library.md#acceptance-criteria) |
 
+## F-05 layout decisions (2026-10-21)
+
+| ID | Decision | Status | Record |
+| --- | --- | --- | --- |
+| A-26 | Add the `focus.ring-on-nav` semantic color token, `orange.400` in both themes, for focus indicators on `bg.nav`. `focus.ring` in the light theme (`orange.700`) is only 2.95:1 on `bg.nav` (`teal.950`), below the 3:1 minimum; `orange.400` gives 6.99:1 dark and 6.33:1 light. No new primitive. Alternative: a lighter light-theme `bg.nav`, which changes the navigation look. | Decided by the repository owner, 2026-10-21 | [Design tokens](../../specs/ux/design-tokens.md#8-focus), [F-05](../../specs/features/F-05-component-library.md) |
+
 ## Open decisions
 
 The **Confirmation required from** column names who must confirm before the dependent work starts.

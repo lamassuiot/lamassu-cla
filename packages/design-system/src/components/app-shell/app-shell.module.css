@@ -1,0 +1,85 @@
+@layer components {
+  .shell {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100dvh;
+    background: var(--cla-color-bg-canvas);
+    color: var(--cla-color-text-primary);
+  }
+
+  /* Hidden until focused, then shown above the header. */
+  .skip {
+    position: absolute;
+    inset-block-start: var(--cla-space-2);
+    inset-inline-start: var(--cla-space-2);
+    padding: var(--cla-space-2) var(--cla-space-4);
+    border-radius: var(--cla-radius-md);
+    background: var(--cla-color-action-primary-bg);
+    color: var(--cla-color-text-on-accent);
+    transform: translateY(-200%);
+  }
+
+  .skip:focus {
+    transform: none;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: var(--cla-space-3);
+    padding: var(--cla-space-3) var(--cla-space-5);
+    border-block-end: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    background: var(--cla-color-bg-surface);
+  }
+
+  .brand {
+    flex: 1;
+    min-inline-size: 0;
+    color: var(--cla-color-text-heading);
+    font-weight: var(--cla-text-h3-weight);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cla-space-3);
+  }
+
+  .body {
+    display: flex;
+    flex: 1;
+    gap: var(--cla-space-5);
+    inline-size: 100%;
+    max-inline-size: 1200px;
+    margin-inline: auto;
+    padding: var(--cla-space-5);
+    box-sizing: border-box;
+  }
+
+  .sidebar {
+    display: none;
+    flex: none;
+    inline-size: 16rem;
+  }
+
+  .main {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .main:focus {
+    outline: none;
+  }
+
+  /* bp.lg: navigation moves from the drawer to the sidebar (design tokens, section 7). */
+  @media (min-width: 1024px) {
+    .menu {
+      display: none;
+    }
+
+    .sidebar {
+      display: block;
+    }
+  }
+}
