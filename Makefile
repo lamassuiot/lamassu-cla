@@ -28,6 +28,12 @@ CHECKOV_HOME := $(CURDIR)/.tools/checkov-home
 # CHECKOV_NETNS to a command that runs it in a network namespace without interfaces.
 CHECKOV_NETNS ?=
 CHECKOV_ENV := $(CHECKOV_NETNS) env -i PATH=$(CHECKOV_VENV)/bin:/usr/bin:/bin HOME=$(CHECKOV_HOME) LC_ALL=C.UTF-8
+
+# Visual regression (F-05, A-23): only in the pinned Playwright image, without network access. Keep
+# the image equal to the one in .github/workflows/frontend.yml.
+PLAYWRIGHT_IMAGE := mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+VISUAL_RUN := docker run --rm --network none --user "$$(id -u):$$(id -g)" -e HOME=/tmp \
+	-v "$(CURDIR):/work" -w /work $(PLAYWRIGHT_IMAGE)
 # Offline, findings carry no severity, so any failed check fails the scan (no --soft-fail or
 # --hard-fail-on). Exceptions are inline `checkov:skip=<ID>:<reason>` comments.
 CHECKOV_FLAGS := --compact --framework terraform --download-external-modules false --skip-download --output cli
@@ -116,6 +122,14 @@ build-web:
 .PHONY: test-browser
 test-browser: ## Story accessibility and component tests in Chromium (F-05); not part of `make check`.
 	STORYBOOK_DISABLE_TELEMETRY=1 npm run test:browser -w @lamassu-cla/design-system
+
+.PHONY: test-visual
+test-visual: ## Compare the visual-regression screenshots in the pinned image (F-05); needs Docker.
+	$(VISUAL_RUN) npm run test:visual -w @lamassu-cla/design-system
+
+.PHONY: test-visual-update
+test-visual-update: ## Re-create the visual baselines in the pinned image; review every changed image.
+	$(VISUAL_RUN) npm run test:visual -w @lamassu-cla/design-system -- --update
 
 .PHONY: build-go
 build-go:

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 (layout and visual baseline) in progress: app shell, navigation, and page header in this PR; visual regression, the 320 px and 200% zoom runs, and the local-setup documentation next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 (layout and visual baseline) implemented: app shell, navigation, and page header in PR #54; visual regression, the 320 px and 200% zoom runs, and the local-setup documentation in this PR; all units implemented |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -398,6 +398,34 @@ Implementation notes (unit 6, first pull request: layout):
   Removing the navigation focus-ring rule, allowing protocol-relative or non-`https:` URLs, keeping
   the drawer open after a link, removing the breakpoint, or pointing the skip link elsewhere failed
   the tests.
+
+Implementation notes (unit 6, second pull request: visual baseline):
+
+- **Narrow widths (F05-T11).** Two more story projects run every story in the light theme at the
+  Storybook viewports `reflow` (320 px) and `zoom200` (640 px, a 1280 px window at 200% zoom),
+  defined in `.storybook/preview.tsx`. The width does not change colors, so the narrow runs use one
+  theme. Story widths come from the viewport global, not from the Vitest browser instance, which
+  the Storybook addon overrides. A Storybook `afterEach` hook fails any story whose page scrolls
+  horizontally (AC-05-11); tables scroll inside their own container. Removing the hash display's
+  wrapping made the hash story fail at 320 px (551 px of content).
+- **Visual regression (F05-T10).** `src/visual/primary.visual.test.tsx` screenshots the primary set
+  (button, form field, card, status badge, dialog, table) in both themes at 1280, 640, and 320 px:
+  36 baselines (about 420 KB) under `src/visual/__screenshots__/`. The `visual` project exists only
+  with `CLA_VISUAL=1`, so host runs never compare against container baselines. `make test-visual`
+  and `make test-visual-update` run it in the digest-pinned Playwright 1.64.1 image with Docker,
+  `--network none`, and the caller's user ID; CI runs it in the same image. Failure images go to
+  `.vitest/attachments` (ignored), which CI uploads as an artifact with `actions/upload-artifact`
+  v7.0.2, pinned by commit.
+- The comparison uses `pixelmatch` with `threshold: 0`. With the default threshold (0.1), changing
+  `orange.500` to the `orange.600` value still passed. With 0, two consecutive runs matched, and
+  changing `orange.500` by one unit failed 12 screenshots (button and dialog, both themes, three
+  widths); the deliberate-change check was done once, as F05-T10 requires.
+- F05-T12 is covered by the unit 2 checks (`scripts/check-web-build.sh` and
+  `scripts/check-portal-dev-deps.sh` in `make build`).
+- `docs/development/local-setup.md` documents the preview (`npm run storybook`), `make test-browser`,
+  `make test-visual`, and `make test-visual-update` (AC-05-12).
+- Browser tests: 347 (27 story files in four runs: light, dark, 320 px, and 640 px; plus 19
+  component test files), and 36 visual comparisons.
 
 ## Open questions
 
