@@ -1,0 +1,33 @@
+@layer components {
+  .hash {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--cla-space-1) var(--cla-space-3);
+    margin: 0;
+  }
+
+  .label {
+    grid-column: 1 / -1;
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-label-size);
+    font-weight: var(--cla-text-label-weight);
+    letter-spacing: var(--cla-text-label-letter-spacing);
+    line-height: var(--cla-text-label-line-height);
+    text-transform: var(--cla-text-label-transform);
+  }
+
+  /* The full value wraps instead of being truncated, and one click selects it for manual copying. */
+  .value {
+    padding: var(--cla-space-2) var(--cla-space-3);
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-radius: var(--cla-radius-sm);
+    background: var(--cla-color-bg-subtle);
+    color: var(--cla-color-text-primary);
+    font-family: var(--cla-font-family-mono);
+    font-size: var(--cla-text-code-size);
+    line-height: var(--cla-text-code-line-height);
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+}
