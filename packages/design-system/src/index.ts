@@ -1,6 +1,12 @@
 export { colorPrimitives } from './tokens/primitives.ts';
 export type { ColorPrimitive } from './tokens/primitives.ts';
-export { gradients, semanticColors, shadows, themes } from './tokens/semantic.ts';
+export {
+  gradients,
+  overlayColors,
+  semanticColors,
+  shadows,
+  themes,
+} from './tokens/semantic.ts';
 export type { Gradient, SemanticColor, Theme } from './tokens/semantic.ts';
 export {
   borderWidths,
@@ -23,6 +29,12 @@ export type { ThemePreference } from './theme.ts';
 export { Button, type ButtonProps, type ButtonVariant } from './components/button/button.tsx';
 export { Card, type CardProps } from './components/card/card.tsx';
 export { Checkbox, type CheckboxProps } from './components/checkbox/checkbox.tsx';
+export {
+  ConfirmationDialog,
+  type ConfirmationDialogProps,
+} from './components/confirmation-dialog/confirmation-dialog.tsx';
+export { Dialog, type DialogProps } from './components/dialog/dialog.tsx';
+export { Drawer, type DrawerProps } from './components/drawer/drawer.tsx';
 export {
   type FieldControlProps,
   FormField,

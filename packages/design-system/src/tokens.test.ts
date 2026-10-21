@@ -7,6 +7,7 @@ import {
   cssVar,
   gradients,
   motion,
+  overlayColors,
   radii,
   renderTokensCss,
   semanticColors,
@@ -134,7 +135,7 @@ describe('token values (AC-04-1)', () => {
     expect(semanticColors).toEqual(expected);
   });
 
-  it('defines the gradients and shadows', () => {
+  it('defines the gradients, shadows, and overlay colors', () => {
     expect(gradients).toEqual({
       'gradient.hero': {
         dark: { angle: '135deg', from: 'navy.950', to: 'teal.950' },
@@ -151,6 +152,9 @@ describe('token values (AC-04-1)', () => {
         dark: '0 12px 32px rgb(0 0 0 / 0.50)',
         light: '0 12px 32px rgb(11 22 34 / 0.14)',
       },
+    });
+    expect(overlayColors).toEqual({
+      'overlay.scrim': { dark: 'rgb(0 0 0 / 0.60)', light: 'rgb(11 22 34 / 0.50)' },
     });
   });
 

@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in this PR; unit 5 next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -131,9 +131,11 @@ F-06 composes the app shell, navigation, and page header into the running portal
   visible focus ring. Component tests cover each interaction.
 - **AC-05-4** Given every story, in both themes, the automated accessibility check reports no
   violations at WCAG 2.2 level A or AA.
-- **AC-05-5** Given an open dialog, confirmation dialog, or drawer, focus moves into it, stays
-  inside it, Escape closes it, focus returns to the element that opened it, and the rest of the
-  page is inert. A confirmation dialog for a destructive action requires an explicit confirming
+- **AC-05-5** Given an open dialog, confirmation dialog, or drawer, focus moves into it, Escape
+  closes it, focus returns to the element that opened it, and the rest of the page is inert. While
+  it is open, focus cannot reach any element of the page content behind it; the browser's native
+  behavior, such as moving focus to the browser's own controls, is allowed (A-25). A confirmation
+  dialog for a destructive action requires an explicit confirming
   action; Escape and the cancel action do not confirm.
 - **AC-05-6** The status badge maps every domain state in section 2.3 of the design tokens to the
   specified status color and always shows its text label; an unknown state renders as `neutral`.
@@ -296,6 +298,30 @@ Implementation notes (unit 3: states and feedback):
   auto-dismiss or removing the focus hand-off failed the tests. The timer test fakes timers before
   the toast is shown and advances them inside `act`; without both, it did not detect the injected
   auto-dismiss.
+
+Implementation notes (unit 4: overlays):
+
+- `Dialog`, `ConfirmationDialog`, and `Drawer` render a native `dialog` opened with `showModal()`.
+  The browser makes the rest of the page inert, focuses the first focusable element, and keeps
+  focus out of the page; no custom focus trap is added (A-25). A shared `useModalDialog` hook syncs
+  the element with the controlled `open` prop. Escape calls `onClose` (or `onCancel`) and the caller
+  closes by setting `open` to false. Focus returns to the opener on close, and also when an open
+  overlay is unmounted.
+- The title is the accessible name (`aria-labelledby`); the optional description is linked with
+  `aria-describedby`. An empty title throws in development (error case "dialog without an
+  accessible name").
+- `Dialog` requires `actions`, so there is always a pointer and touch way to close it.
+  `ConfirmationDialog` places cancel first, so it takes the initial focus and Enter right away
+  cancels; Escape also cancels; only the confirm button confirms, and it uses the `danger` variant
+  when `destructive` is set. `Drawer` has a labelled close button in its header and opens from the
+  inline end by default or from the start.
+- The backdrop uses the new `overlay.scrim` token (A-24, [design tokens](../ux/design-tokens.md#26-overlay)).
+  Dialog and drawer widths are `60ch` and `40ch`, capped by the viewport; these are layout widths,
+  not spacing values.
+- Browser tests: 135 (17 story files, each run in both themes, and 10 component test files).
+  Removing `showModal()`, the focus return on unmount, the name check, or the cancel-first order, or
+  wiring Escape to confirm, failed the tests. Chromium already returns focus to the opener on
+  `close()`, so the explicit return is kept for browsers that do not.
 
 ## Open questions
 
