@@ -147,3 +147,16 @@ jobs:
 
       - name: Story accessibility and component tests
         run: npm run test:browser -w @lamassu-cla/design-system
+
+      # Baselines are created only in this image (`make test-visual-update`); any difference fails.
+      - name: Visual regression
+        run: npm run test:visual -w @lamassu-cla/design-system
+
+      - name: Upload visual differences
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-differences
+          path: packages/design-system/.vitest/attachments
+          if-no-files-found: ignore
+          retention-days: 7

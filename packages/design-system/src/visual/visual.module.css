@@ -1,0 +1,16 @@
+@layer components {
+  .fixture {
+    display: grid;
+    justify-items: start;
+    gap: var(--cla-space-4);
+    padding: var(--cla-space-4);
+    background: var(--cla-color-bg-canvas);
+    color: var(--cla-color-text-primary);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cla-space-3);
+  }
+}
