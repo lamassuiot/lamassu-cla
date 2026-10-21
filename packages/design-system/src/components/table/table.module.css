@@ -1,0 +1,51 @@
+@layer components {
+  .scroll {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-radius: var(--cla-radius-lg);
+    background: var(--cla-color-bg-surface);
+    color: var(--cla-color-text-primary);
+  }
+
+  .table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .caption {
+    padding: var(--cla-space-3) var(--cla-space-4);
+    color: var(--cla-color-text-heading);
+    font-weight: var(--cla-text-h3-weight);
+    text-align: start;
+  }
+
+  .table th,
+  .table td {
+    padding: var(--cla-space-2) var(--cla-space-4);
+    border-block-start: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .table thead th {
+    background: var(--cla-color-bg-subtle);
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-label-size);
+    font-weight: var(--cla-text-label-weight);
+    letter-spacing: var(--cla-text-label-letter-spacing);
+    line-height: var(--cla-text-label-line-height);
+    text-transform: var(--cla-text-label-transform);
+  }
+
+  .table tbody th {
+    font-weight: var(--cla-text-h3-weight);
+  }
+
+  .table .numeric {
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+}

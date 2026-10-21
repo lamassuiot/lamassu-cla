@@ -1,0 +1,59 @@
+@layer components {
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cla-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: var(--cla-space-2);
+    color: var(--cla-color-text-secondary);
+  }
+
+  .marker {
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--cla-space-6);
+    block-size: var(--cla-space-6);
+    border: var(--cla-border-width) solid var(--cla-color-border-control);
+    border-radius: var(--cla-radius-pill);
+    font-size: var(--cla-text-body-sm-size);
+    font-weight: var(--cla-text-label-weight);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+
+  .complete .marker {
+    border-color: var(--cla-color-status-success-text);
+    background: var(--cla-color-status-success-bg);
+    color: var(--cla-color-status-success-text);
+  }
+
+  .current {
+    color: var(--cla-color-text-primary);
+    font-weight: var(--cla-text-label-weight);
+  }
+
+  .current .marker {
+    border-width: var(--cla-border-width-strong);
+    border-color: var(--cla-color-text-accent);
+    color: var(--cla-color-text-accent);
+  }
+
+  /* Visually hidden but read by assistive technology. */
+  .hidden {
+    position: absolute;
+    width: var(--cla-border-width);
+    height: var(--cla-border-width);
+    margin: calc(-1 * var(--cla-border-width));
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    border: 0;
+    white-space: nowrap;
+  }
+}

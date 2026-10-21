@@ -1,0 +1,62 @@
+@layer components {
+  .timeline {
+    display: grid;
+    gap: var(--cla-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    display: flex;
+    gap: var(--cla-space-3);
+  }
+
+  .marker {
+    flex: none;
+    inline-size: var(--cla-space-3);
+    block-size: var(--cla-space-3);
+    margin-block-start: var(--cla-space-1);
+    border: var(--cla-border-width-strong) solid currentcolor;
+    border-radius: var(--cla-radius-pill);
+  }
+
+  .success {
+    color: var(--cla-color-status-success-text);
+  }
+
+  .info {
+    color: var(--cla-color-status-info-text);
+  }
+
+  .warning {
+    color: var(--cla-color-status-warning-text);
+  }
+
+  .danger {
+    color: var(--cla-color-status-danger-text);
+  }
+
+  .neutral {
+    color: var(--cla-color-status-neutral-text);
+  }
+
+  .content {
+    display: grid;
+    gap: var(--cla-space-1);
+    min-inline-size: 0;
+  }
+
+  .title {
+    margin: 0;
+    color: var(--cla-color-text-primary);
+    font-weight: var(--cla-text-h3-weight);
+  }
+
+  .time,
+  .description {
+    color: var(--cla-color-text-secondary);
+    font-size: var(--cla-text-body-sm-size);
+    line-height: var(--cla-text-body-sm-line-height);
+  }
+}
