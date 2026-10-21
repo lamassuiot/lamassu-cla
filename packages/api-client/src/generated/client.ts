@@ -8,7 +8,7 @@
  *
  * OpenAPI spec version: 0.1.0
  */
-import { apiFetch } from '../fetcher';
+import { apiFetch } from '../fetcher.ts';
 export type HealthStatus = typeof HealthStatus[keyof typeof HealthStatus];
 
 
