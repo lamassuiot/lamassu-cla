@@ -1,0 +1,30 @@
+language js
+
+// Components take all user-visible text through props (F-05 AC-05-9, D-21): no literal JSX text,
+// string children, or literal accessible-name attributes in component source.
+or {
+  JsxText() as $text where {
+    $text <: r"(?s).*[^\s].*",
+    register_diagnostic(span=$text, message="Literal text in a component. Pass user-visible text through props.")
+  },
+  JsxExpressionChild(expression=$expression) as $child where {
+    $expression <: or {
+      JsStringLiteralExpression(),
+      JsTemplateExpression()
+    },
+    register_diagnostic(span=$child, message="Literal text in a component. Pass user-visible text through props.")
+  },
+  JsxAttribute(name=$name, initializer=$value) as $attribute where {
+    $name <: or {
+      `alt`,
+      `title`,
+      `placeholder`,
+      `aria-label`,
+      `aria-description`,
+      `aria-valuetext`,
+      `aria-roledescription`
+    },
+    $value <: contains JsxString(),
+    register_diagnostic(span=$attribute, message="Literal accessible text in a component. Pass it through props.")
+  }
+}

@@ -1,0 +1,32 @@
+@layer components {
+  .control {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--cla-space-7);
+    padding: var(--cla-space-2) var(--cla-space-3);
+    border: var(--cla-border-width) solid var(--cla-color-border-control);
+    border-radius: var(--cla-radius-sm);
+    background: var(--cla-color-bg-surface);
+    color: var(--cla-color-text-primary);
+    font: inherit;
+    transition-property: border-color;
+    transition-duration: var(--cla-motion-duration-fast);
+    transition-timing-function: var(--cla-motion-easing-standard);
+  }
+
+  .control[aria-invalid="true"] {
+    border-color: var(--cla-color-status-danger-text);
+    border-width: var(--cla-border-width-strong);
+  }
+
+  .control:disabled {
+    border-color: var(--cla-color-border-subtle);
+    background: var(--cla-color-bg-subtle);
+    color: var(--cla-color-text-secondary);
+    cursor: not-allowed;
+  }
+
+  .textarea {
+    resize: vertical;
+  }
+}

@@ -1,0 +1,11 @@
+@layer components {
+  .label {
+    margin: 0;
+    color: var(--cla-color-text-accent);
+    font-size: var(--cla-text-label-size);
+    font-weight: var(--cla-text-label-weight);
+    line-height: var(--cla-text-label-line-height);
+    letter-spacing: var(--cla-text-label-letter-spacing);
+    text-transform: var(--cla-text-label-transform);
+  }
+}
