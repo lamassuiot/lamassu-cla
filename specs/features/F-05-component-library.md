@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | In review (specification only) |
+| Status | Approved; unit 1 (tooling evaluation) done, A-23 proposed; units 2 to 6 wait for A-23 |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
-| Depends on | F-04; A-11, A-17, D-12, D-21; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
-| Approved by | Pending |
+| Depends on | F-04; A-11, A-17, A-23, D-12, D-21; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
+| Approved by | Repository owner, 2026-10-21 (specification, PR #43) |
 
 ## Problem statement
 
@@ -200,10 +200,25 @@ affected. Screens do not use the components until F-06.
 Each unit is one pull request and depends on the previous one. Units 2 to 6 add stories and tests
 for their own components.
 
+Implementation notes (unit 1):
+
+- The evaluation and the proposed choices are recorded as A-23 in the
+  [decision log](../../docs/decisions/decision-log.md). No dependency is added until A-23 is
+  approved.
+- Proposed: Storybook 10.6.3 for previews; `@storybook/addon-a11y` with axe-core run on every story
+  in both themes through `@storybook/addon-vitest`; Vitest browser mode with Playwright 1.64.1
+  (Chromium) for keyboard and focus tests; and `toMatchScreenshot` baselines created only in the
+  digest-pinned Playwright 1.64.1 image.
+- Focus and keyboard tests (AC-05-3, AC-05-5) use real key presses in browser mode. Storybook's
+  simulated `userEvent` misreported focus in a native modal `dialog`, and jsdom implements neither
+  modal `dialog` nor `inert`.
+- Visual baselines differ between a developer host and the container, so they are created and
+  compared only in the pinned image. Each screenshot test cleans up the previous render.
+
 ## Open questions
 
 - D-12: final brand assets, logos, and fonts (the app shell shows no logo until it is confirmed).
 - D-21: portal languages; components take all text through props, so no translation mechanism is
   chosen in F-05.
-- The preview, accessibility, and visual-regression tools are chosen in unit 1 and recorded as a
-  decision before adoption.
+- The preview, accessibility, and visual-regression tools: evaluated in unit 1; A-23 awaits
+  repository-owner approval.
