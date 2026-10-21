@@ -8,9 +8,11 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "orval --config orval.config.ts"
   },
   "devDependencies": {
+    "orval": "8.40.0",
     "vitest": "5.0.5"
   }
 }

@@ -40,7 +40,7 @@ jobs:
           if [[ "$EVENT_NAME" == pull_request ]]; then
             # HEAD is the PR merge commit, so HEAD^1 is the base branch.
             changed=$(git diff --name-only HEAD^1 HEAD)
-            pattern='^(specs/api/|redocly\.yaml$|\.redocly\.lint-ignore\.yaml$|package(-lock)?\.json$|\.npmrc$|\.nvmrc$|\.github/workflows/openapi\.yml$)'
+            pattern='^(specs/api/|redocly\.yaml$|\.redocly\.lint-ignore\.yaml$|package(-lock)?\.json$|packages/api-client/|scripts/check-api-client-drift\.sh$|\.npmrc$|\.nvmrc$|\.github/workflows/openapi\.yml$)'
             if ! grep -qE "$pattern" <<<"$changed"; then
               openapi=false
             fi
@@ -73,3 +73,7 @@ jobs:
 
       - name: Redocly lint
         run: npm run lint:openapi
+
+      # Regenerates packages/api-client with Orval and fails if the committed client differs (A-22).
+      - name: Generated-client drift check
+        run: scripts/check-api-client-drift.sh

@@ -63,8 +63,9 @@ lint-web: ## Biome lint and format check, the TypeScript type check, and the des
 	npm run tokens:check -w @lamassu-cla/design-system
 
 .PHONY: lint-openapi
-lint-openapi: ## Lint the OpenAPI contract with Redocly (redocly.yaml).
+lint-openapi: ## Lint the OpenAPI contract with Redocly and check the generated API client for drift.
 	npm run lint:openapi
+	scripts/check-api-client-drift.sh
 
 .PHONY: lint-go
 lint-go: $(GOLANGCI_LINT)
