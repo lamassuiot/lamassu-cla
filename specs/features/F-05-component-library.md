@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and this PR; unit 3 next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -274,6 +274,28 @@ Implementation notes (unit 2, second pull request: foundations and forms):
 - The Frontend workflow now runs the component-convention check, its test, and the copy-plugin
   test. Browser tests: 78 (22 story files in two themes, 4 component test files); deliberately
   removing the form-field description wiring or the theme-toggle update failed the tests.
+
+Implementation notes (unit 3: states and feedback):
+
+- `LiveRegionProvider` renders one polite (`role="status"`) and one assertive (`role="alert"`)
+  region before any message is sent, because screen readers ignore regions that are inserted
+  together with their content. `useAnnounce` sends a message to either region. A repeated message
+  alternates a trailing non-breaking space so that it is announced again. The regions are visually
+  hidden but stay in the accessibility tree. Using `useAnnounce` outside the provider throws.
+- `LoadingState` is a polite, busy (`aria-busy`) status region. `EmptyState`, `ErrorState`, and
+  `PermissionDeniedState` are labelled sections with an optional description and action. The
+  heading level is a prop (default 2) so the state fits the surrounding page structure.
+- `ToastProvider` takes its region and dismiss labels as props and requires a surrounding
+  `LiveRegionProvider`. `useToast()` returns a function that shows a toast. Toasts are announced
+  (danger toasts assertively), never take focus, and never disappear on a timer (WCAG 2.2.1);
+  they stay until dismissed. Each dismiss button is described by its message. Dismissing a toast
+  that holds focus moves focus to the next toast, the previous toast, or the toast region, so
+  keyboard focus is never dropped to the document.
+- Browser tests: 111 (14 story files, each run in both themes, and 7 component test files).
+  Injecting a 5-second
+  auto-dismiss or removing the focus hand-off failed the tests. The timer test fakes timers before
+  the toast is shown and advances them inside `act`; without both, it did not detect the injected
+  auto-dismiss.
 
 ## Open questions
 

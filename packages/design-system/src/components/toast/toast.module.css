@@ -1,0 +1,54 @@
+@layer components {
+  .region {
+    position: fixed;
+    inset-block-end: var(--cla-space-5);
+    inset-inline-end: var(--cla-space-5);
+    max-width: min(36ch, calc(100vw - 2 * var(--cla-space-5)));
+  }
+
+  .region:focus {
+    outline: none;
+  }
+
+  .list {
+    display: grid;
+    gap: var(--cla-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .toast {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cla-space-3);
+    padding: var(--cla-space-3) var(--cla-space-4);
+    border: var(--cla-border-width) solid var(--cla-color-border-subtle);
+    border-inline-start-width: var(--cla-space-1);
+    border-radius: var(--cla-radius-md);
+    background: var(--cla-color-bg-raised);
+    box-shadow: var(--cla-shadow-md);
+    color: var(--cla-color-text-primary);
+  }
+
+  .message {
+    flex: 1;
+    margin: 0;
+  }
+
+  .success {
+    border-inline-start-color: var(--cla-color-status-success-text);
+  }
+
+  .info {
+    border-inline-start-color: var(--cla-color-status-info-text);
+  }
+
+  .warning {
+    border-inline-start-color: var(--cla-color-status-warning-text);
+  }
+
+  .danger {
+    border-inline-start-color: var(--cla-color-status-danger-text);
+  }
+}
