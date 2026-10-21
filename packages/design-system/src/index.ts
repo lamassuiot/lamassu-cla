@@ -32,6 +32,11 @@ export {
   type DetailItem,
 } from './components/agreement-status-display/agreement-status-display.tsx';
 export {
+  AppShell,
+  type AppShellLabels,
+  type AppShellProps,
+} from './components/app-shell/app-shell.tsx';
+export {
   AuditEventDisplay,
   type AuditEventDisplayProps,
 } from './components/audit-event-display/audit-event-display.tsx';
@@ -57,6 +62,13 @@ export {
   type Politeness,
   useAnnounce,
 } from './components/live-region/live-region.tsx';
+export {
+  isSafeHref,
+  Navigation,
+  type NavigationItem,
+  type NavigationProps,
+} from './components/navigation/navigation.tsx';
+export { PageHeader, type PageHeaderProps } from './components/page-header/page-header.tsx';
 export { Pagination, type PaginationProps } from './components/pagination/pagination.tsx';
 export {
   type RadioGroupProps,

@@ -1,0 +1,39 @@
+@layer components {
+  .navigation {
+    padding: var(--cla-space-3);
+    border-radius: var(--cla-radius-md);
+    background: var(--cla-color-bg-nav);
+    color: var(--cla-color-text-on-nav);
+  }
+
+  .list {
+    display: grid;
+    gap: var(--cla-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .link {
+    display: block;
+    padding: var(--cla-space-2) var(--cla-space-3);
+    border-inline-start: var(--cla-border-width-strong) solid transparent;
+    border-radius: var(--cla-radius-sm);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .link:hover {
+    text-decoration: underline;
+  }
+
+  .link:focus-visible {
+    outline-color: var(--cla-color-focus-ring-on-nav);
+  }
+
+  /* The current page is marked by weight and a bar, not by color alone. */
+  .link[aria-current="page"] {
+    border-inline-start-color: var(--cla-color-text-on-nav);
+    font-weight: var(--cla-text-label-weight);
+  }
+}

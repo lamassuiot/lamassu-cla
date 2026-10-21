@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 next |
+| Status | Approved; unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 (tooling, foundations, and forms) completed in PR #47 and PR #48; unit 3 (states and feedback) implemented in PR #49; unit 4 (overlays) implemented in PR #50; unit 5 (data display) implemented: table, pagination, timeline item, and step indicator in PR #51; hash display, agreement status display, and audit-event display in PR #52; unit 6 (layout and visual baseline) in progress: app shell, navigation, and page header in this PR; visual regression, the 320 px and 200% zoom runs, and the local-setup documentation next |
 | Phase | 3 |
 | Owner | Repository owner; Design for final visual values (D-12) |
 | Depends on | F-04; A-11, A-17, A-23, D-12, D-21, D-25; [design tokens](../ux/design-tokens.md), [ADR-0004](../../docs/decisions/0004-provider-neutral-signing-and-signature-level.md), [ADR-0011](../../docs/decisions/0011-biome-for-javascript-and-typescript.md) |
@@ -367,9 +367,37 @@ Implementation notes (unit 5, second pull request: domain data display):
 - The agreement state `VOIDED` (domain model, section 3.2) has no status color in the design
   tokens (section 2.3); the badge renders it as `neutral` through the unknown-state fallback. This
   is recorded as C-02 in `specs/STATE.md`; the code is unchanged.
-- Browser tests: 181 (25 story files, each run in both themes, and 15 component test files).
+- Browser tests: 181 (24 story files, each run in both themes, and 17 component test files).
   Removing either copy announcement, announcing the failure politely, removing `user-select`, or
   appending a qualified claim to the signature level failed the tests.
+
+Implementation notes (unit 6, first pull request: layout):
+
+- Unit 6 is split into two pull requests: this one adds the app shell, navigation, and page header;
+  the next adds the visual-regression baselines (F05-T10), the 320 px and 200% zoom runs (F05-T11),
+  and the local-setup documentation (AC-05-12).
+- `Navigation` is a labelled `nav` with a list of links; the current page has
+  `aria-current="page"` and is marked by weight and a bar, not by color alone. Links accept only a
+  relative path (not `//` or `/\`) or an `https:` URL; anything else throws (security
+  considerations). Links are plain anchors; router integration is left to F-06.
+- `focus.ring` in the light theme (`orange.700`) is only 2.95:1 on `bg.nav`, below the 3:1 minimum
+  for focus indicators. The new `focus.ring-on-nav` token (`orange.400`, 6.99:1 dark, 6.33:1 light)
+  is used for links on `bg.nav` (A-26, [design tokens](../ux/design-tokens.md#8-focus)). The token
+  test checks the ratio.
+- `AppShell` has a skip link to `main` as the first tab stop, a header (`banner`) with the brand and
+  optional actions, and the navigation. From `bp.lg` the navigation is a sidebar; below it, a menu
+  button opens it in a start-side `Drawer`, and following a link closes the drawer. The shell renders
+  `Navigation` from its props, so the drawer can close without click delegation. The breakpoint is
+  written as `1024px` in the media query, because custom properties cannot be used there.
+- `PageHeader` renders the page's `h1`, an optional description, and actions on the hero gradient;
+  text contrast holds against the worse stop (light: `text.heading` 13.35:1 and `text.secondary`
+  6.17:1 on `gray.100`; dark: 15.13:1 and 8.54:1 on `teal.950`).
+- The menu-open story sets Storybook's `mobile1` viewport global, which the Vitest addon applies,
+  so the drawer is checked by the accessibility run.
+- Browser tests: 209 (27 story files, each run in both themes, and 19 component test files).
+  Removing the navigation focus-ring rule, allowing protocol-relative or non-`https:` URLs, keeping
+  the drawer open after a link, removing the breakpoint, or pointing the skip link elsewhere failed
+  the tests.
 
 ## Open questions
 

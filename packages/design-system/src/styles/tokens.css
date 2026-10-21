@@ -115,6 +115,7 @@
   --cla-color-action-primary-bg: var(--cla-color-orange-500);
   --cla-color-action-primary-bg-hover: var(--cla-color-orange-600);
   --cla-color-focus-ring: var(--cla-color-orange-700);
+  --cla-color-focus-ring-on-nav: var(--cla-color-orange-400);
   --cla-color-status-success-text: var(--cla-color-status-success-light-text);
   --cla-color-status-success-bg: var(--cla-color-status-success-light-bg);
   --cla-color-status-warning-text: var(--cla-color-status-warning-light-text);
@@ -150,6 +151,7 @@
   --cla-color-action-primary-bg: var(--cla-color-orange-500);
   --cla-color-action-primary-bg-hover: var(--cla-color-orange-400);
   --cla-color-focus-ring: var(--cla-color-orange-400);
+  --cla-color-focus-ring-on-nav: var(--cla-color-orange-400);
   --cla-color-status-success-text: var(--cla-color-status-success-dark-text);
   --cla-color-status-success-bg: var(--cla-color-status-success-dark-bg);
   --cla-color-status-warning-text: var(--cla-color-status-warning-dark-text);
@@ -186,6 +188,7 @@
     --cla-color-action-primary-bg: var(--cla-color-orange-500);
     --cla-color-action-primary-bg-hover: var(--cla-color-orange-400);
     --cla-color-focus-ring: var(--cla-color-orange-400);
+    --cla-color-focus-ring-on-nav: var(--cla-color-orange-400);
     --cla-color-status-success-text: var(--cla-color-status-success-dark-text);
     --cla-color-status-success-bg: var(--cla-color-status-success-dark-bg);
     --cla-color-status-warning-text: var(--cla-color-status-warning-dark-text);

@@ -23,6 +23,7 @@ export const semanticColors = {
   'action.primary.bg': { dark: 'orange.500', light: 'orange.500' },
   'action.primary.bg-hover': { dark: 'orange.400', light: 'orange.600' },
   'focus.ring': { dark: 'orange.400', light: 'orange.700' },
+  'focus.ring-on-nav': { dark: 'orange.400', light: 'orange.400' },
   'status.success.text': { dark: 'status.success.dark.text', light: 'status.success.light.text' },
   'status.success.bg': { dark: 'status.success.dark.bg', light: 'status.success.light.bg' },
   'status.warning.text': { dark: 'status.warning.dark.text', light: 'status.warning.light.text' },

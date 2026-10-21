@@ -66,6 +66,7 @@ Tokens have three tiers. Components use only semantic or component tokens, never
 | `action.primary.bg` | `orange.500` | `orange.500` |
 | `action.primary.bg-hover` | `orange.400` | `orange.600` |
 | `focus.ring` | `orange.400` | `orange.700` |
+| `focus.ring-on-nav` | `orange.400` | `orange.400` |
 
 Primary buttons use **navy text on orange**. White text on `orange.500` is only 2.94:1 and fails
 WCAG AA, so it is not allowed.
@@ -111,6 +112,7 @@ borders and focus indicators need at least 3:1.
 | `border.control` on `bg.canvas` | 4.05 | 3.33 |
 | `border.control` on `bg.surface` | 3.22 | 3.63 |
 | `focus.ring` on `bg.canvas` | 7.62 | 4.72 |
+| `focus.ring-on-nav` on `bg.nav` | 6.99 | 6.33 |
 | Status badges (lowest) | 6.41 | 4.69 |
 
 `border.subtle` is decorative only and is never the sole boundary of an interactive control.
@@ -224,6 +226,8 @@ With `prefers-reduced-motion: reduce`, transitions are limited to opacity and du
 
 - Every interactive element shows a visible focus indicator: 2 px `focus.ring` outline with 2 px
   offset, using `:focus-visible`.
+- On `bg.nav`, the indicator uses `focus.ring-on-nav`: `focus.ring` in the light theme
+  (`orange.700`) is only 2.95:1 on `bg.nav`, below the 3:1 minimum for focus indicators (A-26).
 - Focus is never removed without a replacement. Focus order follows visual order.
 
 ## 9. Components

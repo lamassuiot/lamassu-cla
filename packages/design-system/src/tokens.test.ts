@@ -61,6 +61,7 @@ const specSemantic: Record<string, [string, string]> = {
   'action.primary.bg': ['orange.500', 'orange.500'],
   'action.primary.bg-hover': ['orange.400', 'orange.600'],
   'focus.ring': ['orange.400', 'orange.700'],
+  'focus.ring-on-nav': ['orange.400', 'orange.400'],
 };
 
 // [dark text, dark background, light text, light background]
@@ -86,6 +87,7 @@ const specContrast: [string, string, number, number, number][] = [
   ['border.control', 'bg.canvas', 3, 4.05, 3.33],
   ['border.control', 'bg.surface', 3, 3.22, 3.63],
   ['focus.ring', 'bg.canvas', 3, 7.62, 4.72],
+  ['focus.ring-on-nav', 'bg.nav', 3, 6.99, 6.33],
 ];
 const specStatusMinimum = { dark: 6.41, light: 4.69 };
 
