@@ -27,12 +27,13 @@ Last updated: 2026-10-08
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
 - **Next gate:** F-04 unit 3 (themes and base styles), then the F-05 specification. The Phase 3
-  decision reviews were recorded in PR #27 (decision-log entries A-20 to A-22): A-20 keeps the
-  ADR-0012 exception unchanged and awaits Security-owner review (Checkov 3.3.29, merged from
-  Dependabot PR #34, still pins `asteval==1.0.6`, so no A-20 trigger has fired); PR #29, which
-  implements A-21, was merged by the repository owner on 2026-10-08, but no explicit approval of
-  A-21 is recorded and confirmation is requested; A-22 (Orval for the generated client) awaits
-  repository-owner approval, and the A-18 deferral continues until then. Phase 2:
+  reviews were recorded in PR #27 (decision-log entries A-20 to A-22). A-20 keeps the ADR-0012
+  exception unchanged and awaits Security-owner review; Checkov 3.3.29 still pins
+  `asteval==1.0.6`. A-21 was confirmed by the repository owner on 2026-10-21 and implemented
+  in merged PR #29: Dependabot may propose TypeScript upgrades, while TypeScript 6.0.3 remains
+  pinned pending a separate reviewed upgrade. A-22 was confirmed on 2026-10-21 as the choice
+  of Orval 8.40.0; its implementation PR is next. The A-18 deferral remains open until that
+  PR merges. Phase 2:
   Security-owner and platform-owner review of the final A-19, ADR-0012, and T-19 wording; approval
   of D-24 (central state account). F-03 step 5 (deployment workflow) stays blocked until the
   platform-owner prerequisites are met (see Blocked items).
@@ -54,6 +55,7 @@ Last updated: 2026-10-08
 | 2026-10-08 | Repository owner | Start Phase 3 while the remaining Phase 2 items stay blocked; write the F-04 specification (specification-only PR). Final visual values remain pending D-12. |
 | 2026-10-08 | Repository owner | F-04 specification approved (merged as PR #25; "continue" given as approval in chat); implementation may start with unit 1. |
 | 2026-10-08 | Repository owner | Carry out the Phase 3 reviews of ADR-0012, A-15 and A-16, and A-18 alongside F-04, recording evidence and outcomes; propose dependency or policy changes in separate PRs; Security-owner review required for the ADR-0012 outcome. Outcomes A-20 to A-22 are proposed, not yet approved. |
+| 2026-10-21 | Repository owner | A-21 decided: PR #29 implements it; Dependabot may propose TypeScript upgrades, TypeScript 6.0.3 stays pinned until a separate upgrade PR passes review and CI, and the `@types/node` major-version hold remains. A-22 decided as the choice of generator: a separate PR implements Orval 8.40.0 (exact pin) with a reviewed fetch wrapper and a generated-client drift check; the A-18 implementation deferral stays open until that PR merges. |
 
 ## Phases
 
