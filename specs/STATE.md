@@ -27,10 +27,10 @@ Last updated: 2026-10-08
   met. Production additionally requires Legal confirmation of D-10.
 - **Next gate:** F-04 units 2 (token-only CSS check) and 3 (themes and base styles). The Phase 3
   decision reviews were carried out on 2026-10-08 (decision-log entries A-20 to A-22): A-20 keeps
-  the ADR-0012 exception unchanged and awaits Security-owner review; A-21 proposes removing the
-  Dependabot `typescript >=6.1.0` ignore rule (TypeScript stays at 6.0.3) and awaits repository-owner
-  approval; A-22 finds Orval 8.40.0 meets the A-18 criteria and proposes it for the generated client,
-  awaiting repository-owner approval (the A-18 deferral continues until then). Phase 2:
+  the ADR-0012 exception unchanged and awaits Security-owner review; A-21 (Dependabot proposes
+  TypeScript upgrades; TypeScript stays at 6.0.3) was decided on 2026-10-21 and is implemented
+  (PR #29); A-22 was decided on 2026-10-21 as the choice of generator (Orval 8.40.0), and its
+  implementation PR is next; the A-18 deferral stays open until that PR merges. Phase 2:
   Security-owner and platform-owner review of the final A-19, ADR-0012, and T-19 wording; approval
   of D-24 (central state account). F-03 step 5 (deployment workflow) stays blocked until the
   platform-owner prerequisites are met (see Blocked items).
@@ -52,6 +52,7 @@ Last updated: 2026-10-08
 | 2026-10-08 | Repository owner | Start Phase 3 while the remaining Phase 2 items stay blocked; write the F-04 specification (specification-only PR). Final visual values remain pending D-12. |
 | 2026-10-08 | Repository owner | F-04 specification approved (merged as PR #25; "continue" given as approval in chat); implementation may start with unit 1. |
 | 2026-10-08 | Repository owner | Carry out the Phase 3 reviews of ADR-0012, A-15 and A-16, and A-18 alongside F-04, recording evidence and outcomes; propose dependency or policy changes in separate PRs; Security-owner review required for the ADR-0012 outcome. Outcomes A-20 to A-22 are proposed, not yet approved. |
+| 2026-10-21 | Repository owner | A-21 decided: PR #29 implements it; Dependabot may propose TypeScript upgrades, TypeScript 6.0.3 stays pinned until a separate upgrade PR passes review and CI, and the `@types/node` major-version hold remains. A-22 decided as the choice of generator: a separate PR implements Orval 8.40.0 (exact pin) with a reviewed fetch wrapper and a generated-client drift check; the A-18 implementation deferral stays open until that PR merges. |
 
 ## Phases
 
