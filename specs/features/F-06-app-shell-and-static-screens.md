@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (router and shell) in this PR, with A-27 proposed; unit 2 next (depends on D-27) |
+| Status | Approved; unit 1 (router and shell) merged in PR #57, with A-27 decided; unit 2 (landing page and portal accessibility runs) in this PR, with D-27 decided |
 | Phase | 3 |
 | Owner | Repository owner |
 | Depends on | F-05; D-12, D-21, D-26, D-27; [architecture](../architecture.md#7-frontend-architecture), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
@@ -196,9 +196,24 @@ Implementation notes (unit 1: router and shell):
   and in the CI browser job. Mutations that failed them: routing modified clicks, not moving focus,
   removing the error element, showing the error message, and not marking the current link.
 
+Implementation notes (unit 2: landing page and portal accessibility runs):
+
+- The landing page shows the D-27 text, decided by the repository owner on 2026-10-22: the title
+  "Lamassu Contributor Agreements" and the description "Complete and review the contributor
+  agreements required for your Lamassu contributions." The title differs from the brand, so the
+  document title is `Lamassu Contributor Agreements – Lamassu CLA`.
+- `apps/web/src/accessibility.browser.test.tsx` (F06-T5) renders the landing, not-found, and error
+  screens in both themes at 1280, 640 (200% zoom of a 1280 px window), and 320 px: 18 runs. Each
+  runs axe with the WCAG 2.0 to 2.2 A and AA tags on the whole document and fails on any
+  violation, then fails if the page scrolls horizontally. `axe-core` 4.14.0 is a portal development
+  dependency, the version approved in D-25; the portal dependency check still passes.
+- A page header that could not reflow failed the 320 px and 640 px runs, and an unnamed link
+  failed axe (`link-name`) on every not-found run.
+- Portal browser tests: 25 (7 routing and shell tests and 18 accessibility runs).
+
 ## Open questions
 
 - D-12: brand assets; the shell shows the brand as text until confirmed.
 - D-21: portal languages; English only, with all text in one copy module.
 - D-26: whether the portal links to its source code (AGPL-3.0 section 13), and where.
-- D-27: the landing-page copy.
+- D-27: the landing-page copy (decided 2026-10-22).

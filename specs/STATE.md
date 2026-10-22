@@ -28,8 +28,9 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** approval of A-27 (React Router 8.5.0) and merge of F-06 unit 1 (router and shell).
-  Unit 2 (landing page and portal accessibility runs) needs D-27 (landing copy). The
+- **Next gate:** merge of F-06 unit 2 (landing page and portal accessibility runs, with D-27);
+  F-06 is then done. Unit 1 (router and shell) merged in PR #57, with A-27 decided on 2026-10-22.
+  D-26 (source-code link) stays open for Legal. The
   [F-06 specification](features/F-06-app-shell-and-static-screens.md) was approved by the repository
   owner on 2026-10-21 (PR #56). F-05 is done: unit 6
   merged in PR #54 (app shell, navigation, and page header, with A-26) and PR #55 (visual
@@ -79,6 +80,8 @@ Last updated: 2026-10-08
 | 2026-10-21 | Repository owner | A-23 approved for the proposed tools (Storybook 10.6.3, `@storybook/addon-a11y` with axe-core, Vitest browser mode with Playwright 1.64.1, and pinned-image visual regression), subject to Legal confirming that the MPL-2.0 and CC-BY-4.0 dependencies are acceptable (D-25) before they are added. They are development-only and excluded from the portal build. Add the browser-test check to the `main` ruleset after it has run successfully. |
 | 2026-10-21 | Repository owner | D-25 decided: `axe-core` 4.14.0 (MPL-2.0) and `caniuse-lite` (CC-BY-4.0) may be added as development-only dependencies. Keep their license notices and metadata; attribute caniuse.com in the third-party notices if an artifact including its data is redistributed; verify both are excluded from the portal bundle; reopen the decision if Storybook, the development container, or that data starts being distributed. |
 | 2026-10-21 | Repository owner | F-06 specification approved by merging PR #56. Start unit 1 (router and shell); the router version is proposed as A-27 and needs approval before unit 1 merges. |
+| 2026-10-22 | Repository owner | A-27 approved: React Router 8.5.0 and its dependencies (`cookie-es` 3.1.1, `@remix-run/route-pattern` 0.22.1) are decided; PR #57 proceeds to its required GitHub review. |
+| 2026-10-22 | Repository owner | D-27 decided: landing title "Lamassu Contributor Agreements" and description "Complete and review the contributor agreements required for your Lamassu contributions." D-26 stays open for Legal. |
 | 2026-10-22 | Repository owner | C-02 approved: add `VOIDED` to the `neutral` status row beside `EXPIRED`, with the specification update and test. |
 
 ## Phases
@@ -118,7 +121,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
-| F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 (router and shell) in review, with A-27 proposed; unit 2 needs D-27 |
+| F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 done (PR #57, A-27 decided); unit 2 in review (D-27 decided) |
 | F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |

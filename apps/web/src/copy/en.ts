@@ -14,8 +14,12 @@ export const copy = {
   },
   nav: { home: 'Home' },
   loading: { title: 'Loading' },
-  // The landing description is added with the approved copy (D-27).
-  landing: { title: 'Lamassu CLA' },
+  // D-27, approved by the repository owner on 2026-10-22.
+  landing: {
+    title: 'Lamassu Contributor Agreements',
+    description:
+      'Complete and review the contributor agreements required for your Lamassu contributions.',
+  },
   notFound: {
     title: 'Page not found',
     description: 'The page you requested does not exist.',
