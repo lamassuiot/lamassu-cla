@@ -122,7 +122,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
 | F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 done (PR #57, A-27 decided); unit 2 in review (D-27 decided) |
-| F-07 | GitHub sign-in and sessions | 4 | F-02, F-03, D-06 | Not started |
+| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29 | Specification draft; approval blocked on D-02, D-06, D-20, D-28, and D-29 |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
 | F-10 | Signing-provider port and DocuSign adapter | 6 | F-03, D-09, D-11 | Not started |

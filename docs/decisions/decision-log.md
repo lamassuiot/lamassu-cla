@@ -148,6 +148,8 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
 | D-25 | Are the F-05 development dependencies `axe-core` 4.14.0 (MPL-2.0, via `@storybook/addon-a11y`) and `caniuse-lite` (CC-BY-4.0, browser-support data) acceptable for this AGPL-3.0-only repository? Both are development dependencies only, used unmodified for previews and tests; neither is part of the portal build, which `scripts/check-web-build.sh` and the F-05 build check verify. | Decided by the repository owner, 2026-10-21: both may be added as development-only dependencies, on four conditions. (1) Their license notices and metadata are kept (no files stripped from the installed packages; lockfile license fields unchanged). (2) If an artifact that includes `caniuse-lite` data is ever redistributed, the third-party notices attribute caniuse.com. (3) Neither is in the portal bundle; `scripts/check-portal-dev-deps.sh` verifies this in `make build` and CI. (4) The decision is reopened if Storybook, the development container, or that data starts being distributed. | F-05 units 2 to 6 (adding the A-23 dependencies) | Repository owner (decided); originally routed to **Legal** | Recorded as decided by the repository owner; Legal did not separately confirm. |
 | D-26 | Should the portal link to its corresponding source code, and where? The repository is AGPL-3.0-only, and section 13 concerns users who interact with the software over a network. | Open | F-06 (shell content); production launch | Repository owner, **Legal** | None. Do not assume; the link target and wording need confirmation. |
 | D-27 | What text does the public landing page show (title, description, and whether it mentions that signing is not yet available)? | Decided by the repository owner, 2026-10-22: title "Lamassu Contributor Agreements"; description "Complete and review the contributor agreements required for your Lamassu contributions." | F-06 unit 2 | Repository owner (decided) | Implemented in F-06 unit 2; the text lives in `apps/web/src/copy/en.ts`. |
+| D-28 | May contributors whose status is `SUSPENDED` or `REVOKED` sign in to the portal? | Open | F-07 approval | Repository owner, Security owner | Yes: sign-in only proves which GitHub account the person controls; coverage and authorization decisions use the contributor status. |
+| D-29 | Does the first sign-in create a contributor record (`PENDING`, GitHub user ID and login only), or is the record created only when the person starts an agreement? | Open | F-07 approval | Repository owner, **DPO** | Create it at sign-in with only the GitHub user ID and login, which the catalogue and signing flows need; no email or profile data. |
 
 ## Summary of decisions awaiting confirmation
 
@@ -156,9 +158,9 @@ Decisions marked **Legal** or **Platform owner** cannot be settled by maintainer
   (D-24) and the three workload accounts, confirmation of the Control Tower controls, verification
   of CloudTrail and account-level S3 Block Public Access, and execution of the Terraform bootstrap
   before any environment deployment. Review of the final A-19, ADR-0012, and T-19 wording.
-- **DPO:** D-10, D-19, D-20.
-- **Security owner:** D-06, D-13, D-19, D-24; review of A-19, ADR-0012 (including the temporary
+- **DPO:** D-10, D-19, D-20, D-29.
+- **Security owner:** D-06, D-13, D-19, D-24, D-28; review of A-19, ADR-0012 (including the temporary
   dependency-review exception), and T-19.
-- **Repository owner:** D-02, D-11, D-15, D-21, D-26.
+- **Repository owner:** D-02, D-11, D-15, D-21, D-26, D-28, D-29.
 - **Organization admins:** D-08.
 - **Design:** D-12.
