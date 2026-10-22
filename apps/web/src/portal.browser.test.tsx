@@ -51,7 +51,7 @@ test('navigation routes without a full load, sets the title, focuses the h1, and
   expect(router.state.location.pathname).toBe('/');
   expect(window.location.href).toBe(before);
   expect((window as unknown as Record<symbol, boolean>)[marker]).toBe(true);
-  expect(document.title).toBe(copy.brand);
+  expect(document.title).toBe(`${copy.landing.title} – ${copy.brand}`);
   expect(document.activeElement).toBe(heading);
   expect(getByRole('link', { name: copy.nav.home }).getAttribute('aria-current')).toBe('page');
 });

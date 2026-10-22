@@ -4,5 +4,5 @@ import { usePageTitle } from '../shell/use-page-title';
 
 export function LandingScreen() {
   usePageTitle(copy.landing.title);
-  return <PageHeader title={copy.landing.title} />;
+  return <PageHeader title={copy.landing.title} description={copy.landing.description} />;
 }
