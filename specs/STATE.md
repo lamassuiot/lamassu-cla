@@ -35,7 +35,7 @@ Last updated: 2026-10-08
   owner on 2026-10-21 (PR #56). F-05 is done: unit 6
   merged in PR #54 (app shell, navigation, and page header, with A-26) and PR #55 (visual
   regression, the 320 px and 200% zoom runs, and the local-setup
-  documentation). C-02 (`VOIDED` status color) awaits the repository owner. Unit 5 (data display)
+  documentation). C-02 (`VOIDED` status color) was approved on 2026-10-22 and is resolved. Unit 5 (data display)
   is complete in PR #51
   and PR #52. Unit 4 (overlays) is complete in PR #50,
   with A-24 (`overlay.scrim` token) and A-25 (AC-05-5 clarification) decided by the repository
@@ -82,6 +82,7 @@ Last updated: 2026-10-08
 | 2026-10-21 | Repository owner | F-06 specification approved by merging PR #56. Start unit 1 (router and shell); the router version is proposed as A-27 and needs approval before unit 1 merges. |
 | 2026-10-22 | Repository owner | A-27 approved: React Router 8.5.0 and its dependencies (`cookie-es` 3.1.1, `@remix-run/route-pattern` 0.22.1) are decided; PR #57 proceeds to its required GitHub review. |
 | 2026-10-22 | Repository owner | D-27 decided: landing title "Lamassu Contributor Agreements" and description "Complete and review the contributor agreements required for your Lamassu contributions." D-26 stays open for Legal. |
+| 2026-10-22 | Repository owner | C-02 approved: add `VOIDED` to the `neutral` status row beside `EXPIRED`, with the specification update and test. |
 
 ## Phases
 
@@ -139,7 +140,7 @@ Feature specifications are written at the start of the phase that implements the
 | ID | Contradiction | Proposed resolution | Status |
 | --- | --- | --- | --- |
 | C-01 | `infra/bootstrap` and [F-03](features/F-03-terraform-foundation.md#main-flow) create the state bucket and KMS key in each workload account. They use one role for state access and deployment, with state keys under `<environment>/` (D-05). [T-19](security/threat-model.md#3-threats-and-mitigations) and D-24 describe a dedicated Infrastructure/Tooling state account, `lamassu-cla/<environment>/<stack>/terraform.tfstate` keys, and separate state and deployment roles. | After D-24 is approved, rework `infra/bootstrap`, F-03, and the [architecture](architecture.md#9-infrastructure-as-code) in a separate pull request, with plan-only, mocked-provider tests. Until then, the current bootstrap must not be run. | Open; awaiting D-24 |
-| C-02 | The agreement state `VOIDED` ([domain model](domain-model.md), section 3.2) has no status color in the [design tokens](ux/design-tokens.md#23-status-colors) (section 2.3). The status badge renders it as `neutral` through the unknown-state fallback (AC-05-6). | Add `VOIDED` to the `neutral` row, next to `EXPIRED`, as a design-token specification change, and add it to the status mapping and its test. Code unchanged until approved. | Open; awaiting the repository owner |
+| C-02 | The agreement state `VOIDED` ([domain model](domain-model.md), section 3.2) has no status color in the [design tokens](ux/design-tokens.md#23-status-colors) (section 2.3). The status badge renders it as `neutral` through the unknown-state fallback (AC-05-6). | Add `VOIDED` to the `neutral` row, next to `EXPIRED`, as a design-token specification change, and add it to the status mapping and its test. | Resolved: approved by the repository owner on 2026-10-22 and implemented in the C-02 PR |
 
 ## Blocked items
 

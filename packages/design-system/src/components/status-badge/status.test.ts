@@ -7,7 +7,7 @@ const spec: Record<string, string[]> = {
   warning: ['PENDING_SIGNATURE', 'VERIFYING', 'PENDING_REVIEW', 'ACTION_REQUIRED'],
   danger: ['FAILED', 'REVOKED', 'REJECTED', 'DECLINED'],
   info: ['DRAFT'],
-  neutral: ['SUSPENDED', 'EXPIRED', 'DEPRECATED', 'ARCHIVED', 'SUPERSEDED', 'SKIPPED'],
+  neutral: ['SUSPENDED', 'EXPIRED', 'VOIDED', 'DEPRECATED', 'ARCHIVED', 'SUPERSEDED', 'SKIPPED'],
 };
 
 describe('status badge mapping (AC-05-6)', () => {
