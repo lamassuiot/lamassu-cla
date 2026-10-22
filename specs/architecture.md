@@ -94,11 +94,18 @@ IAM role, log group, alarms, and reserved concurrency limit.
 API Gateway routes are grouped by audience. OpenAPI is the source of truth
 ([`api/openapi.yaml`](api/openapi.yaml)); conventions are in [`api/conventions.md`](api/conventions.md).
 
+The portal and the API share one origin (D-02): CloudFront serves the portal by default and routes
+`/api/*` to API Gateway. Prefixes below are relative to `/api`, so `/v1/health` is served at
+`/api/v1/health`. The GitHub sign-in callback is `/api/auth/github/callback`, outside the versioned
+routes, so the URL registered with GitHub stays stable across API versions. The production origin
+is `https://cla.developers.lamassu.cloud`; the domain is not provisioned yet, and D-02 does not
+authorize deployment.
+
 | Group | Prefix | Function | Authentication |
 | --- | --- | --- | --- |
 | Health | `/v1/health` | `api` | None |
 | Public catalogue | `/v1/public/...` | `api` | None |
-| Authentication | `/v1/auth/...` | `api` | OAuth flow |
+| Authentication | `/v1/auth/...`; callback `/auth/github/callback` (unversioned) | `api` | OAuth flow |
 | Current user and contributor | `/v1/me/...` | `api` | Session |
 | Agreements and signing sessions | `/v1/agreements/...`, `/v1/signing-sessions/...` | `api` | Session |
 | Organizations | `/v1/organizations/...` | `api` | Session and role |
@@ -265,4 +272,5 @@ scripts/            developer scripts
 
 ## 13. Open decisions affecting the architecture
 
-D-02, D-06, D-16. See the [decision log](../docs/decisions/decision-log.md).
+D-06 (proposed to the Security owner), D-16, and D-30. D-02 was decided on 2026-10-22 (section 4).
+See the [decision log](../docs/decisions/decision-log.md).

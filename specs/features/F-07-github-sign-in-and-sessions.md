@@ -2,10 +2,10 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Draft; blocked on D-02, D-06, and D-20 before approval |
+| Status | Draft; approval needs D-06 (Security owner) and D-30; sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
 | Phase | 4 |
 | Owner | Repository owner; Security owner for the authentication model (D-06) |
-| Depends on | F-02, F-03, F-06; D-02, D-06, D-08 (if D-06 selects a GitHub App), D-20, D-28, D-29; [security](../security/security.md#31-people-github-sign-in), [data protection](../security/data-protection.md), [threat model](../security/threat-model.md) (T-15, T-16) |
+| Depends on | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29, D-30; [security](../security/security.md#31-people-github-sign-in), [data protection](../security/data-protection.md), [threat model](../security/threat-model.md) (T-15, T-16) |
 | Approved by | Pending |
 
 ## Problem statement
@@ -25,13 +25,20 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 ## Preconditions
 
-- D-06 is decided: GitHub App user authorization (recommended in the decision log) or a GitHub
-  OAuth App, and the session model. This draft follows the recommendation; the API, data model,
-  and acceptance criteria hold for either choice unless marked otherwise.
-- D-02 is decided, so the callback URL can be registered exactly (no wildcards).
-- D-20 is decided, so the portal can show the privacy notice before sign-in.
-- If D-06 selects a GitHub App, the App is registered (D-08) and its client ID and client secret
-  are stored in Secrets Manager by the platform owner. Nothing about the App is committed.
+- D-06 is decided by the Security owner. This draft follows the repository owner's proposal of
+  2026-10-22: a GitHub **OAuth App** used only for sign-in, with no repository permissions and no
+  email access, separate from the GitHub App that receives pull-request events and publishes
+  Checks (F-14, D-08).
+- D-02 is decided (2026-10-22): the portal origin is `https://cla.developers.lamassu.cloud`, the
+  versioned API base is `https://cla.developers.lamassu.cloud/api/v1`, CloudFront routes `/api/*`
+  to API Gateway, and the OAuth callback URL is
+  `https://cla.developers.lamassu.cloud/api/auth/github/callback`, deliberately outside the
+  versioned routes. The domain is not provisioned, and D-02 does not authorize deployment.
+- D-20 is decided by Legal and the DPO (lawful basis and privacy notice). Until then, no sign-in by
+  real people and no contributor-record creation happen in any environment (D-29); the code is
+  built and tested with synthetic identities only.
+- The OAuth App is registered (owner: D-30) with exactly the callback URL above, and its client ID
+  and client secret are stored in Secrets Manager. Nothing about the OAuth App is committed.
 - Running sign-in in an environment needs F-03 step 5 (deployment). Until then, everything is
   built and tested without AWS: domain and use cases with fakes, adapters against local test
   servers, and Terraform plan-only with mocked providers.
@@ -39,33 +46,38 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 ## Main flow
 
 1. A visitor chooses **Sign in with GitHub** in the portal header or on a page that needs sign-in.
-   The portal navigates the browser to `GET /v1/auth/github/start?return_to=<relative path>`.
+   The portal navigates the browser to `GET /api/v1/auth/github/start?return_to=<relative path>`.
 2. The API validates `return_to` against the relative-path allowlist (falling back to `/`),
-   creates a single-use `state` and a PKCE verifier, stores them hashed in the `ephemeral` table for
+   creates a single-use `state` and, where GitHub supports PKCE for OAuth Apps (security,
+   section 3.1; confirmed in unit 2), a PKCE verifier, stores them hashed in the `ephemeral` table for
    10 minutes, sets a short-lived pre-authentication cookie bound to `state`, and redirects to
    GitHub's authorization page with the exact registered callback URL.
-3. The person approves on GitHub. GitHub redirects to `GET /v1/auth/github/callback` with `code`
-   and `state`.
+3. The person approves on GitHub. GitHub redirects to the registered callback,
+   `GET /api/auth/github/callback`, with `code` and `state`. The callback stays outside the
+   versioned API, so the registered URL does not change when the API version changes (D-02).
 4. The API checks that `state` exists, is unexpired, unused, and matches the pre-authentication
    cookie; deletes it; exchanges `code` (with the PKCE verifier) for a user access token; reads the
    GitHub user ID and login; and discards the token. The token is never stored, logged, or sent to
    the browser.
-5. The API creates or updates the contributor record (`github_user_id`; `github_login` refreshed,
-   FR-CON-01). A new contributor starts as `PENDING` (proposed; D-29). No email address is read or stored in F-07;
-   email lookup values (D-19) are added by the feature that resolves commit authors (F-15).
+5. The API creates or updates the minimal contributor record (D-29): the numeric GitHub user ID,
+   which is the only stable identifier, and the current login, refreshed on every sign-in for
+   display only (FR-CON-01). A new contributor starts as `PENDING`. The login is never used as an
+   identifier or key. No email address is read or stored; the OAuth App requests no email access,
+   and email lookup values (D-19) are added by the feature that resolves commit authors (F-15).
+   Record creation is enabled only after D-20 is decided.
 6. The API creates a session: a 256-bit random token, stored only as a hash in the `ephemeral`
    table with the GitHub user ID, creation time, last-seen time, idle expiry, absolute expiry, and
    a session-bound CSRF secret. It sets the `__Host-cla_session` cookie (`HttpOnly`, `Secure`,
    `SameSite=Lax`, `Path=/`), clears the pre-authentication cookie, writes an audit event, and
    redirects to the validated `return_to`.
-7. The portal calls `GET /v1/session`, which returns the signed-in person (GitHub user ID and
+7. The portal calls `GET /api/v1/session`, which returns the signed-in person (GitHub user ID and
    login), the session expiry, and the CSRF token. The header shows the login and a **Sign out**
    button.
 8. Every authenticated request is checked by middleware: the session hash must exist and be
    within its idle and absolute expiry; the last-seen time is extended (throttled to at most one
    write per minute). State-changing requests also need a matching `X-CSRF-Token` header and an
    allowed `Origin`.
-9. **Sign out** calls `POST /v1/session/sign-out` (CSRF-protected). The API deletes the session,
+9. **Sign out** calls `POST /api/v1/session/sign-out` (CSRF-protected). The API deletes the session,
    expires the cookie, writes an audit event, and returns 204; the portal returns to the landing
    page in the signed-out state.
 
@@ -73,12 +85,13 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 - **Already signed in.** Starting sign-in again replaces the session (the old one is deleted), so a
   session token is never reused across sign-ins (session rotation).
-- **Session expires.** After the idle timeout (proposed 30 minutes) or the absolute timeout
-  (proposed 8 hours), the API answers 401; the portal shows the signed-out state and offers sign-in
-  with `return_to` set to the current page. Timeouts are configuration (security, section 3.1);
-  final values come with D-06.
-- **Suspended or revoked contributor.** Sign-in still succeeds: it proves identity, not coverage.
-  Coverage and later authorization decisions use the contributor status. Open question D-28.
+- **Session expires.** After 30 minutes without activity or 8 hours after sign-in, whichever comes
+  first (D-06 proposal), the API answers 401; there is no silent renewal, and the person signs in
+  again. The portal shows the signed-out state and offers sign-in with `return_to` set to the
+  current page. Timeouts are configuration (security, section 3.1).
+- **Suspended or revoked contributor.** Sign-in still succeeds (D-28, decided 2026-10-22).
+  Authentication only confirms identity: it grants no permissions and does not restore the
+  validity of any CLA. Coverage and authorization decisions keep using the contributor status.
 - **GitHub login changed.** The GitHub user ID is the identity; the stored login is refreshed on
   every sign-in.
 
@@ -102,8 +115,13 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
   pre-authentication cookie binds them to the browser that started sign-in.
 - Session tokens are 256-bit random values from a cryptographic source, stored only as SHA-256
   hashes; comparisons of secrets are constant time. The CSRF token is bound to the session.
-- No GitHub token is persisted, logged, or returned. Requested GitHub permissions are the minimum
-  for reading the user ID and login (no email scope in F-07).
+- No GitHub token is persisted, logged, or returned. The OAuth App requests no scopes: it reads only
+  the public numeric user ID and login, with no repository permissions and no email access (D-06
+  proposal). It is separate from the GitHub App, so a sign-in token never carries repository or
+  Checks permissions.
+- Identity is the numeric GitHub user ID. The login can change and be reused by another account, so
+  it is never used as an identifier, key, or authorization input (D-29).
+- Signing in grants no permissions and does not restore an agreement's validity (D-28).
 - `return_to` accepts only relative paths from an allowlist; protocol-relative and absolute URLs
   are rejected.
 - Logs, metrics, and problem responses contain no session tokens, codes, `state` values, or
@@ -114,14 +132,18 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 ## API changes
 
 New operations in `specs/api/openapi.yaml` under the existing `auth` tag, added in unit 1 before
-any handler. None is breaking; `sessionCookie` and `csrfToken` security schemes already exist.
+any handler; `sessionCookie` and `csrfToken` security schemes already exist. Paths below are
+site-relative (D-02). Unit 1 also aligns the contract's server configuration with D-02 (versioned
+operations under `/api/v1`, the callback at `/api/auth/github/callback`) and regenerates the API
+client; the only existing operation, `GET /v1/health`, moves to `/api/v1/health`. No consumer
+exists yet, so this is not a breaking change for any client.
 
 | Operation | Purpose | Responses |
 | --- | --- | --- |
-| `GET /v1/auth/github/start` | Start sign-in; query `return_to` (relative path) | 302 to GitHub; 400 for malformed input |
-| `GET /v1/auth/github/callback` | Complete sign-in; query `code`, `state`, or `error` | 302 to `return_to` with the session cookie; 302 to a portal error route on failure |
-| `GET /v1/session` | Current session (`sessionCookie`) | 200 with `github_user_id`, `github_login`, `expires_at`, `csrf_token`; 401 |
-| `POST /v1/session/sign-out` | End the session (`sessionCookie` and `csrfToken`) | 204; 401; 403 |
+| `GET /api/v1/auth/github/start` | Start sign-in; query `return_to` (relative path) | 302 to GitHub; 400 for malformed input |
+| `GET /api/auth/github/callback` | Complete sign-in; query `code`, `state`, or `error`. Unversioned: it is the URL registered with GitHub (D-02) | 302 to `return_to` with the session cookie; 302 to a portal error route on failure |
+| `GET /api/v1/session` | Current session (`sessionCookie`) | 200 with `github_user_id`, `github_login`, `expires_at`, `csrf_token`; 401 |
+| `POST /api/v1/session/sign-out` | End the session (`sessionCookie` and `csrfToken`) | 204; 401; 403 |
 
 ## Data-model changes
 
@@ -140,15 +162,15 @@ any handler. None is breaking; `sessionCookie` and `csrfToken` security schemes 
   signed in. Built from existing components; no new tokens.
 - A sign-in error route shows the error cases above with an `ErrorState` and a retry link.
 - The privacy notice from D-20 is linked next to the sign-in action.
-- Session state comes from `GET /v1/session` through the generated API client. Using TanStack
+- Session state comes from `GET /api/v1/session` through the generated API client. Using TanStack
   Query for server state (architecture, section 7) is a new runtime dependency and is proposed with
   evidence in unit 4, like A-27.
 
 ## Acceptance criteria
 
-- **AC-07-1** Given a visitor who starts sign-in, the API redirects to GitHub with a new single-use
-  `state`, a PKCE challenge, and the exact registered callback URL, and sets a pre-authentication
-  cookie bound to that `state`.
+- **AC-07-1** Given a visitor who starts sign-in, the API redirects to GitHub's OAuth authorization
+  page with a new single-use `state`, a PKCE challenge where supported, no requested scopes, and
+  the exact registered callback URL, and sets a pre-authentication cookie bound to that `state`.
 - **AC-07-2** Given a callback whose `state` is missing, expired, already used, or not bound to the
   browser's pre-authentication cookie, no code exchange happens and no session is created.
 - **AC-07-3** Given a successful callback, a contributor record exists for the GitHub user ID with
@@ -169,6 +191,12 @@ any handler. None is breaking; `sessionCookie` and `csrfToken` security schemes 
 - **AC-07-10** The portal shows the signed-out and signed-in header states and the sign-in error
   route, with no WCAG 2.2 A or AA violations in either theme at the F-06 widths.
 
+- **AC-07-11** Given a contributor whose status is `SUSPENDED` or `REVOKED`, sign-in succeeds, and
+  the session carries no permission and changes no agreement or coverage state (D-28).
+- **AC-07-12** Given two sign-ins by the same numeric GitHub user ID with different logins, one
+  contributor record exists with the latest login; given a sign-in whose login matches another
+  record's former login, no record is matched by login (D-29).
+
 ## Automated test scenarios
 
 | ID | Scenario | Level | Covers |
@@ -184,6 +212,7 @@ any handler. None is breaking; `sessionCookie` and `csrfToken` security schemes 
 | F07-T9 | OpenAPI contract tests: every new operation's responses validate against `openapi.yaml`. | Contract | All API criteria |
 | F07-T10 | Portal header states and sign-in error route, axe and reflow at the F-06 widths, with the API mocked. | Component (browser) | AC-07-10 |
 | F07-T11 | Terraform plan-only tests with mocked providers for the new API, Lambda, tables, and secret. | Infrastructure | Rollback and least privilege |
+| F07-T12 | Sign-in of suspended and revoked contributors, and login changes and reuse, with fakes. | Unit | AC-07-11, AC-07-12 |
 
 ## Observability requirements
 
@@ -217,14 +246,19 @@ retained, not destroyed, by default).
 4. **Portal.** Session state, header states, sign-in error route, privacy-notice link, and
    accessibility runs (F07-T10); the server-state library proposed with evidence.
 
-Units 1 and 2 depend on D-06; unit 4 depends on D-20; registering the callback URL depends on D-02.
+Units 1 and 2 depend on D-06 (Security owner). Enabling contributor-record creation and any
+sign-in by real people depends on D-20 (Legal, DPO); unit 4's privacy-notice link depends on the
+approved notice. Registering the OAuth App depends on D-30. Deployment stays blocked until F-03
+step 5; D-02 does not authorize it.
 
 ## Open questions
 
-- D-02: production URL, needed for the exact callback URL.
-- D-06: GitHub App user authorization or OAuth App, and session timeouts (proposed 30 minutes idle,
-  8 hours absolute).
-- D-08: GitHub App registration, if D-06 selects a GitHub App.
-- D-20: lawful basis and privacy notice shown at sign-in.
-- D-28: may suspended or revoked contributors sign in?
-- D-29: does the first sign-in create a contributor record, or only starting an agreement?
+- D-06: Security-owner decision on the repository owner's proposal (OAuth App for sign-in only;
+  30 minutes idle and 8 hours absolute).
+- D-20: Legal and DPO validation of the proposed lawful bases, the privacy notice, retention
+  periods, recipients, and any international transfers.
+- D-30: who registers the sign-in OAuth App in the `lamassuiot` organization and stores its client
+  secret.
+
+Decided on 2026-10-22: D-02 (origins and callback URL), D-28 (suspended or revoked contributors may
+sign in), and D-29 (minimal record at first sign-in, gated on D-20).

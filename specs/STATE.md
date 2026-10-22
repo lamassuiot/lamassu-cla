@@ -83,6 +83,9 @@ Last updated: 2026-10-08
 | 2026-10-22 | Repository owner | A-27 approved: React Router 8.5.0 and its dependencies (`cookie-es` 3.1.1, `@remix-run/route-pattern` 0.22.1) are decided; PR #57 proceeds to its required GitHub review. |
 | 2026-10-22 | Repository owner | D-27 decided: landing title "Lamassu Contributor Agreements" and description "Complete and review the contributor agreements required for your Lamassu contributions." D-26 stays open for Legal. |
 | 2026-10-22 | Repository owner | C-02 approved: add `VOIDED` to the `neutral` status row beside `EXPIRED`, with the specification update and test. |
+| 2026-10-22 | Repository owner | D-02 decided: portal origin `https://cla.developers.lamassu.cloud`, API base `/api/v1`, CloudFront routes `/api/*` to API Gateway, GitHub callback `/api/auth/github/callback` outside the versioned routes. The domain is not provisioned; no deployment is authorized. |
+| 2026-10-22 | Repository owner | D-28 decided (suspended or revoked contributors may sign in; sign-in grants no permissions and restores no CLA). D-29 decided (minimal record at first sign-in with the numeric GitHub user ID and current login, no email; the login is not a stable identifier; creation waits for D-20). |
+| 2026-10-22 | Repository owner | D-06 proposal for the Security owner (sign-in-only OAuth App; separate GitHub App for pull requests and Checks; server-side sessions, 30 minutes idle and 8 hours absolute). D-20 lawful-basis proposal for Legal and DPO review (controller LKS S.Coop); D-20 stays open and no production processing is authorized. |
 
 ## Phases
 
@@ -91,7 +94,7 @@ Last updated: 2026-10-08
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
 | 3 | Frontend shell and design system | In progress (F-04 and F-05 done; F-06 specification in review) | Final visual values: D-12. |
-| 4 | Authentication and user profile | Not started | Phase 2; D-02, D-06, D-13, D-19 (DPO), D-20. |
+| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20, D-30. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
 | 7 | CCLA workflow | Not started | Phase 6; D-15. |
@@ -122,7 +125,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
 | F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 done (PR #57, A-27 decided); unit 2 in review (D-27 decided) |
-| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29 | Specification draft; approval blocked on D-02, D-06, D-20, D-28, and D-29 |
+| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20, D-30 | Specification draft; approval needs D-06 (Security owner) and D-30; real sign-ins and contributor records need D-20 |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
 | F-10 | Signing-provider port and DocuSign adapter | 6 | F-03, D-09, D-11 | Not started |
