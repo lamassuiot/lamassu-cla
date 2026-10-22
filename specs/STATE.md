@@ -3,15 +3,13 @@
 This file is the orchestrator's task-state record. Update it when a task starts, is blocked, or
 completes. See [the SDD workflow](sdd-workflow.md).
 
-Last updated: 2026-10-08
+Last updated: 2026-10-22
 
 ## Current position
 
 - **Phase:** 1 complete (PR #4). Phase 2 in progress (remaining items blocked; see Blocked items).
-  Phase 3 started on 2026-10-08 with the F-04 specification (PR #25), approved the same day.
-  F-04 units 1 (tokens and generation), 2 (token-only CSS check), and 3 (themes and base styles)
-  merged (PRs #26, #30, #39); F-04 is done. F-02's generated API client and drift check merged
-  (PR #41, A-22), which closes the A-18 deferral.
+  Phase 3 complete on 2026-10-22 (started 2026-10-08). F-02's generated API client and drift check
+  merged (PR #41, A-22), which closes the A-18 deferral.
 - **Phase 2:** F-02 unit 1 merged (PR #5). F-01 merged (PR #6), approved, and completed by
   PR #11 (`Dev Container build` CI job, now a required check). Dependency policy A-15 merged
   (PR #12). Biome migration (A-17, ADR-0011) merged (PR #14). F-02 unit 2 (backend workflow)
@@ -28,33 +26,20 @@ Last updated: 2026-10-08
 - **Deployment gate:** No branch deploys infrastructure or creates AWS resources until the
   platform-owner prerequisites in [F-03](features/F-03-terraform-foundation.md#preconditions) are
   met. Production additionally requires Legal confirmation of D-10.
-- **Next gate:** merge of F-06 unit 2 (landing page and portal accessibility runs, with D-27);
-  F-06 is then done. Unit 1 (router and shell) merged in PR #57, with A-27 decided on 2026-10-22.
-  D-26 (source-code link) stays open for Legal. The
-  [F-06 specification](features/F-06-app-shell-and-static-screens.md) was approved by the repository
-  owner on 2026-10-21 (PR #56). F-05 is done: unit 6
-  merged in PR #54 (app shell, navigation, and page header, with A-26) and PR #55 (visual
-  regression, the 320 px and 200% zoom runs, and the local-setup
-  documentation). C-02 (`VOIDED` status color) was approved on 2026-10-22 and is resolved. Unit 5 (data display)
-  is complete in PR #51
-  and PR #52. Unit 4 (overlays) is complete in PR #50,
-  with A-24 (`overlay.scrim` token) and A-25 (AC-05-5 clarification) decided by the repository
-  owner on 2026-10-21. Unit 3 (states and feedback) is complete in PR #49. Unit 2 (tooling,
-  foundations, and forms) is
-  complete: PR #47 and PR #48. D-25 was decided by the repository owner on
-  2026-10-21 (development-only, notices kept, caniuse.com attribution on redistribution, excluded
-  from the portal bundle). The browser-test check was added to the
-  `main` ruleset after its first successful run (PR #47). The Phase 3 reviews were recorded in PR #27 (decision-log
-  entries A-20 to A-22). A-20: the repository owner decided on 2026-10-21 to keep the ADR-0012
-  exception unchanged, and reported the Security owner's confirmation of that review on the same
-  day (Checkov 3.3.30 still pins
-  `asteval==1.0.6`, and no release avoids the advisories). A-21 was confirmed on 2026-10-21 and
-  implemented in merged PR #29: Dependabot may propose TypeScript upgrades, while TypeScript 6.0.3
-  remains pinned pending a separate reviewed upgrade. A-22 (Orval 8.40.0) was confirmed on
-  2026-10-21 and implemented in merged PR #41, which closes the A-18 deferral. Phase 2:
-  Security-owner and platform-owner review of the final A-19, ADR-0012, and T-19 wording; approval
-  of D-24 (central state account). F-03 step 5 (deployment workflow) stays blocked until the
-  platform-owner prerequisites are met (see Blocked items).
+- **Phase 3:** done. F-04 (PRs #26, #30, #39); F-05 (PRs #47 to #55; A-23 to A-26, D-25, C-02);
+  F-06 (PRs #56, #57, #59; A-27, D-27). Still open and not blocking: D-12 (final brand assets) and
+  D-26 (source-code link, Legal).
+- **Next gate:** Phase 4 (authentication and user profile). The
+  [F-07 specification](features/F-07-github-sign-in-and-sessions.md) (GitHub sign-in and sessions)
+  is a draft (PR #61); its approval needs D-06 (Security owner, on the repository owner's
+  proposal) and D-30 (OAuth App registration owner). Sign-in by real people and contributor-record
+  creation also need D-20 (Legal and DPO; the repository owner's lawful-basis proposal is
+  recorded). D-02, D-28, and D-29 were decided on 2026-10-22; the D-19 technical default applies.
+  F-08 (roles) needs D-13 (Security owner). Running sign-in in an
+  environment needs F-03 step 5 (platform owner). Phase 2 still needs the Security-owner and
+  platform-owner review of the final A-19, ADR-0012, and T-19 wording and approval of D-24; F-03
+  step 5 (deployment workflow) stays blocked until the platform-owner prerequisites are met (see
+  Blocked items).
 
 ## Approvals
 
@@ -93,7 +78,7 @@ Last updated: 2026-10-08
 | --- | --- | --- | --- |
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
-| 3 | Frontend shell and design system | In progress (F-04 and F-05 done; F-06 specification in review) | Final visual values: D-12. |
+| 3 | Frontend shell and design system | Done (F-04, F-05, F-06) | Final visual values: D-12 (does not block Phase 4). |
 | 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20, D-30. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
@@ -124,7 +109,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-03 | [Terraform foundation and environments](features/F-03-terraform-foundation.md) | 2 | F-01 | Steps 1–4 merged (PR #20; no deployment); Checkov scan merged (PRs #22, #23; ADR-0012 proposed); step 5 blocked; A-19, T-19, and D-24 pending |
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
-| F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 done (PR #57, A-27 decided); unit 2 in review (D-27 decided) |
+| F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 (PR #57, A-27 decided) and unit 2 (PR #59, D-27 decided) merged; done |
 | F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20, D-30 | Specification draft; approval needs D-06 (Security owner) and D-30; real sign-ins and contributor records need D-20 |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
