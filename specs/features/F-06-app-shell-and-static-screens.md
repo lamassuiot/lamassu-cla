@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Approved; unit 1 (router and shell) merged in PR #57, with A-27 decided; unit 2 (landing page and portal accessibility runs) in this PR, with D-27 decided |
+| Status | Done; approved; unit 1 (router and shell) merged in PR #57, with A-27 decided; unit 2 (landing page and portal accessibility runs) merged in PR #59, with D-27 decided |
 | Phase | 3 |
 | Owner | Repository owner |
 | Depends on | F-05; D-12, D-21, D-26, D-27; [architecture](../architecture.md#7-frontend-architecture), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
