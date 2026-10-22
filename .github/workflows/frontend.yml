@@ -148,6 +148,9 @@ jobs:
       - name: Story accessibility and component tests
         run: npm run test:browser -w @lamassu-cla/design-system
 
+      - name: Portal browser tests
+        run: npm run test:browser -w @lamassu-cla/web
+
       # Baselines are created only in this image (`make test-visual-update`); any difference fails.
       - name: Visual regression
         run: npm run test:visual -w @lamassu-cla/design-system

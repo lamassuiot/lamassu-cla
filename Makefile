@@ -120,8 +120,9 @@ build-web:
 	scripts/check-portal-dev-deps.sh
 
 .PHONY: test-browser
-test-browser: ## Story accessibility and component tests in Chromium (F-05); not part of `make check`.
+test-browser: ## Story accessibility, component, and portal tests in Chromium (F-05, F-06); not part of `make check`.
 	STORYBOOK_DISABLE_TELEMETRY=1 npm run test:browser -w @lamassu-cla/design-system
+	npm run test:browser -w @lamassu-cla/web
 
 .PHONY: test-visual
 test-visual: ## Compare the visual-regression screenshots in the pinned image (F-05); needs Docker.

@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | In review |
+| Status | Approved; unit 1 (router and shell) in this PR, with A-27 proposed; unit 2 next (depends on D-27) |
 | Phase | 3 |
 | Owner | Repository owner |
 | Depends on | F-05; D-12, D-21, D-26, D-27; [architecture](../architecture.md#7-frontend-architecture), [ADR-0010](../../docs/decisions/0010-cloudfront-frontend-hosting.md) |
-| Approved by | Pending |
+| Approved by | Repository owner, 2026-10-21 (specification, PR #56) |
 
 ## Problem statement
 
@@ -105,8 +105,10 @@ None.
 
 - `apps/web`: router, `AppShell` frame, landing page, not-found screen, error screen, copy module,
   and the title and focus handling on navigation.
-- `packages/design-system`: `Navigation` passes the click event to `onNavigate` (additive; existing
-  callers keep working). No new component and no new token.
+- `packages/design-system`: `Navigation` passes the click event and the href to `onNavigate`, and
+  `AppShell` forwards a caller's `onNavigate` to the sidebar and the drawer; the state panels accept
+  `headingLevel={1}`, so a full-page state can be the page's only `h1` (AC-06-1). All three changes
+  are additive; existing callers keep working. No new component and no new token.
 - Whether the shell links to the portal's source code (AGPL-3.0 section 13) is decided in D-26 and
   is not part of F-06 until then.
 
@@ -165,6 +167,34 @@ is affected, and nothing is deployed until an environment exists (F-03 step 5).
    640 px, in the pinned Playwright image in CI (F06-T5). Depends on unit 1 and D-27.
 
 Each unit is one pull request.
+
+Implementation notes (unit 1: router and shell):
+
+- React Router 8.5.0 (`react-router`, MIT) is added with an exact pin as the portal's only new
+  runtime dependency, recorded as A-27 (proposed; approval needed before merge). Evidence: it adds
+  `react-router` 8.5.0, `cookie-es` 3.1.1, and `@remix-run/route-pattern` 0.22.1, all MIT, none
+  with an install script; no existing package version changed; no `overrides`; `npm audit` reports
+  0 vulnerabilities. The main chunk grows from 220 KB to 323 KB (68 KB to 102 KB gzip); the landing
+  and not-found screens load as separate chunks.
+- `apps/web/src/routes.tsx` builds the tree with `portalRoutes(pages)`: `PortalShell` (the
+  `AppShell` frame with the theme toggle and navigation) wraps a pathless route whose
+  `errorElement` is the error screen, so the shell stays visible when a page's chunk fails to load
+  or a screen throws. Tests reuse `portalRoutes` to inject failing pages. `App` creates the browser
+  router once, inside the component.
+- Each screen sets the document title in a layout effect (`usePageTitle`), so the error and
+  not-found screens set it too. After each navigation (not the first load), a layout effect moves
+  focus to the page's `h1`, made focusable with `tabIndex = -1`. A passive effect moved focus only
+  after the new page was already visible, which the browser test caught.
+- `shouldRoute` routes only plain left clicks on same-origin paths; Ctrl-, Meta-, Shift-, and
+  Alt-clicks keep the browser's default.
+- `scripts/check-web-build.sh` now rejects inline scripts, inline event handlers, `style`
+  attributes, and `style` elements in the built HTML (seven new test cases), and
+  `scripts/check-portal-dev-deps.sh` fails unless the portal's runtime dependencies are exactly
+  `@lamassu-cla/design-system`, `react`, `react-dom`, and `react-router`. The copy plugin now covers
+  `apps/web/src` except `copy/` and tests (four new test cases).
+- Portal browser tests (`apps/web/vitest.browser.config.ts`, 7 tests) run in `make test-browser`
+  and in the CI browser job. Mutations that failed them: routing modified clicks, not moving focus,
+  removing the error element, showing the error message, and not marking the current link.
 
 ## Open questions
 

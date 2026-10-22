@@ -35,6 +35,12 @@ run_case 'remote dynamic import' 1 assets/index.js 'import("https://cdn.example.
 run_case 'local assets only' 0 assets/index.css '.a{background:url(/assets/a.svg);color:var(--cla-color-text-primary)}'
 run_case 'URL strings that are not load points' 0 assets/index.js 'const ns="http://www.w3.org/2000/svg";const doc="https://react.dev/errors/";'
 run_case 'local dynamic import' 0 assets/index.js 'import("./chunk.js")'
+run_case 'inline script' 1 index.html '<script>window.x = 1</script>'
+run_case 'inline module script' 1 index.html '<script type="module">import "/a.js"</script>'
+run_case 'inline event handler' 1 index.html '<body onload="init()"></body>'
+run_case 'style attribute' 1 index.html '<div id="root" style="color:red"></div>'
+run_case 'inline style element' 1 index.html '<style>body{color:red}</style>'
+run_case 'external module script and preload' 0 index.html '<script type="module" crossorigin src="/assets/index.js"></script><link rel="modulepreload" href="/assets/chunk.js">'
 
 missing="$(mktemp -d)/dist"
 if "$script" "$missing" >/dev/null 2>&1; then

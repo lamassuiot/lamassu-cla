@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import styles from './navigation.module.css';
 
 export interface NavigationItem {
@@ -11,8 +12,9 @@ export interface NavigationProps {
   // Names the landmark, for example "Main".
   label: string;
   items: NavigationItem[];
-  // Called when a link is followed, for example to close the drawer that contains the navigation.
-  onNavigate?: () => void;
+  // Called when a link is followed. A client-side router can call `event.preventDefault()` and
+  // route to `href` itself; a drawer can close.
+  onNavigate?: (event: MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
 
 export function isSafeHref(href: string): boolean {
@@ -41,7 +43,7 @@ export function Navigation({ label, items, onNavigate }: NavigationProps) {
               className={styles.link}
               href={item.href}
               aria-current={item.current ? 'page' : undefined}
-              onClick={onNavigate}
+              onClick={onNavigate && ((event) => onNavigate(event, item.href))}
             >
               {item.label}
             </a>

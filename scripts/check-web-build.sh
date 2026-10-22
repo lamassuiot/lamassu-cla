@@ -36,4 +36,12 @@ check '*.css' "@import[^;]*${remote}[^;]*" 'imports a stylesheet from another or
 check '*.css' '@font-face' 'declares a font; fonts are pending D-12'
 check '*.js' "import\\([\"'\`]${remote}[^)]*\\)" 'imports a module from another origin'
 
+# F-06 AC-06-7: the HTML must work under a Content Security Policy without 'unsafe-inline'.
+if hits=$(find "$dist" -type f -name '*.html' -exec grep -oHiE '<script[^>]*>' {} + | grep -viE '[[:space:]]src='); then
+  while IFS= read -r hit; do fail "${hit%%:*}: has an inline script (${hit#*:})"; done <<<"$hits"
+fi
+check '*.html' '<[^>]*[[:space:]]on[a-z]+[[:space:]]*=' 'has an inline event handler'
+check '*.html' '<[^>]*[[:space:]]style[[:space:]]*=' 'has a style attribute'
+check '*.html' '<style[[:space:]>]' 'has an inline style element'
+
 exit "$status"

@@ -1,8 +1,9 @@
-// Placeholder shell; screens and layout arrive in Phase 3 (F-04 to F-06).
+import { useState } from 'react';
+import { createBrowserRouter } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
+import { routes } from './routes';
+
 export function App() {
-  return (
-    <main>
-      <h1>Lamassu CLA</h1>
-    </main>
-  );
+  const [router] = useState(() => createBrowserRouter(routes));
+  return <RouterProvider router={router} />;
 }
