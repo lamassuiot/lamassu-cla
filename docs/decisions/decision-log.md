@@ -115,6 +115,12 @@ in disposable worktrees of `main` at ddc1e4b, outside the repository. No depende
 | --- | --- | --- | --- |
 | A-26 | Add the `focus.ring-on-nav` semantic color token, `orange.400` in both themes, for focus indicators on `bg.nav`. `focus.ring` in the light theme (`orange.700`) is only 2.95:1 on `bg.nav` (`teal.950`), below the 3:1 minimum; `orange.400` gives 6.99:1 dark and 6.33:1 light. No new primitive. Alternative: a lighter light-theme `bg.nav`, which changes the navigation look. | Decided by the repository owner, 2026-10-21 | [Design tokens](../../specs/ux/design-tokens.md#8-focus), [F-05](../../specs/features/F-05-component-library.md) |
 
+## F-06 router evaluation (2026-10-22)
+
+| ID | Proposal and evidence | Status | Record |
+| --- | --- | --- | --- |
+| A-27 | **Proposal:** React Router 8.5.0 (`react-router`, published 2026-10-19, MIT) as the portal's client-side router, exact-pinned in `apps/web` as its only new runtime dependency, used as a data router (`createBrowserRouter`) with lazy routes. React Router is already named in the [architecture](../../specs/architecture.md#7-frontend-architecture); this records the version and evidence. **Evidence:** installs with Node.js 24.21, TypeScript 6.0.3, React 19.3.1, and Vite 8.3.4 without `overrides` or peer conflicts (peer range `react >=19.2.7`); `npm audit` 0 vulnerabilities; adds three packages, `react-router` 8.5.0, `cookie-es` 3.1.1, and `@remix-run/route-pattern` 0.22.1, all MIT and without install scripts; no existing package version changed. The portal's main chunk grows from 220 KB to 323 KB (68 KB to 102 KB gzip); screens load as separate chunks. The built HTML passes the extended build check (no inline scripts, handlers, or styles), and `scripts/check-portal-dev-deps.sh` now pins the runtime dependency list. **Alternatives:** TanStack Router (not named in the architecture, larger change); no router (manual history handling, no code splitting or error boundaries). | Proposed; approval by the repository owner needed before F-06 unit 1 merges | [F-06](../../specs/features/F-06-app-shell-and-static-screens.md#implementation-plan) |
+
 ## Open decisions
 
 The **Confirmation required from** column names who must confirm before the dependent work starts.

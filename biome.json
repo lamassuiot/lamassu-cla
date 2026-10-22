@@ -59,6 +59,8 @@
       "path": "./.biome/plugins/no-component-copy.grit",
       "includes": [
         "**/packages/design-system/src/components/**/*.tsx",
+        "**/apps/web/src/**/*.tsx",
+        "!**/apps/web/src/copy/**",
         "!**/*.stories.tsx",
         "!**/*.test.tsx"
       ]

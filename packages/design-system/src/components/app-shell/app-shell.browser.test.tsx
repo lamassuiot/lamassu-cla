@@ -16,7 +16,7 @@ afterEach(async () => {
   await page.viewport(414, 896);
 });
 
-function renderShell() {
+function renderShell(onNavigate?: (href: string) => void) {
   return render(
     <AppShell
       labels={{
@@ -32,6 +32,7 @@ function renderShell() {
           { href: '/dashboard', label: 'Dashboard', current: true },
           { href: '/agreements', label: 'Agreements' },
         ],
+        ...(onNavigate && { onNavigate: (_event, href) => onNavigate(href) }),
       }}
     >
       <h1>Dashboard</h1>
@@ -61,6 +62,16 @@ test('below bp.lg the navigation is in a drawer; following a link closes it', as
   await userEvent.click(getByRole('link', { name: 'Agreements' }));
   expect(queryByRole('dialog')).toBeNull();
   expect(document.activeElement).toBe(menu);
+});
+
+test("the caller's onNavigate runs for drawer links, and the drawer still closes", async () => {
+  await page.viewport(375, 800);
+  const followed: string[] = [];
+  const { getByRole, queryByRole } = renderShell((href) => followed.push(href));
+  await userEvent.click(getByRole('button', { name: 'Menu' }));
+  await userEvent.click(getByRole('link', { name: 'Agreements' }));
+  expect(followed).toEqual(['/agreements']);
+  expect(queryByRole('dialog')).toBeNull();
 });
 
 test('from bp.lg the navigation is a sidebar and there is no menu button', async () => {

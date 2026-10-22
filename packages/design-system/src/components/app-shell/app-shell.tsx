@@ -17,7 +17,7 @@ export interface AppShellProps {
   // Product name or logo link; brand assets are pending D-12.
   brand: ReactNode;
   // Shown as a sidebar from `bp.lg`, and in a drawer below it.
-  navigation: Omit<NavigationProps, 'onNavigate'>;
+  navigation: NavigationProps;
   // Header controls such as the theme toggle or sign-in.
   actions?: ReactNode;
   children: ReactNode;
@@ -57,7 +57,13 @@ export function AppShell({ labels, brand, navigation, actions, children }: AppSh
         side="start"
       >
         {/* Following a link closes the drawer; the destination page takes over. */}
-        <Navigation {...navigation} onNavigate={() => setMenuOpen(false)} />
+        <Navigation
+          {...navigation}
+          onNavigate={(event, href) => {
+            navigation.onNavigate?.(event, href);
+            setMenuOpen(false);
+          }}
+        />
       </Drawer>
     </div>
   );

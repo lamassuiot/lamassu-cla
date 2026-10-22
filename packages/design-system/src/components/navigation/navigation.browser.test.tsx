@@ -58,3 +58,21 @@ test('keyboard focus on bg.nav uses focus.ring-on-nav, which has 3:1 contrast in
   // orange.400 (#F78C40), not the light-theme focus.ring orange.700 (#B4500A).
   expect(getComputedStyle(link).outlineColor).toBe('rgb(247, 140, 64)');
 });
+
+test('onNavigate receives the click event and the href, and can prevent the default', async () => {
+  const calls: string[] = [];
+  const { getByRole } = render(
+    <Navigation
+      label="Main"
+      items={[{ href: '/agreements', label: 'Agreements' }]}
+      onNavigate={(event, href) => {
+        event.preventDefault();
+        calls.push(href);
+      }}
+    />,
+  );
+  const before = window.location.href;
+  await userEvent.click(getByRole('link', { name: 'Agreements' }));
+  expect(calls).toEqual(['/agreements']);
+  expect(window.location.href).toBe(before);
+});

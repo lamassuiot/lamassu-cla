@@ -15,6 +15,14 @@ if hits=$(npm ls --omit=dev --all --parseable -w @lamassu-cla/web 2>/dev/null | 
   status=1
 fi
 
+# F-06 AC-06-7: a new runtime dependency of the portal needs a reviewed decision and this list.
+allowed='@lamassu-cla/design-system react react-dom react-router'
+actual=$(node -p 'Object.keys(require("./apps/web/package.json").dependencies ?? {}).sort().join(" ")')
+if [[ "$actual" != "$allowed" ]]; then
+  echo "Runtime dependencies of @lamassu-cla/web are \"$actual\"; expected \"$allowed\"."
+  status=1
+fi
+
 out="$(mktemp -d)"
 trap 'rm -rf "$out"' EXIT
 npx vite build apps/web --sourcemap --outDir "$out" --emptyOutDir --logLevel error

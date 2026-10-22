@@ -6,8 +6,8 @@ export interface StatePanelProps {
   description?: string;
   // A recovery action, for example a retry button or a link to request access.
   action?: ReactNode;
-  // Matches the surrounding heading structure; defaults to a level-2 heading.
-  headingLevel?: 2 | 3 | 4;
+  // Matches the surrounding heading structure; 1 when the state is the whole page.
+  headingLevel?: 1 | 2 | 3 | 4;
 }
 
 type Kind = 'loading' | 'empty' | 'error' | 'denied';

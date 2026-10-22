@@ -52,6 +52,11 @@ lint_case 'whitespace between elements' "$component" clean 'export const A = ({ 
 );'
 lint_case 'stories may contain copy' packages/design-system/src/components/demo/demo.stories.tsx clean 'export const A = () => <button type="button">Save</button>;'
 lint_case 'tests may contain copy' packages/design-system/src/components/demo/demo.browser.test.tsx clean 'export const A = () => <button type="button">Save</button>;'
+# F-06 AC-06-6: portal screens take their text from the copy module.
+lint_case 'portal screen with literal text' apps/web/src/screens/demo.tsx copy 'export const A = () => <h1>Agreements</h1>;'
+lint_case 'portal screen with literal aria-label' apps/web/src/shell/demo.tsx copy 'export const A = () => <nav aria-label="Main" />;'
+lint_case 'portal copy module' apps/web/src/copy/demo.tsx clean 'export const A = () => <h1>Agreements</h1>;'
+lint_case 'portal tests may contain copy' apps/web/src/demo.browser.test.tsx clean 'export const A = () => <h1>Agreements</h1>;'
 
 echo "check-component-copy tests: $pass passed, $fail failed"
 [[ "$fail" -eq 0 ]]
