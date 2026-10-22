@@ -272,5 +272,7 @@ scripts/            developer scripts
 
 ## 13. Open decisions affecting the architecture
 
-D-06 (proposed to the Security owner), D-16, and D-30. D-02 was decided on 2026-10-22 (section 4).
+D-06 (proposed to the Security owner) and D-16. D-02 was decided on 2026-10-22 (section 4). D-30
+(an LKS-controlled GitHub organization owns the sign-in OAuth App) was decided as a direction, and the
+exact organization account is still to be confirmed.
 See the [decision log](../docs/decisions/decision-log.md).

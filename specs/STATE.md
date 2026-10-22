@@ -32,7 +32,7 @@ Last updated: 2026-10-22
 - **Next gate:** Phase 4 (authentication and user profile). The
   [F-07 specification](features/F-07-github-sign-in-and-sessions.md) (GitHub sign-in and sessions)
   is a draft (PR #61); its approval needs D-06 (Security owner, on the repository owner's
-  proposal) and D-30 (OAuth App registration owner). Sign-in by real people and contributor-record
+  proposal). D-30 was decided as a direction on 2026-10-22: an LKS-controlled GitHub organization owns the OAuth App; the exact account is still to be confirmed before registration. Sign-in by real people and contributor-record
   creation also need D-20 (Legal and DPO; the repository owner's lawful-basis proposal is
   recorded). D-02, D-28, and D-29 were decided on 2026-10-22; the D-19 technical default applies.
   F-08 (roles) needs D-13 (Security owner). Running sign-in in an
@@ -71,6 +71,7 @@ Last updated: 2026-10-22
 | 2026-10-22 | Repository owner | D-02 decided: portal origin `https://cla.developers.lamassu.cloud`, API base `/api/v1`, CloudFront routes `/api/*` to API Gateway, GitHub callback `/api/auth/github/callback` outside the versioned routes. The domain is not provisioned; no deployment is authorized. |
 | 2026-10-22 | Repository owner | D-28 decided (suspended or revoked contributors may sign in; sign-in grants no permissions and restores no CLA). D-29 decided (minimal record at first sign-in with the numeric GitHub user ID and current login, no email; the login is not a stable identifier; creation waits for D-20). |
 | 2026-10-22 | Repository owner | D-06 proposal for the Security owner (sign-in-only OAuth App; separate GitHub App for pull requests and Checks; server-side sessions, 30 minutes idle and 8 hours absolute). D-20 lawful-basis proposal for Legal and DPO review (controller LKS S.Coop); D-20 stays open and no production processing is authorized. |
+| 2026-10-22 | Repository owner | D-30 direction: the sign-in OAuth App is owned by a GitHub organization controlled by LKS S.Coop. (the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The exact organization account must be confirmed before registration. The same ownership logic is proposed for the pull-request GitHub App (D-08). |
 
 ## Phases
 
@@ -79,7 +80,7 @@ Last updated: 2026-10-22
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
 | 3 | Frontend shell and design system | Done (F-04, F-05, F-06) | Final visual values: D-12 (does not block Phase 4). |
-| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20, D-30. |
+| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20; D-30 account confirmation before registration. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
 | 7 | CCLA workflow | Not started | Phase 6; D-15. |
@@ -110,7 +111,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
 | F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 (PR #57, A-27 decided) and unit 2 (PR #59, D-27 decided) merged; done |
-| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20, D-30 | Specification draft; approval needs D-06 (Security owner) and D-30; real sign-ins and contributor records need D-20 |
+| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20 | Specification draft; approval needs D-06 (Security owner) and D-30; real sign-ins and contributor records need D-20 |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
 | F-10 | Signing-provider port and DocuSign adapter | 6 | F-03, D-09, D-11 | Not started |

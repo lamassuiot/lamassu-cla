@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Draft; approval needs D-06 (Security owner) and D-30; sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
+| Status | Draft; approval needs D-06 (Security owner); sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
 | Phase | 4 |
 | Owner | Repository owner; Security owner for the authentication model (D-06) |
 | Depends on | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29, D-30; [security](../security/security.md#31-people-github-sign-in), [data protection](../security/data-protection.md), [threat model](../security/threat-model.md) (T-15, T-16) |
@@ -28,7 +28,7 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - D-06 is decided by the Security owner. This draft follows the repository owner's proposal of
   2026-10-22: a GitHub **OAuth App** used only for sign-in, with no repository permissions and no
   email access, separate from the GitHub App that receives pull-request events and publishes
-  Checks (F-14, D-08).
+  Checks (F-14, D-08), which LKS S.Coop. also proposes to own.
 - D-02 is decided (2026-10-22): the portal origin is `https://cla.developers.lamassu.cloud`, the
   versioned API base is `https://cla.developers.lamassu.cloud/api/v1`, CloudFront routes `/api/*`
   to API Gateway, and the OAuth callback URL is
@@ -37,8 +37,12 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - D-20 is decided by Legal and the DPO (lawful basis and privacy notice). Until then, no sign-in by
   real people and no contributor-record creation happen in any environment (D-29); the code is
   built and tested with synthetic identities only.
-- The OAuth App is registered (owner: D-30) with exactly the callback URL above, and its client ID
-  and client secret are stored in Secrets Manager. Nothing about the OAuth App is committed.
+- The OAuth App is owned by a GitHub organization controlled by LKS S.Coop., the data controller
+  (D-30, decided 2026-10-22). LKS organization admins register and manage it with exactly the
+  callback URL above. Its client secret is stored in AWS Secrets Manager and readable only by the
+  authentication backend. The exact GitHub organization account must be confirmed before
+  registration; nothing about the OAuth App is committed. The owning organization does not have to
+  be the one that holds the repositories.
 - Running sign-in in an environment needs F-03 step 5 (deployment). Until then, everything is
   built and tested without AWS: domain and use cases with fakes, adapters against local test
   servers, and Terraform plan-only with mocked providers.
@@ -241,14 +245,14 @@ retained, not destroyed, by default).
    pinned CI image); handlers, middleware, Lambda wiring, and a local development server (F07-T3,
    F07-T7 to F07-T9).
 3. **Infrastructure (plan-only).** API Gateway HTTP API, the `api` Lambda, the `core`, `audit`, and
-   `ephemeral` tables, the Secrets Manager secret (value set by the platform owner), and
+   `ephemeral` tables, the Secrets Manager secret (value set by LKS organization admins; readable only by the authentication backend), and
    least-privilege IAM, with plan-only tests (F07-T11). No apply until F-03 step 5.
 4. **Portal.** Session state, header states, sign-in error route, privacy-notice link, and
    accessibility runs (F07-T10); the server-state library proposed with evidence.
 
 Units 1 and 2 depend on D-06 (Security owner). Enabling contributor-record creation and any
 sign-in by real people depends on D-20 (Legal, DPO); unit 4's privacy-notice link depends on the
-approved notice. Registering the OAuth App depends on D-30. Deployment stays blocked until F-03
+approved notice. Registering the OAuth App needs the organization account confirmed under D-30. Deployment stays blocked until F-03
 step 5; D-02 does not authorize it.
 
 ## Open questions
@@ -257,8 +261,8 @@ step 5; D-02 does not authorize it.
   30 minutes idle and 8 hours absolute).
 - D-20: Legal and DPO validation of the proposed lawful bases, the privacy notice, retention
   periods, recipients, and any international transfers.
-- D-30: who registers the sign-in OAuth App in the `lamassuiot` organization and stores its client
-  secret.
+- D-30: the exact LKS-controlled GitHub organization account that will own the sign-in OAuth App,
+  to be confirmed before registration (direction decided 2026-10-22).
 
 Decided on 2026-10-22: D-02 (origins and callback URL), D-28 (suspended or revoked contributors may
 sign in), and D-29 (minimal record at first sign-in, gated on D-20).
