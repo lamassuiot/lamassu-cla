@@ -32,7 +32,7 @@ Last updated: 2026-10-22
 - **Next gate:** Phase 4 (authentication and user profile). The
   [F-07 specification](features/F-07-github-sign-in-and-sessions.md) (GitHub sign-in and sessions)
   is a draft (PR #61); its approval needs D-06 (Security owner, on the repository owner's
-  proposal). D-30 was decided as a direction on 2026-10-22: an LKS-controlled GitHub organization owns the OAuth App; the exact account is still to be confirmed before registration. Sign-in by real people and contributor-record
+  proposal). D-30 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App (and the pull-request GitHub App, D-08); this does not authorize deployment or real sign-ins. Sign-in by real people and contributor-record
   creation also need D-20 (Legal and DPO; the repository owner's lawful-basis proposal is
   recorded). D-02, D-28, and D-29 were decided on 2026-10-22; the D-19 technical default applies.
   F-08 (roles) needs D-13 (Security owner). Running sign-in in an
@@ -71,7 +71,7 @@ Last updated: 2026-10-22
 | 2026-10-22 | Repository owner | D-02 decided: portal origin `https://cla.developers.lamassu.cloud`, API base `/api/v1`, CloudFront routes `/api/*` to API Gateway, GitHub callback `/api/auth/github/callback` outside the versioned routes. The domain is not provisioned; no deployment is authorized. |
 | 2026-10-22 | Repository owner | D-28 decided (suspended or revoked contributors may sign in; sign-in grants no permissions and restores no CLA). D-29 decided (minimal record at first sign-in with the numeric GitHub user ID and current login, no email; the login is not a stable identifier; creation waits for D-20). |
 | 2026-10-22 | Repository owner | D-06 proposal for the Security owner (sign-in-only OAuth App; separate GitHub App for pull requests and Checks; server-side sessions, 30 minutes idle and 8 hours absolute). D-20 lawful-basis proposal for Legal and DPO review (controller LKS S.Coop); D-20 stays open and no production processing is authorized. |
-| 2026-10-22 | Repository owner | D-30 direction: the sign-in OAuth App is owned by a GitHub organization controlled by LKS S.Coop. (the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The exact organization account must be confirmed before registration. The same ownership logic is proposed for the pull-request GitHub App (D-08). |
+| 2026-10-22 | Repository owner | D-30 decided: the sign-in OAuth App is owned by the `lksnext` GitHub organization (controlled by LKS S.Coop., the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The same LKS ownership applies to the pull-request GitHub App (D-08; installation scope stays open). This confirms the organization account only: it does not authorize production deployment or real sign-ins, and D-06 and D-20 stay subject to their assigned reviews. |
 
 ## Phases
 
@@ -80,7 +80,7 @@ Last updated: 2026-10-22
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
 | 3 | Frontend shell and design system | Done (F-04, F-05, F-06) | Final visual values: D-12 (does not block Phase 4). |
-| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20; D-30 account confirmation before registration. |
+| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20. |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
 | 7 | CCLA workflow | Not started | Phase 6; D-15. |

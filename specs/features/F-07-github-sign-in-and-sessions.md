@@ -28,7 +28,7 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - D-06 is decided by the Security owner. This draft follows the repository owner's proposal of
   2026-10-22: a GitHub **OAuth App** used only for sign-in, with no repository permissions and no
   email access, separate from the GitHub App that receives pull-request events and publishes
-  Checks (F-14, D-08), which LKS S.Coop. also proposes to own.
+  Checks (F-14, D-08), which the same `lksnext` organization owns.
 - D-02 is decided (2026-10-22): the portal origin is `https://cla.developers.lamassu.cloud`, the
   versioned API base is `https://cla.developers.lamassu.cloud/api/v1`, CloudFront routes `/api/*`
   to API Gateway, and the OAuth callback URL is
@@ -37,12 +37,12 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - D-20 is decided by Legal and the DPO (lawful basis and privacy notice). Until then, no sign-in by
   real people and no contributor-record creation happen in any environment (D-29); the code is
   built and tested with synthetic identities only.
-- The OAuth App is owned by a GitHub organization controlled by LKS S.Coop., the data controller
-  (D-30, decided 2026-10-22). LKS organization admins register and manage it with exactly the
-  callback URL above. Its client secret is stored in AWS Secrets Manager and readable only by the
-  authentication backend. The exact GitHub organization account must be confirmed before
-  registration; nothing about the OAuth App is committed. The owning organization does not have to
-  be the one that holds the repositories.
+- The OAuth App is owned by the `lksnext` GitHub organization, controlled by LKS S.Coop., the data
+  controller (D-30, decided 2026-10-22). LKS organization admins register and manage it with
+  exactly the callback URL above. Its client secret is stored in AWS Secrets Manager and readable
+  only by the authentication backend. Nothing about the OAuth App is committed. The owning
+  organization does not have to be the one that holds the repositories. Confirming the owner does
+  not authorize production deployment or real sign-ins.
 - Running sign-in in an environment needs F-03 step 5 (deployment). Until then, everything is
   built and tested without AWS: domain and use cases with fakes, adapters against local test
   servers, and Terraform plan-only with mocked providers.
@@ -252,8 +252,8 @@ retained, not destroyed, by default).
 
 Units 1 and 2 depend on D-06 (Security owner). Enabling contributor-record creation and any
 sign-in by real people depends on D-20 (Legal, DPO); unit 4's privacy-notice link depends on the
-approved notice. Registering the OAuth App needs the organization account confirmed under D-30. Deployment stays blocked until F-03
-step 5; D-02 does not authorize it.
+approved notice. Registering the OAuth App (under `lksnext`, D-30) does not authorize deployment or real sign-ins.
+Deployment stays blocked until F-03 step 5; D-02 does not authorize it.
 
 ## Open questions
 
@@ -261,8 +261,7 @@ step 5; D-02 does not authorize it.
   30 minutes idle and 8 hours absolute).
 - D-20: Legal and DPO validation of the proposed lawful bases, the privacy notice, retention
   periods, recipients, and any international transfers.
-- D-30: the exact LKS-controlled GitHub organization account that will own the sign-in OAuth App,
-  to be confirmed before registration (direction decided 2026-10-22).
 
-Decided on 2026-10-22: D-02 (origins and callback URL), D-28 (suspended or revoked contributors may
+Decided on 2026-10-22: D-02 (origins and callback URL), D-30 (the `lksnext` organization owns the
+sign-in OAuth App), D-28 (suspended or revoked contributors may
 sign in), and D-29 (minimal record at first sign-in, gated on D-20).
