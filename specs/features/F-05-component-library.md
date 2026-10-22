@@ -364,9 +364,10 @@ Implementation notes (unit 5, second pull request: domain data display):
   personal data out of the fields (domain model, audit event metadata).
 - Stories and tests use synthetic values only; the example hash is the public SHA-256 of empty
   input.
-- The agreement state `VOIDED` (domain model, section 3.2) has no status color in the design
-  tokens (section 2.3); the badge renders it as `neutral` through the unknown-state fallback. This
-  is recorded as C-02 in `specs/STATE.md`; the code is unchanged.
+- The agreement state `VOIDED` (domain model, section 3.2) had no status color in the design
+  tokens (section 2.3), so the badge rendered it as `neutral` through the unknown-state fallback
+  (C-02). The repository owner approved adding it to the `neutral` row beside `EXPIRED` on
+  2026-10-22; the mapping and its spec-copied test now list it explicitly.
 - Browser tests: 181 (24 story files, each run in both themes, and 17 component test files).
   Removing either copy announcement, announcing the failure politely, removing `user-select`, or
   appending a qualified claim to the signature level failed the tests.

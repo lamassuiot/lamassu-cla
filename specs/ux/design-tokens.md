@@ -91,7 +91,7 @@ Status is never conveyed by color alone; badges always include text and, where u
 | `PENDING_SIGNATURE`, `VERIFYING`, `PENDING_REVIEW`, `ACTION_REQUIRED` | `warning` |
 | `FAILED`, `REVOKED`, `REJECTED`, `DECLINED` | `danger` |
 | `DRAFT`, informational notices | `info` |
-| `SUSPENDED`, `EXPIRED`, `DEPRECATED`, `ARCHIVED`, `SUPERSEDED`, `SKIPPED` | `neutral` |
+| `SUSPENDED`, `EXPIRED`, `VOIDED`, `DEPRECATED`, `ARCHIVED`, `SUPERSEDED`, `SKIPPED` | `neutral` |
 
 ### 2.4 Verified contrast
 

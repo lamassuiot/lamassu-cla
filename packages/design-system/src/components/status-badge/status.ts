@@ -17,6 +17,7 @@ export const domainStateStatus = {
   DRAFT: 'info',
   SUSPENDED: 'neutral',
   EXPIRED: 'neutral',
+  VOIDED: 'neutral',
   DEPRECATED: 'neutral',
   ARCHIVED: 'neutral',
   SUPERSEDED: 'neutral',
