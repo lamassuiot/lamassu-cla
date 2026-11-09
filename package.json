@@ -20,10 +20,10 @@
     "format": "biome check --write ."
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.2",
-    "@redocly/cli": "2.69.0",
+    "@biomejs/biome": "2.6.5",
+    "@redocly/cli": "2.76.0",
     "@types/node": "24.19.2",
     "typescript": "6.0.3",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   }
 }
