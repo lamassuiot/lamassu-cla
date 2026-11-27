@@ -1,6 +1,6 @@
 # ADR-0007: Pin Node.js 24
 
-- Status: Accepted
+- Status: Superseded by ADR-0013
 - Date: 2026-10-05
 - Decision-log entry: A-07
 

@@ -31,7 +31,7 @@ updates:
           - minor
           - patch
     # TypeScript upgrades are proposed and tested, but the 6.0.3 pin (A-13) changes only in a
-    # reviewed PR (A-21). @types/node majors follow the Node.js 24 runtime (ADR-0007).
+    # reviewed PR (A-21). @types/node majors follow the Node.js 26 runtime (ADR-0013).
     ignore:
       - dependency-name: "@types/node"
         update-types:

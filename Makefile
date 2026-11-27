@@ -1,5 +1,5 @@
 # Developer entry points for the CLA Management Platform (F-01).
-# Run `make help` for targets. Requires Node.js 24 (`nvm use`), npm, Go, and Docker for the Dev Container.
+# Run `make help` for targets. Requires Node.js 26 (`nvm use`), npm, Go, and Docker for the Dev Container.
 
 SHELL := bash
 .SHELLFLAGS := -euo pipefail -c
@@ -31,7 +31,7 @@ CHECKOV_ENV := $(CHECKOV_NETNS) env -i PATH=$(CHECKOV_VENV)/bin:/usr/bin:/bin HO
 
 # Visual regression (F-05, A-23): only in the pinned Playwright image, without network access. Keep
 # the image equal to the one in .github/workflows/frontend.yml.
-PLAYWRIGHT_IMAGE := mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+PLAYWRIGHT_IMAGE := mcr.microsoft.com/playwright:v1.65.1-noble@sha256:1507cbfc550a63a6b7396791ca4f00df17beb56342d2447b3f106c306f525579
 VISUAL_RUN := docker run --rm --network none --user "$$(id -u):$$(id -g)" -e HOME=/tmp \
 	-v "$(CURDIR):/work" -w /work $(PLAYWRIGHT_IMAGE)
 # Offline, findings carry no severity, so any failed check fails the scan (no --soft-fail or

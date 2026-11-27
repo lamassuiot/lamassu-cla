@@ -36,7 +36,7 @@ No authorization roles are involved.
    `packages/design-system/src/tokens/`, exactly as listed in sections 2 to 7 of the
    [design tokens](../ux/design-tokens.md). The design tokens define no component tokens yet;
    F-05 adds them with the components that use them.
-2. A generator script, run with Node.js 24 type stripping and no new dependency, renders the tokens
+2. A generator script, run with Node.js type stripping and no new dependency, renders the tokens
    to `packages/design-system/src/styles/tokens.css` as CSS custom properties prefixed `--cla-`.
    The generated file is committed.
 3. The CSS defines the light theme on `:root` and `[data-theme="light"]`, the dark theme on
