@@ -376,6 +376,15 @@ retained, not destroyed, by default).
 1. **Contract, domain, and use cases.** OpenAPI operations; domain types (session, sign-in attempt,
    `return_to` policy); ports (identity provider, session store, contributor repository, audit
    writer, clock, random source); use cases with fakes (F07-T1, F07-T2, F07-T4 to F07-T6).
+   *Delivered:* `specs/api/openapi.yaml` (server base `/api`, four operations, `Session` schema)
+   and the regenerated client; `services/api/internal/domain` (`secret.go`, `session.go`,
+   `contributor.go`, `returnto.go`, `audit.go`); `services/api/internal/ports/auth.go`;
+   `services/api/internal/application` (`StartSignIn`, `CompleteSignIn`, `Authenticate`,
+   `VerifyCSRF`, `SignOut`). The audit event travels with the session change through the
+   session-store port rather than a separate audit-writer port, so that one transaction covers
+   both (step 6). Tests with fakes cover F07-T1, F07-T2 (including 16 concurrent callbacks),
+   F07-T4, F07-T5, F07-T6, F07-T12, F07-T15, F07-T16, F07-T17, and the use-case parts of F07-T3,
+   F07-T8, F07-T13, and F07-T14; the adapter and handler parts follow in unit 2.
 2. **Adapters and HTTP.** GitHub identity adapter tested against a local fake server; DynamoDB
    adapters (test approach proposed with evidence, for example a local DynamoDB container in the
    pinned CI image); handlers, middleware, Lambda wiring, and a local development server (F07-T3,
