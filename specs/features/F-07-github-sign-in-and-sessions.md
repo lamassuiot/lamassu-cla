@@ -2,11 +2,11 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Draft; D-06 decided (Security owner, 2026-11-27, [ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)); approval by the repository owner pending; sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
+| Status | Approved by the repository owner on 2026-11-27 (commit `5185972` of PR #86, with the F07-T8 clarification); D-06 decided (Security owner, 2026-11-27, [ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)); sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
 | Phase | 4 |
 | Owner | Repository owner; Security owner for the authentication model (D-06) |
 | Depends on | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29, D-30; [security](../security/security.md#31-people-github-sign-in), [data protection](../security/data-protection.md), [threat model](../security/threat-model.md) (T-15, T-16) |
-| Approved by | Pending |
+| Approved by | Repository owner, 2026-11-27 (units 1 and 2 may start; deferred tool decisions, deployment restrictions, the D-20 gate, and the C-03 follow-up stay as documented) |
 
 ## Problem statement
 
@@ -341,7 +341,7 @@ exists yet, so this is not a breaking change for any client.
 | F07-T5 | Logs, audit events, stored items, response bodies, and cookies from the flows above are scanned for the access token, refresh token, code, `state`, PKCE verifier, session token, and CSRF token; each may appear only where AC-07-5 allows (the session token only in `Set-Cookie`, `state` only in the GitHub redirect and callback, the CSRF token only in the session body and header); the `OAUTH#{state_hash}` item is gone after the callback. | Unit, handler | AC-07-5 |
 | F07-T6 | Middleware: idle and absolute expiry with a fake clock; unknown token; sliding `idle_expires_at` capped by `expires_at`, throttled to one write per minute, skipped for `GET /api/v1/session`, and not applied to a session deleted between check and update. | Unit | AC-07-6 |
 | F07-T7 | CSRF and `Origin` checks on a state-changing route. | Handler | AC-07-7 |
-| F07-T8 | Sign-out deletes the session and creates `auth.signed_out` in one transaction and expires the cookie; the old token returns 401; the audit event remains; a failing or timing-out store yields 503 and no audit event; sign-out without a session yields 204. | Handler | AC-07-8 |
+| F07-T8 | Sign-out deletes the session and creates `auth.signed_out` in one transaction and expires the cookie; the old token returns 401; the audit event remains. A confirmed transaction failure yields 503, preserves the session, and creates no audit event. A transaction that committed before its response was lost (faked timeout after commit) yields 503 while the session is deleted and the audit event exists. Sign-out without a session yields 204. | Handler | AC-07-8 |
 | F07-T9 | OpenAPI contract tests: every new operation's responses validate against `openapi.yaml`. | Contract | All API criteria |
 | F07-T10 | Portal header states and sign-in error route, axe and reflow at the F-06 widths, with the API mocked. | Component (browser) | AC-07-10 |
 | F07-T11 | Terraform plan-only tests with mocked providers for the new API, Lambda, tables, and secret. | Infrastructure | Rollback and least privilege |

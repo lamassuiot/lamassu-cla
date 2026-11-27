@@ -29,13 +29,13 @@ Last updated: 2026-11-27
 - **Phase 3:** done. F-04 (PRs #26, #30, #39); F-05 (PRs #47 to #55; A-23 to A-26, D-25, C-02);
   F-06 (PRs #56, #57, #59; A-27, D-27). Still open and not blocking: D-12 (final brand assets) and
   D-26 (source-code link, Legal).
-- **Next gate:** Phase 4 (authentication and user profile). D-06 was decided by the Security owner
-  on 2026-11-27 ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)):
+- **Next gate:** Phase 4 (authentication and user profile) has started. D-06 was decided by the
+  Security owner on 2026-11-27
+  ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)):
   sign-in-only OAuth App, no repository or email scope, server-side sessions (30 minutes idle,
   8 hours absolute). The
   [F-07 specification](features/F-07-github-sign-in-and-sessions.md) (GitHub sign-in and sessions)
-  is a draft (PR #61) whose authentication model is now fixed; its approval by the repository owner is
-  the remaining gate for units 1 and 2. D-30 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App (and the pull-request GitHub App, D-08); this does not authorize deployment or real sign-ins. Sign-in by real people and contributor-record
+  was approved by the repository owner on 2026-11-27 (PR #86); units 1 and 2 are in progress. D-30 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App (and the pull-request GitHub App, D-08); this does not authorize deployment or real sign-ins. Sign-in by real people and contributor-record
   creation also need D-20 (Legal and DPO; the repository owner's lawful-basis proposal is
   recorded). D-02, D-28, and D-29 were decided on 2026-10-22; the D-19 technical default applies.
   C-03 (no email scope at sign-in versus the email reads assumed in data protection section 4) is
@@ -79,6 +79,7 @@ Last updated: 2026-11-27
 | 2026-10-22 | Repository owner | D-30 decided: the sign-in OAuth App is owned by the `lksnext` GitHub organization (controlled by LKS S.Coop., the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The same LKS ownership applies to the pull-request GitHub App (D-08; installation scope stays open). This confirms the organization account only: it does not authorize production deployment or real sign-ins, and D-06 and D-20 stay subject to their assigned reviews. |
 | 2026-11-27 | Repository owner | A-28 decided: Node.js 26 replaces Node.js 24 as the pinned release line (ADR-0013 supersedes ADR-0007), triggered by the Playwright 1.65.1 image. Biome 2.6 configuration adapted (ADR-0011 consequences). |
 | 2026-11-27 | Security owner (reported by the repository owner) | D-06 decided ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)): dedicated sign-in-only GitHub OAuth App with no repository permissions and no email access, reading only the numeric user ID and login; separate GitHub App for pull requests and Checks (D-08); server-side sessions with an opaque 256-bit token in a `__Host-` HttpOnly, Secure, SameSite=Lax cookie, hash-only storage, 30 minutes idle and 8 hours absolute, no silent renewal, CSRF token and Origin check. C-03 recorded for the email reads assumed in data protection section 4. |
+| 2026-11-27 | Repository owner | F-07 specification approved at commit `5185972` of PR #86, after two security reviews, with one clarification applied in the same PR (F07-T8 distinguishes a confirmed transaction failure, which preserves the session and writes no audit event, from a committed transaction whose response was lost, which deletes the session and writes the event even though the API returns 503). Units 1 and 2 may start. The deferred tool decisions (DynamoDB test approach in unit 2, TanStack Query in unit 4), the deployment restrictions (F-03 step 5), the D-20 gate on real sign-ins and contributor records, and the C-03 follow-up stay as documented. |
 
 ## Phases
 
@@ -87,7 +88,7 @@ Last updated: 2026-11-27
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
 | 3 | Frontend shell and design system | Done (F-04, F-05, F-06) | Final visual values: D-12 (does not block Phase 4). |
-| 4 | Authentication and user profile | Not started (F-07 specification in draft; D-06 decided) | Phase 2; F-07 approval, D-13, D-19 (DPO), D-20. |
+| 4 | Authentication and user profile | In progress (F-07 approved; units 1 and 2 started) | Phase 2 for deployment; D-13 (F-08), D-19 (DPO), D-20 (real sign-ins). |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
 | 7 | CCLA workflow | Not started | Phase 6; D-15. |
@@ -118,7 +119,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
 | F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 (PR #57, A-27 decided) and unit 2 (PR #59, D-27 decided) merged; done |
-| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20 | Specification draft; D-06 decided (ADR-0014) and D-30 decided; approval by the repository owner pending; real sign-ins and contributor records need D-20 |
+| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20 | Approved (PR #86, 2026-11-27; D-06 via ADR-0014, D-30 decided); units 1 and 2 in progress; real sign-ins and contributor records need D-20; units 3 and 4 follow |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
 | F-10 | Signing-provider port and DocuSign adapter | 6 | F-03, D-09, D-11 | Not started |
