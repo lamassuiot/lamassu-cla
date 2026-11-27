@@ -54,8 +54,10 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
    The portal navigates the browser to `GET /api/v1/auth/github/start?return_to=<relative path>`.
 2. The API validates `return_to` against the relative-path allowlist (falling back to `/`),
    creates a single-use `state` and, where GitHub supports PKCE for OAuth Apps (security,
-   section 3.1; confirmed in unit 2), a PKCE verifier, stores them hashed in the `ephemeral` table for
-   10 minutes, sets a short-lived pre-authentication cookie bound to `state`, and redirects to
+   section 3.1; confirmed in unit 2), a PKCE verifier. It stores one `ephemeral` item for 10
+   minutes, keyed by the hash of `state`, holding the verifier in plaintext (the code exchange
+   needs the original value; the table is encrypted at rest with its KMS key) and the validated
+   `return_to`. It sets a short-lived pre-authentication cookie bound to `state`, and redirects to
    GitHub's authorization page with the exact registered callback URL.
 3. The person approves on GitHub. GitHub redirects to the registered callback,
    `GET /api/auth/github/callback`, with `code` and `state`. The callback stays outside the
@@ -116,8 +118,12 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 - Follows the [security specification](../security/security.md#31-people-github-sign-in), section
   3.1, and threats T-15 (session theft or CSRF) and T-16 (open redirect).
-- `state` and PKCE verifier are single use, expire after 10 minutes, and are stored hashed; the
-  pre-authentication cookie binds them to the browser that started sign-in.
+- `state` is single use, expires after 10 minutes, and is stored only as a hash, because it is
+  only compared. The PKCE verifier cannot be hashed: the code exchange needs the original value. It
+  is stored in plaintext inside the same encrypted, TTL-bounded `ephemeral` item, which is deleted
+  before the exchange, and it never appears in logs, responses, or cookies. On its own it is
+  useless without the authorization `code`, which only transits in the browser redirect. The
+  pre-authentication cookie binds the item to the browser that started sign-in.
 - Session tokens are 256-bit random values from a cryptographic source, stored only as SHA-256
   hashes; comparisons of secrets are constant time. The CSRF token is bound to the session.
 - No GitHub token is persisted, logged, or returned. The OAuth App requests no scopes: it reads only
@@ -153,7 +159,8 @@ exists yet, so this is not a breaking change for any client.
 ## Data-model changes
 
 - `ephemeral` table (domain model, section 5.3): the existing `OAUTH#{state_hash}` record gains the
-  PKCE verifier and the validated `return_to`; the existing `SESSION#{session_token_hash}` record is
+  PKCE verifier (plaintext; the table is encrypted at rest and the item is deleted on use) and the
+  validated `return_to`; the existing `SESSION#{session_token_hash}` record is
   specified (GitHub user ID, `created_at`, `last_seen_at`, `idle_expires_at`, `expires_at`, CSRF
   secret hash). Both use TTL on `expires_at`, and readers treat expired items as absent.
 - `core` table: contributor records are created on first sign-in (`PENDING`), and `github_login`
@@ -184,8 +191,10 @@ exists yet, so this is not a breaking change for any client.
   validated `return_to`.
 - **AC-07-4** Given any `return_to` that is not an allowed relative path (absolute, protocol-relative,
   backslash, or encoded variants), the redirect goes to `/`.
-- **AC-07-5** No GitHub token, authorization code, `state`, session token, or email address appears
-  in storage, logs, metrics, audit events, or responses.
+- **AC-07-5** No GitHub token, authorization code, session token, or email address appears in
+  storage, logs, metrics, audit events, responses, or cookies. `state` appears in storage only as
+  a hash, and the PKCE verifier only in the `OAUTH#{state_hash}` item until it is used; neither
+  appears in logs, metrics, audit events, or responses.
 - **AC-07-6** Given a session past its idle or absolute expiry, or an unknown token, authenticated
   operations return 401.
 - **AC-07-7** Given a state-changing request without the session's CSRF token or with a disallowed
@@ -206,11 +215,11 @@ exists yet, so this is not a breaking change for any client.
 
 | ID | Scenario | Level | Covers |
 | --- | --- | --- | --- |
-| F07-T1 | Sign-in start: redirect parameters, stored hashed `state` and verifier, pre-authentication cookie. | Unit (use case with fakes), handler | AC-07-1 |
+| F07-T1 | Sign-in start: redirect parameters, stored hashed `state`, stored verifier and `return_to`, pre-authentication cookie. | Unit (use case with fakes), handler | AC-07-1 |
 | F07-T2 | Callback with missing, expired, reused, and mismatched `state`: no exchange, no session. | Unit, handler | AC-07-2 |
 | F07-T3 | Successful callback against a local fake of GitHub's endpoints: contributor upsert, hashed session, cookie attributes, redirect. | Adapter and handler (local test server) | AC-07-3, AC-07-9 |
 | F07-T4 | `return_to` table test with relative, absolute, protocol-relative, backslash, and encoded inputs. | Unit | AC-07-4 |
-| F07-T5 | Logs, audit events, stored items, and responses from the flows above are scanned for the token, code, `state`, and session token. | Unit, handler | AC-07-5 |
+| F07-T5 | Logs, audit events, stored items, responses, and cookies from the flows above are scanned for the token, code, `state`, PKCE verifier, and session token; the `OAUTH#{state_hash}` item is gone after the callback. | Unit, handler | AC-07-5 |
 | F07-T6 | Middleware: idle and absolute expiry with a fake clock; unknown token. | Unit | AC-07-6 |
 | F07-T7 | CSRF and `Origin` checks on a state-changing route. | Handler | AC-07-7 |
 | F07-T8 | Sign-out deletes the session and expires the cookie; the old token returns 401. | Handler | AC-07-8 |

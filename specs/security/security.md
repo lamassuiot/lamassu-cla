@@ -60,7 +60,10 @@ the login, then discards the token.
 
 - Authorization-code flow with a cryptographically random `state` bound to a pre-authentication
   cookie, single use, 10-minute expiry, stored hashed in the `ephemeral` table.
-- PKCE is used where GitHub supports it for OAuth Apps.
+- PKCE is used where GitHub supports it for OAuth Apps. The verifier is stored in plaintext in the
+  same encrypted, TTL-bounded `ephemeral` item as the hashed `state`, because the code exchange
+  needs the original value; the item is deleted before the exchange, and the verifier never
+  appears in logs, responses, or cookies.
 - Redirect URIs are registered exactly; no wildcards. Post-login `return_to` accepts only relative
   paths from an allowlist.
 - GitHub user access tokens are used only during sign-in to read the numeric user ID and login,
