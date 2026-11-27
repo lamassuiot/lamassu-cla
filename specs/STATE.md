@@ -72,6 +72,7 @@ Last updated: 2026-10-22
 | 2026-10-22 | Repository owner | D-28 decided (suspended or revoked contributors may sign in; sign-in grants no permissions and restores no CLA). D-29 decided (minimal record at first sign-in with the numeric GitHub user ID and current login, no email; the login is not a stable identifier; creation waits for D-20). |
 | 2026-10-22 | Repository owner | D-06 proposal for the Security owner (sign-in-only OAuth App; separate GitHub App for pull requests and Checks; server-side sessions, 30 minutes idle and 8 hours absolute). D-20 lawful-basis proposal for Legal and DPO review (controller LKS S.Coop); D-20 stays open and no production processing is authorized. |
 | 2026-10-22 | Repository owner | D-30 decided: the sign-in OAuth App is owned by the `lksnext` GitHub organization (controlled by LKS S.Coop., the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The same LKS ownership applies to the pull-request GitHub App (D-08; installation scope stays open). This confirms the organization account only: it does not authorize production deployment or real sign-ins, and D-06 and D-20 stay subject to their assigned reviews. |
+| 2026-11-27 | Repository owner | A-28 decided: Node.js 26 replaces Node.js 24 as the pinned release line (ADR-0013 supersedes ADR-0007), triggered by the Playwright 1.65.1 image. Biome 2.6 configuration adapted (ADR-0011 consequences). |
 
 ## Phases
 

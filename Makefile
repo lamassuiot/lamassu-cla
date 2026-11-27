@@ -1,5 +1,5 @@
 # Developer entry points for the CLA Management Platform (F-01).
-# Run `make help` for targets. Requires Node.js 24 (`nvm use`), npm, Go, and Docker for the Dev Container.
+# Run `make help` for targets. Requires Node.js 26 (`nvm use`), npm, Go, and Docker for the Dev Container.
 
 SHELL := bash
 .SHELLFLAGS := -euo pipefail -c

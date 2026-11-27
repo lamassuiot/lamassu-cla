@@ -29,12 +29,13 @@ Write an ADR when a decision:
 | [0004](0004-provider-neutral-signing-and-signature-level.md) | Provider-neutral signing and configurable signature level | Accepted |
 | [0005](0005-configurable-object-lock-retention.md) | Configurable Object Lock retention | Accepted (values pending D-10) |
 | [0006](0006-explicit-ccla-authorization.md) | Explicit CCLA authorization | Accepted |
-| [0007](0007-pin-nodejs-24.md) | Pin Node.js 24 | Accepted |
+| [0007](0007-pin-nodejs-24.md) | Pin Node.js 24 | Superseded by ADR-0013 |
 | [0008](0008-hexagonal-go-backend-on-lambda.md) | Hexagonal Go backend on Lambda with asynchronous workers | Accepted |
 | [0009](0009-dynamodb-table-layout.md) | DynamoDB table layout | Accepted |
 | [0010](0010-cloudfront-frontend-hosting.md) | CloudFront frontend hosting | Accepted |
 | [0011](0011-biome-for-javascript-and-typescript.md) | Biome for JavaScript and TypeScript formatting and linting | Accepted |
 | [0012](0012-checkov-terraform-scan.md) | Checkov for the Terraform security scan | Proposed |
+| [0013](0013-pin-nodejs-26.md) | Pin Node.js 26 | Accepted |
 
 ## ADR format
 

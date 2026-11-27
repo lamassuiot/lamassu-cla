@@ -34,7 +34,7 @@ To use it, install:
 * Dev Containers extension for VS Code
 * Git
 
-Alternatively, local development without the Dev Container requires Node.js 24, npm, Go, GNU Make, and the tools documented in the local setup guide.
+Alternatively, local development without the Dev Container requires Node.js 26, npm, Go, GNU Make, and the tools documented in the local setup guide.
 
 ### Installation and usage
 

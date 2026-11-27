@@ -185,7 +185,7 @@ Role assignment is open (D-13). The authorization matrix is in the
 
 - Public repository, AGPLv3 license, copyright LKS S. Coop.
 - AWS: API Gateway HTTP APIs, Lambda (Go), DynamoDB, S3, KMS, Secrets Manager, CloudWatch.
-- Frontend: Vite, React, TypeScript, React Router, TanStack Query; Node.js 24.
+- Frontend: Vite, React, TypeScript, React Router, TanStack Query; Node.js 26.
 - Terraform for all infrastructure; GitHub Actions with OIDC for deployments.
 - Repository governance in [`AGENTS.md`](../AGENTS.md) and [`CONTRIBUTING.md`](../CONTRIBUTING.md).
 

@@ -21,7 +21,7 @@ Contributors and maintainers (developer experience). No end-user roles are affec
 ## Preconditions
 
 - Phase 1 specifications merged (PR #4).
-- Node.js 24 (`.nvmrc`), Go, and npm available locally.
+- Node.js 26 (`.nvmrc`), Go, and npm available locally.
 
 ## Main flow
 
@@ -38,7 +38,7 @@ Contributors and maintainers (developer experience). No end-user roles are affec
 
 | Case | Detection | System behavior | User-visible result |
 | --- | --- | --- | --- |
-| Unsupported Node.js version | `engines` with `engine-strict` | Install fails | Message naming Node.js 24 |
+| Unsupported Node.js version | `engines` with `engine-strict` | Install fails | Message naming Node.js 26 |
 | Unsupported Go version | `go` directive in `go.mod` | Build fails or toolchain download | Go version error |
 | Layer rule violation | `depguard` in `golangci-lint` | Lint fails | Rule and import named |
 | Inline `style` attribute in the portal | Biome `nursery/noInlineStyles` and the `.biome/plugins/no-inline-style-attribute.grit` plugin | Lint fails | Message pointing to design-system tokens |
@@ -68,7 +68,7 @@ are built in Phase 3.
 
 ## Acceptance criteria
 
-- **AC-01-1** Given Node.js 24, when `npm ci` runs at the root, then all workspaces install from the
+- **AC-01-1** Given Node.js 26, when `npm ci` runs at the root, then all workspaces install from the
   committed lockfile. Given another major version, installation fails.
 - **AC-01-2** The root `package.json` is private and declares the workspaces `apps/*` and
   `packages/*`.
@@ -90,7 +90,7 @@ are built in Phase 3.
 | --- | --- | --- | --- |
 | F01-T1 | A placeholder unit test per workspace and Go package runs and passes. | Unit | AC-01-5 |
 | F01-T2 | `scripts/check-go-layering.test.sh`: 9 forbidden imports (cross-layer, adapters, I/O in `domain`) fail with a `depguard` finding; 4 allowed imports pass. | Lint | AC-01-4 |
-| F01-T3 | CI installs with `npm ci` on Node.js 24. | CI | AC-01-1 |
+| F01-T3 | CI installs with `npm ci` on Node.js 26. | CI | AC-01-1 |
 | F01-T4 | The `Dev Container build` CI job builds the Dev Container from the frozen lockfile, runs `make bootstrap`, and passes `make check` (F-02, A-14). | CI | AC-01-5 |
 | F01-T5 | `scripts/check-ts-directives.test.sh` (10 cases). Every rule mapped in ADR-0011, the inline-style plugin, and the two TypeScript plugins fire on synthetic violations and not on valid code (verified once during the A-17 migration). | Script, Lint | AC-01-6 |
 
@@ -124,7 +124,7 @@ Implementation notes:
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 - The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
   section.
-- Dependabot ignores major upgrades of `@types/node` (Node.js 24, ADR-0007); other minor and patch
+- Dependabot ignores major upgrades of `@types/node` (Node.js 26, ADR-0013); other minor and patch
   updates continue. Since A-21, Dependabot also proposes TypeScript upgrades; the 6.0.3 pin
   changes only through a reviewed PR that passes the frontend checks and updates this section.
 - The Dev Container configuration was validated syntactically (`devcontainer read-configuration`

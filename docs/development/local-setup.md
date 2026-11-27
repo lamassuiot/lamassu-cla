@@ -7,8 +7,8 @@ See [`specs/features/F-01-monorepo-tooling.md`](../../specs/features/F-01-monore
 
 | Tool | Version | Notes |
 | --- | --- | --- |
-| Node.js | 24 (from `.nvmrc`) | Install with [nvm](https://github.com/nvm-sh/nvm) and run `nvm use`. Other major versions are rejected (`engine-strict`). |
-| npm | 11 or later | Ships with Node.js 24. |
+| Node.js | 26 (from `.nvmrc`) | Install with [nvm](https://github.com/nvm-sh/nvm) and run `nvm use`. Other major versions are rejected (`engine-strict`). |
+| npm | 11 or later | Ships with Node.js 26. |
 | Go | Any Go 1.21 or later | The `Makefile` sets `GOTOOLCHAIN=go1.27.1`; Go downloads that toolchain automatically. |
 | GNU Make | Any recent version | |
 | Docker | Any recent version | Only for the Dev Container and local emulators. |
@@ -98,7 +98,7 @@ comparison.
 
 ## Dev Container
 
-The `.devcontainer/` configuration provides Node.js 24, Go 1.27, Terraform 1.16, and TFLint on
+The `.devcontainer/` configuration provides Node.js 26, Go 1.27, Terraform 1.16, and TFLint on
 a pinned Ubuntu 24.04 base image, and runs `make bootstrap` after creation. Open the repository in
 VS Code and choose **Reopen in Container**.
 
