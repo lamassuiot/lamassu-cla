@@ -224,7 +224,7 @@ Names are the job names that GitHub reports on pull requests.
 | `Dev Container build` | CI | A-14 |
 | `Detect backend changes` | Backend | 2026-10-07 |
 | `Go checks` | Backend | 2026-10-07 |
-| `DynamoDB adapter tests` | Backend | Added to the ruleset after its first successful run (A-30; F-07 unit 2) |
+| `DynamoDB adapter tests` | Backend | 2026-11-27 (A-30; F-07 unit 2, PR #89) |
 | `Go vulnerability scan` | Backend | 2026-10-07 |
 | `Detect frontend changes` | Frontend | 2026-10-07 |
 | `Frontend checks` | Frontend | 2026-10-07 |
