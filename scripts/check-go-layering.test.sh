@@ -20,7 +20,9 @@ run_case() {
   local result="pass"
   if [[ "$status" -ne 0 ]]; then
     result="error"
-    grep -q '(depguard)' "$work/lint.log" && result="fail"
+    # Since F-07, application imports domain, so a reverse probe is also an import cycle that
+    # the compiler rejects before depguard runs; both outcomes prove the layering holds.
+    grep -qE '\(depguard\)|import cycle not allowed' "$work/lint.log" && result="fail"
   fi
   if [[ "$result" == "$expected" ]]; then
     echo "ok: $name"

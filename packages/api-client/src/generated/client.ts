@@ -3,8 +3,10 @@
  * Do not edit manually.
  * Lamassu CLA Management Platform API
  * Source of truth for the platform API. Conventions are defined in `conventions.md` next to
- * this file. Operations are added by feature specifications; this initial structure defines
- * shared components and the health operation only.
+ * this file. Operations are added by feature specifications. Every path is relative to the `/api`
+ * base that CloudFront routes to API Gateway (D-02): versioned operations live under `/v1`, and
+ * the GitHub sign-in callback stays unversioned at `/auth/github/callback` because it is the URL
+ * registered with GitHub.
  *
  * OpenAPI spec version: 0.1.0
  */
@@ -18,6 +20,30 @@ export const HealthStatus = {
 
 export interface Health {
   status: HealthStatus;
+}
+
+/**
+ * The signed-in person and session metadata. Never includes the session token.
+ */
+export interface Session {
+  /**
+     * Numeric GitHub user ID, the stable identity (D-29). A string to avoid integer precision loss.
+     * @pattern ^[0-9]{1,20}$
+     */
+  github_user_id: string;
+  /**
+     * Current GitHub login, display only; refreshed on every sign-in.
+     * @maxLength 39
+     */
+  github_login: string;
+  /** Absolute session expiry. Idle expiry is enforced server-side and not exposed. */
+  expires_at: string;
+  /**
+     * Session-bound token to send as `X-CSRF-Token` on state-changing requests.
+     * @minLength 43
+     * @maxLength 64
+     */
+  csrf_token: string;
 }
 
 export interface FieldError {
@@ -126,6 +152,32 @@ export type LimitParameter = number;
  */
 export type CursorParameter = string;
 
+export type StartGithubSignInParams = {
+  /**
+   * Relative portal path to return to after sign-in. Rejected values fall back to `/`.
+   * @maxLength 2048
+   */
+  return_to?: string;
+};
+
+export type CompleteGithubSignInParams = {
+  /**
+   * Authorization code from GitHub. Present on success; never logged.
+   * @maxLength 256
+   */
+  code?: string;
+  /**
+   * The single-use `state` issued by the start operation. Never logged.
+   * @maxLength 256
+   */
+  state: string;
+  /**
+   * GitHub error code, for example `access_denied`, when the person declines.
+   * @maxLength 128
+   */
+  error?: string;
+};
+
 export type getHealthResponse200 = {
   data: Health
   status: 200
@@ -155,7 +207,7 @@ export const getGetHealthUrl = () => {
 
 
 
-  return `/v1/health`
+  return `/api/v1/health`
 }
 
 /**
@@ -168,6 +220,240 @@ export const getHealth = async ( options?: Parameters<typeof apiFetch>[1]): Prom
   {
     ...options,
     method: 'GET'
+
+
+  }
+);}
+
+
+
+export type startGithubSignInResponse302 = {
+  data: void
+  status: 302
+}
+
+export type startGithubSignInResponse400 = {
+  data: BadRequestResponse
+  status: 400
+}
+
+export type startGithubSignInResponse429 = {
+  data: TooManyRequestsResponse
+  status: 429
+}
+
+export type startGithubSignInResponse503 = {
+  data: Problem
+  status: 503
+}
+
+;
+export type startGithubSignInResponseError = (startGithubSignInResponse302 | startGithubSignInResponse400 | startGithubSignInResponse429 | startGithubSignInResponse503) & {
+  headers: Headers;
+};
+
+export type startGithubSignInResponse = (startGithubSignInResponseError)
+
+export const getStartGithubSignInUrl = (params?: StartGithubSignInParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/auth/github/start?${stringifiedParams}` : `/api/v1/auth/github/start`
+}
+
+/**
+ * Browser navigation, not an XHR call. Validates `return_to` against the relative-path
+ * allowlist (falling back to `/`), stores a hashed single-use `state` with a PKCE `S256`
+ * verifier for 10 minutes, sets the `__Host-cla_oauth` pre-authentication cookie, and
+ * redirects to GitHub with an explicitly empty `scope` and the registered callback URL. Any
+ * existing portal session is left untouched (F-07, AC-07-1). While sign-in is disabled by
+ * configuration, returns 503 with code `SIGN_IN_DISABLED` without contacting GitHub.
+ * @summary Start GitHub sign-in.
+ */
+export const startGithubSignIn = async (params?: StartGithubSignInParams, options?: Parameters<typeof apiFetch>[1]): Promise<startGithubSignInResponse> => {
+
+  return apiFetch<startGithubSignInResponse>(getStartGithubSignInUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type completeGithubSignInResponse302 = {
+  data: void
+  status: 302
+}
+
+export type completeGithubSignInResponse429 = {
+  data: TooManyRequestsResponse
+  status: 429
+}
+
+;
+export type completeGithubSignInResponseError = (completeGithubSignInResponse302 | completeGithubSignInResponse429) & {
+  headers: Headers;
+};
+
+export type completeGithubSignInResponse = (completeGithubSignInResponseError)
+
+export const getCompleteGithubSignInUrl = (params: CompleteGithubSignInParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/auth/github/callback?${stringifiedParams}` : `/api/auth/github/callback`
+}
+
+/**
+ * Browser navigation from GitHub. Unversioned because it is the callback URL registered with
+ * the OAuth App (D-02). Rejects malformed input, checks the `__Host-cla_oauth` binding,
+ * consumes `state` atomically, exchanges `code` with the PKCE verifier, verifies that the
+ * granted scope is empty, extracts only `id` and `login` from `GET /user`, creates or
+ * refreshes the contributor record, and replaces the session in one transaction with its
+ * audit event (F-07, main flow steps 4 to 6). Every outcome redirects: success to the
+ * validated `return_to` with the session cookie, failure or cancellation to the portal's
+ * sign-in error route with a reason code and no personal data.
+ * @summary Complete GitHub sign-in (registered callback URL).
+ */
+export const completeGithubSignIn = async (params: CompleteGithubSignInParams, options?: Parameters<typeof apiFetch>[1]): Promise<completeGithubSignInResponse> => {
+
+  return apiFetch<completeGithubSignInResponse>(getCompleteGithubSignInUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type getSessionResponse200 = {
+  data: Session
+  status: 200
+}
+
+export type getSessionResponse401 = {
+  data: UnauthorizedResponse
+  status: 401
+}
+
+export type getSessionResponse429 = {
+  data: TooManyRequestsResponse
+  status: 429
+}
+
+export type getSessionResponse503 = {
+  data: ServiceUnavailableResponse
+  status: 503
+}
+
+export type getSessionResponseSuccess = (getSessionResponse200) & {
+  headers: Headers;
+};
+export type getSessionResponseError = (getSessionResponse401 | getSessionResponse429 | getSessionResponse503) & {
+  headers: Headers;
+};
+
+export type getSessionResponse = (getSessionResponseSuccess | getSessionResponseError)
+
+export const getGetSessionUrl = () => {
+
+
+
+
+  return `/api/v1/session`
+}
+
+/**
+ * Returns the signed-in person, the absolute session expiry, and the session's CSRF token.
+ * Reading the session does not extend its idle expiry (F-07, AC-07-6). A missing, unknown,
+ * or expired session returns 401 with code `SESSION_REQUIRED` and expires any stale cookie.
+ * @summary Read the current session.
+ */
+export const getSession = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getSessionResponse> => {
+
+  return apiFetch<getSessionResponse>(getGetSessionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+export type signOutResponse204 = {
+  data: void
+  status: 204
+}
+
+export type signOutResponse403 = {
+  data: ForbiddenResponse
+  status: 403
+}
+
+export type signOutResponse429 = {
+  data: TooManyRequestsResponse
+  status: 429
+}
+
+export type signOutResponse503 = {
+  data: ServiceUnavailableResponse
+  status: 503
+}
+
+export type signOutResponseSuccess = (signOutResponse204) & {
+  headers: Headers;
+};
+export type signOutResponseError = (signOutResponse403 | signOutResponse429 | signOutResponse503) & {
+  headers: Headers;
+};
+
+export type signOutResponse = (signOutResponseSuccess | signOutResponseError)
+
+export const getSignOutUrl = () => {
+
+
+
+
+  return `/api/v1/session/sign-out`
+}
+
+/**
+ * Deletes the session and writes the `auth.signed_out` audit event in one transaction, then
+ * expires the cookie. Idempotent: without a session it still returns 204 and expires any
+ * cookie. The `Origin` check always applies; a valid session also requires its CSRF token
+ * (403 with code `CSRF_TOKEN_INVALID` or `ORIGIN_NOT_ALLOWED`). A failed or uncertain
+ * deletion returns 503 with code `STORE_UNAVAILABLE`, never 204 (F-07, AC-07-8).
+ * @summary End the current session.
+ */
+export const signOut = async ( options?: Parameters<typeof apiFetch>[1]): Promise<signOutResponse> => {
+
+  return apiFetch<signOutResponse>(getSignOutUrl(),
+  {
+    ...options,
+    method: 'POST'
 
 
   }

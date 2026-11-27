@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiRequestError, apiFetch, setCsrfTokenProvider } from './fetcher';
-import { getHealth } from './index';
+import { getHealth, getSession, getStartGithubSignInUrl, signOut } from './index';
 
 type FetchCall = [string, RequestInit];
 
@@ -19,14 +19,14 @@ beforeEach(() => setCsrfTokenProvider(() => undefined));
 afterEach(() => vi.unstubAllGlobals());
 
 describe('generated client (AC-02-7)', () => {
-  it('calls GET /v1/health through the wrapper and returns typed data', async () => {
+  it('calls GET /api/v1/health through the wrapper and returns typed data', async () => {
     const fetchMock = respond(200, { status: 'OK' });
     vi.stubGlobal('fetch', fetchMock);
     const result = await getHealth();
     expect(result.status).toBe(200);
     if (result.status === 200) expect(result.data.status).toBe('OK');
     const [url, init] = lastCall(fetchMock);
-    expect(url).toBe('/v1/health');
+    expect(url).toBe('/api/v1/health');
     expect(init.method).toBe('GET');
   });
 
@@ -42,6 +42,56 @@ describe('generated client (AC-02-7)', () => {
     const result = await getHealth();
     expect(result.status).toBe(503);
     if (result.status === 503) expect(result.data.code).toBe('SERVICE_UNAVAILABLE');
+  });
+});
+
+describe('session operations (F-07 unit 1)', () => {
+  it('reads the session from GET /api/v1/session with typed fields', async () => {
+    const session = {
+      github_user_id: '1234567',
+      github_login: 'synthetic-contributor',
+      expires_at: '2026-01-01T08:00:00Z',
+      csrf_token: 'c'.repeat(43),
+    };
+    const fetchMock = respond(200, session);
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await getSession();
+    expect(lastCall(fetchMock)[0]).toBe('/api/v1/session');
+    expect(result.status).toBe(200);
+    if (result.status === 200) expect(result.data.github_user_id).toBe('1234567');
+  });
+
+  it('types a 401 on GET /api/v1/session as a Problem', async () => {
+    const problem = {
+      type: 'about:blank',
+      title: 'Session required',
+      status: 401,
+      code: 'SESSION_REQUIRED',
+      request_id: '01J9Z3K4Q8X7M2N5P6R7S8T9V0',
+    };
+    vi.stubGlobal('fetch', respond(401, problem, 'application/problem+json'));
+    const result = await getSession();
+    expect(result.status).toBe(401);
+    if (result.status === 401) expect(result.data.code).toBe('SESSION_REQUIRED');
+  });
+
+  it('posts sign-out to /api/v1/session/sign-out with the CSRF token', async () => {
+    setCsrfTokenProvider(() => 'csrf-1');
+    const fetchMock = respond(204);
+    vi.stubGlobal('fetch', fetchMock);
+    const result = await signOut();
+    const [url, init] = lastCall(fetchMock);
+    expect(url).toBe('/api/v1/session/sign-out');
+    expect(init.method).toBe('POST');
+    expect(new Headers(init.headers).get('X-CSRF-Token')).toBe('csrf-1');
+    expect(result.status).toBe(204);
+  });
+
+  it('builds the browser-navigation start URL under /api with return_to', () => {
+    expect(getStartGithubSignInUrl({ return_to: '/agreements' })).toBe(
+      '/api/v1/auth/github/start?return_to=%2Fagreements',
+    );
+    expect(getStartGithubSignInUrl()).toBe('/api/v1/auth/github/start');
   });
 });
 
