@@ -53,18 +53,23 @@ Rules:
 
 ### 3.1 People (GitHub sign-in)
 
-Model choice is open (D-06). Regardless of the choice:
+Decided (D-06, [ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)): a
+dedicated GitHub OAuth App used only for sign-in, with no repository permissions and no email
+scope, separate from the GitHub App of section 3.2. The API reads the numeric GitHub user ID and
+the login, then discards the token.
 
 - Authorization-code flow with a cryptographically random `state` bound to a pre-authentication
   cookie, single use, 10-minute expiry, stored hashed in the `ephemeral` table.
-- PKCE is used where GitHub supports it for the chosen app type.
+- PKCE is used where GitHub supports it for OAuth Apps.
 - Redirect URIs are registered exactly; no wildcards. Post-login `return_to` accepts only relative
   paths from an allowlist.
-- GitHub user access tokens are used only during sign-in to read identity and verified email, then
-  discarded. They are never stored or sent to the browser.
+- GitHub user access tokens are used only during sign-in to read the numeric user ID and login,
+  then discarded. They are never stored or sent to the browser. Verified emails are not read at
+  sign-in (C-03 in `specs/STATE.md` covers the later email step).
 - Sessions use an opaque 256-bit random token in a `__Host-` cookie (`HttpOnly`, `Secure`,
-  `SameSite=Lax`), stored hashed. Idle and absolute timeouts are configuration (proposed 30 minutes
-  idle, 8 hours absolute). Sessions rotate on sign-in and role change and are revoked on sign-out.
+  `SameSite=Lax`), stored hashed. Idle and absolute timeouts are configuration with the decided
+  defaults of 30 minutes idle and 8 hours absolute; there is no silent renewal. Sessions rotate on
+  sign-in and role change and are revoked on sign-out.
 - CSRF: `SameSite=Lax` plus a session-bound `X-CSRF-Token` header and `Origin` check on state-changing
   requests.
 

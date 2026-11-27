@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Draft; approval needs D-06 (Security owner); sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
+| Status | Draft; D-06 decided (Security owner, 2026-11-27, [ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)); approval by the repository owner pending; sign-in for real people and contributor-record creation also need D-20 (Legal, DPO) |
 | Phase | 4 |
 | Owner | Repository owner; Security owner for the authentication model (D-06) |
 | Depends on | F-02, F-03, F-06; D-02, D-06, D-20, D-28, D-29, D-30; [security](../security/security.md#31-people-github-sign-in), [data protection](../security/data-protection.md), [threat model](../security/threat-model.md) (T-15, T-16) |
@@ -25,8 +25,9 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 ## Preconditions
 
-- D-06 is decided by the Security owner. This draft follows the repository owner's proposal of
-  2026-10-22: a GitHub **OAuth App** used only for sign-in, with no repository permissions and no
+- D-06 is decided by the Security owner (2026-11-27,
+  [ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)): a GitHub
+  **OAuth App** used only for sign-in, with no repository permissions and no
   email access, separate from the GitHub App that receives pull-request events and publishes
   Checks (F-14, D-08), which the same `lksnext` organization owns.
 - D-02 is decided (2026-10-22): the portal origin is `https://cla.developers.lamassu.cloud`, the
@@ -90,7 +91,7 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - **Already signed in.** Starting sign-in again replaces the session (the old one is deleted), so a
   session token is never reused across sign-ins (session rotation).
 - **Session expires.** After 30 minutes without activity or 8 hours after sign-in, whichever comes
-  first (D-06 proposal), the API answers 401; there is no silent renewal, and the person signs in
+  first (D-06), the API answers 401; there is no silent renewal, and the person signs in
   again. The portal shows the signed-out state and offers sign-in with `return_to` set to the
   current page. Timeouts are configuration (security, section 3.1).
 - **Suspended or revoked contributor.** Sign-in still succeeds (D-28, decided 2026-10-22).
@@ -120,8 +121,8 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - Session tokens are 256-bit random values from a cryptographic source, stored only as SHA-256
   hashes; comparisons of secrets are constant time. The CSRF token is bound to the session.
 - No GitHub token is persisted, logged, or returned. The OAuth App requests no scopes: it reads only
-  the public numeric user ID and login, with no repository permissions and no email access (D-06
-  proposal). It is separate from the GitHub App, so a sign-in token never carries repository or
+  the public numeric user ID and login, with no repository permissions and no email access (D-06,
+  ADR-0014). It is separate from the GitHub App, so a sign-in token never carries repository or
   Checks permissions.
 - Identity is the numeric GitHub user ID. The login can change and be reused by another account, so
   it is never used as an identifier, key, or authorization input (D-29).
@@ -250,18 +251,20 @@ retained, not destroyed, by default).
 4. **Portal.** Session state, header states, sign-in error route, privacy-notice link, and
    accessibility runs (F07-T10); the server-state library proposed with evidence.
 
-Units 1 and 2 depend on D-06 (Security owner). Enabling contributor-record creation and any
+Units 1 and 2 depend on this specification's approval by the repository owner (D-06 is decided). Enabling contributor-record creation and any
 sign-in by real people depends on D-20 (Legal, DPO); unit 4's privacy-notice link depends on the
 approved notice. Registering the OAuth App (under `lksnext`, D-30) does not authorize deployment or real sign-ins.
 Deployment stays blocked until F-03 step 5; D-02 does not authorize it.
 
 ## Open questions
 
-- D-06: Security-owner decision on the repository owner's proposal (OAuth App for sign-in only;
-  30 minutes idle and 8 hours absolute).
 - D-20: Legal and DPO validation of the proposed lawful bases, the privacy notice, retention
   periods, recipients, and any international transfers.
+- C-03 (`specs/STATE.md`): where verified emails are read, now that sign-in has no email scope.
+  Out of scope for F-07; it concerns the agreement and validation flows.
 
+Decided on 2026-11-27: D-06 (sign-in-only OAuth App; 30 minutes idle and 8 hours absolute;
+[ADR-0014](../../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)).
 Decided on 2026-10-22: D-02 (origins and callback URL), D-30 (the `lksnext` organization owns the
 sign-in OAuth App), D-28 (suspended or revoked contributors may
 sign in), and D-29 (minimal record at first sign-in, gated on D-20).

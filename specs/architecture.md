@@ -272,7 +272,9 @@ scripts/            developer scripts
 
 ## 13. Open decisions affecting the architecture
 
-D-06 (proposed to the Security owner) and D-16. D-02 was decided on 2026-10-22 (section 4). D-30
+D-16. D-02 was decided on 2026-10-22 (section 4). D-06 was decided on 2026-11-27
+([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)): a sign-in-only GitHub
+OAuth App and server-side sessions. D-30
 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App, and the
 same ownership applies to the pull-request GitHub App (D-08).
 See the [decision log](../docs/decisions/decision-log.md).

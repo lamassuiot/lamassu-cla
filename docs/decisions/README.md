@@ -36,6 +36,7 @@ Write an ADR when a decision:
 | [0011](0011-biome-for-javascript-and-typescript.md) | Biome for JavaScript and TypeScript formatting and linting | Accepted |
 | [0012](0012-checkov-terraform-scan.md) | Checkov for the Terraform security scan | Proposed |
 | [0013](0013-pin-nodejs-26.md) | Pin Node.js 26 | Accepted |
+| [0014](0014-github-oauth-app-sign-in-and-sessions.md) | GitHub OAuth App sign-in and server-side sessions | Accepted |
 
 ## ADR format
 
