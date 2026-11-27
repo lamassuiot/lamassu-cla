@@ -70,10 +70,13 @@ the login, then discards the token.
   needs the original value; the item is deleted before the exchange, and the verifier never
   appears in logs, responses, or cookies.
 - The authorization request sends an explicitly empty `scope`; because GitHub grants previously
-  authorized scopes when no `scope` is provided, the API verifies that the granted scope in the
-  token response is empty and refuses the sign-in otherwise. Only `id` and `login` are extracted
-  from `GET /user`; other fields, including a public email, are ignored and never persisted or
-  logged. The access token is revoked best-effort after use; any refresh token is discarded.
+  authorized scopes when no `scope` is provided, the API verifies that the granted scope is empty
+  twice, in the token response's `scope` and then in the `X-OAuth-Scopes` header of the
+  authenticated `GET /user` response, and refuses the sign-in if either is missing or not empty.
+  Only `id` and `login` are extracted from `GET /user`; other fields, including a public email,
+  are ignored and never persisted or logged. The access token is revoked best-effort after use;
+  any refresh token is discarded. Portal sign-out does not revoke the person's authorization grant
+  for the OAuth App on GitHub.
 - Redirect URIs are registered exactly, with GitHub's wildcard matching disabled, and the same
   `redirect_uri` is sent in the
   authorization and token-exchange requests. Post-login `return_to` accepts only relative

@@ -84,12 +84,13 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
    4. Clear the pre-authentication cookie, on every outcome from here on.
    5. For `error`, show the cancelled or error result. For `code`, exchange `code` with
       `code_verifier`, the backend-held `client_secret`, and the same `redirect_uri` for a user
-      access token; verify that the **granted scope is empty** (the token response's `scope` and
-      the `X-OAuth-Scopes` header); call `GET /user` and extract only `id` and `login`, treating a
-      missing or invalid field as failure; then discard the access token and any `refresh_token`,
-      after a best-effort revocation (`DELETE /applications/{client_id}/token`) whose failure does
-      not fail the sign-in. A non-empty granted scope ends sign-in without a session. No token is
-      stored, logged, or sent to the browser.
+      access token. Validate that the token response explicitly reports an empty `scope`. Call
+      authenticated `GET /user`, verify that its `X-OAuth-Scopes` response header is empty, and
+      validate and extract `id` and `login`; missing or malformed scope metadata, or a missing or
+      invalid `id` or `login`, fails the sign-in. Then discard the access token and any
+      `refresh_token`, after a best-effort revocation (`DELETE /applications/{client_id}/token`)
+      whose failure does not fail the sign-in. A non-empty granted scope ends sign-in without a
+      session. No token is stored, logged, or sent to the browser.
 5. The API creates or updates the minimal contributor record (D-29): the numeric GitHub user ID,
    which is the only stable identifier, and the current login, refreshed on every sign-in for
    display only (FR-CON-01). A new contributor starts as `PENDING`; an existing record keeps its
@@ -119,15 +120,17 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 9. **Sign out** calls `POST /api/v1/session/sign-out` (CSRF- and Origin-protected). The API deletes
    the session and writes the `auth.signed_out` audit event in one transaction, expires the
    cookie, and returns 204; the portal returns to the landing page in the signed-out state. Local
-   sign-out ends the portal session only; it does not revoke the person's GitHub authorization of
-   the OAuth App.
+   sign-out ends the portal session only. It makes no further GitHub revocation request (the
+   access token was already revoked best-effort in step 4) and does not remove the person's
+   authorization grant for the OAuth App on GitHub.
 
 ## Alternative flows
 
 - **Already signed in.** Starting sign-in leaves the current session untouched. On a successful
-  callback the new session replaces the old one atomically (step 6); on cancellation or failure
-  the old session stays valid. A session token is therefore never reused across sign-ins, and a
-  failed attempt never signs anyone out.
+  callback the new session replaces the old one atomically (step 6). Cancellation and failures
+  before session replacement preserve the existing valid session. If replacement commits but its
+  result or the response is lost, the previous session may already be invalidated and the person
+  may need to sign in again. A session token is never reused across sign-ins.
 - **Second attempt in another tab.** The new attempt supersedes the first: the old tab's callback
   fails the binding check and shows "sign-in attempt expired or replaced".
 - **Session expires.** After 30 minutes without activity or 8 hours after sign-in, whichever comes
@@ -146,7 +149,8 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 ## Error cases
 
-"No new session" below always means that an existing valid session is preserved.
+"No new session" below means that an existing valid session is preserved, except where the session
+replacement transaction committed but its result was lost (see that row).
 
 | Case | Detection | System behavior | User-visible result |
 | --- | --- | --- | --- |
@@ -155,7 +159,7 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 | Missing or mismatched pre-authentication cookie | Binding check before consumption | Nothing consumed; no exchange; no new session; sanitized security event | "Sign-in attempt expired or replaced", with a link to start a new attempt |
 | Missing, expired, or reused `state`, on a success or an error callback | Atomic consume of `OAUTH#{state_hash}` | No exchange; no cancelled message; no business audit event; sanitized security event | Generic sign-in failure with a link to start a new attempt |
 | Person declines on GitHub | `error=access_denied`, after binding check and consumption | Cookie cleared; no new session | Cancellation message; the existing signed-in or signed-out state is preserved |
-| Granted scope is not empty | `scope` in the token response or `X-OAuth-Scopes` header | Token discarded (best-effort revoked); no new session; security event `scope_unexpected` | Generic failure with a support reference |
+| Granted scope is not empty, or scope metadata is missing or malformed | `scope` in the token response, then `X-OAuth-Scopes` on the `GET /user` response | Token discarded (best-effort revoked); no new session; security event `scope_unexpected` | Generic failure with a support reference |
 | GitHub authorization, token exchange, or `GET /user` fails, or `id` or `login` is missing or invalid | Upstream error, timeout, or response validation | No new session; received credentials discarded; no automatic callback replay | Failure page with a link to start a new attempt |
 | `return_to` not allowed | Canonicalization and allowlist check | Falls back to `/` | Lands on the landing page |
 | Contributor upsert or session transaction fails or its outcome is uncertain | Store error or timeout | No session cookie is set; the previous session is preserved unless the transaction committed, in which case the person simply signs in again | Error page; restart sign-in when the service recovers |
@@ -293,8 +297,8 @@ exists yet, so this is not a breaking change for any client.
   expired, and the old token no longer authenticates; if the deletion fails or is uncertain, the
   API returns 503, not 204; without a session, sign-out returns 204.
 - **AC-07-9** Given a signed-in browser that completes a new sign-in, the new session replaces the
-  old one in one transaction and the old token no longer authenticates; given a cancelled or
-  failed attempt, the old session stays valid.
+  old one in one transaction and the old token no longer authenticates; given an attempt that is
+  cancelled or fails before session replacement, the old session stays valid.
 - **AC-07-10** The portal shows the signed-out and signed-in header states and the sign-in error
   route, with no WCAG 2.2 A or AA violations in either theme at the F-06 widths.
 
@@ -303,7 +307,8 @@ exists yet, so this is not a breaking change for any client.
 - **AC-07-12** Given two sign-ins by the same numeric GitHub user ID with different logins, one
   contributor record exists with the latest login; given a sign-in whose login matches another
   record's former login, no record is matched by login (D-29).
-- **AC-07-13** Given a token exchange whose granted scope is not empty, the token is discarded, no
+- **AC-07-13** Given a token response whose `scope` is not an explicit empty value, or a `GET /user`
+  response whose `X-OAuth-Scopes` header is missing or not empty, the token is discarded, no
   session is created, and a `scope_unexpected` security event is logged without personal data.
 - **AC-07-14** Given a `GET /user` response, only `id` and `login` are extracted; every other field,
   including a public `email`, is absent from storage, logs, and audit events; a missing or invalid
