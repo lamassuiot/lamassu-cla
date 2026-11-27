@@ -38,6 +38,16 @@
       "selfCloseVoidElements": "always"
     }
   },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "enabled": false
+    }
+  },
   "assist": {
     "enabled": true,
     "actions": {
@@ -205,10 +215,8 @@
       "includes": ["**/apps/web/**/*.{jsx,tsx}"],
       "linter": {
         "rules": {
-          "nursery": {
-            "noInlineStyles": "error"
-          },
           "style": {
+            "noInlineStyles": "error",
             "useComponentExportOnlyModules": "error"
           }
         }
@@ -218,7 +226,7 @@
       "includes": ["**/packages/design-system/**/*.{jsx,tsx}"],
       "linter": {
         "rules": {
-          "nursery": {
+          "style": {
             "noInlineStyles": "error"
           }
         }

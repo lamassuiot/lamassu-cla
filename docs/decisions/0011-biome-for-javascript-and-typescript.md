@@ -27,7 +27,8 @@ Biome 2.5.15. Each rule was triggered with a synthetic fixture and verified agai
 - `tsc --noEmit` remains the type check and Vitest remains the test runner. Go, Terraform, OpenAPI,
   and CodeQL tooling are unchanged.
 - Inline `style` attributes in `apps/web` fail lint through two controls:
-  - `nursery/noInlineStyles` (error), which covers DOM elements and `createElement`.
+  - `noInlineStyles` (error), which covers DOM elements and `createElement`. It was a `nursery`
+    rule at adoption and graduated to the `style` group in Biome 2.6.
   - The GritQL plugin `.biome/plugins/no-inline-style-attribute.grit`, which also covers
     components such as `<Card style={...} />`. `noInlineStyles` misses this case.
 - Rules without a Biome equivalent are covered as follows:
@@ -58,7 +59,10 @@ Biome 2.5.15. Each rule was triggered with a synthetic fixture and verified agai
   - `noNoninteractiveElementInteractions` flags `onLoad` and `onError` on `img` and `iframe`.
 - `noInlineStyles` and `useReactCompiler` are nursery rules. Nursery rules carry no semantic
   versioning guarantee and can change or disappear in any release. The exact version pin and the
-  GritQL plugin limit this risk. Every Biome upgrade must re-run `make check`.
+  GritQL plugin limit this risk. Every Biome upgrade must re-run `make check`. Biome 2.6 (merged
+  in PR #63 and PR #77) moved `noInlineStyles` to `style` and enabled Markdown and YAML
+  formatters by default; both formatters are disabled in `biome.json` so that Biome's scope stays
+  JavaScript, TypeScript, JSX, JSON, CSS, and HTML, and markdownlint remains the Markdown check.
 - Biome GritQL plugin `includes` patterns must start with `**/`. Other patterns silently match
   nothing.
 - Biome has no equivalent of the `jsx-a11y` component-mapping settings. Only a few a11y rules

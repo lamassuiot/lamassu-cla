@@ -244,7 +244,8 @@ Implementation notes (unit 2, first pull request: tooling and button):
   or the modules in a source-mapped portal build, include `axe-core`, `caniuse-lite`, Storybook,
   Playwright, or Vitest. It runs in `make build` and the Frontend workflow. Verified: importing
   either package into the portal fails the check.
-- The `Design system browser tests` job runs in the digest-pinned Playwright 1.64.1 image and
+- The `Design system browser tests` job runs in the digest-pinned Playwright image, whose version
+  equals the `playwright` package, and
   fails if the installed `playwright` version differs from the image. Locally, `make test-browser`
   runs the same tests (Chromium from `npx playwright install chromium`).
 - Button: `primary`, `secondary`, `ghost`, and `danger` variants from semantic tokens only; a token-
@@ -413,7 +414,7 @@ Implementation notes (unit 6, second pull request: visual baseline):
   (button, form field, card, status badge, dialog, table) in both themes at 1280, 640, and 320 px:
   36 baselines (about 420 KB) under `src/visual/__screenshots__/`. The `visual` project exists only
   with `CLA_VISUAL=1`, so host runs never compare against container baselines. `make test-visual`
-  and `make test-visual-update` run it in the digest-pinned Playwright 1.64.1 image with Docker,
+  and `make test-visual-update` run it in the digest-pinned Playwright image with Docker,
   `--network none`, and the caller's user ID; CI runs it in the same image. Failure images go to
   `.vitest/attachments` (ignored), which CI uploads as an artifact with `actions/upload-artifact`
   v7.0.2, pinned by commit.
