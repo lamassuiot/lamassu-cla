@@ -13,11 +13,33 @@ phase starts.
 
 | Question | Status |
 | --- | --- |
-| Which legal entity is the controller for contributor and signer data? | **Legal decision required** |
+| Which legal entity is the controller for contributor and signer data? | Proposed by the repository owner (2026-10-22): LKS S.Coop. **Legal confirmation required** (D-20). |
 | Processors and sub-processors (for example AWS, the signing provider, GitHub) and the agreements in place with them. | **Legal decision required** |
 | Whether a data-protection impact assessment is required. | **DPO decision required** |
-| Lawful basis per processing purpose and the privacy notice shown at sign-in and signing (D-20). | **Legal decision required** |
+| Lawful basis per processing purpose and the privacy notice shown at sign-in and signing (D-20). | Proposal in section 1.1. **Legal and DPO decision required** |
 | International transfers resulting from provider and hosting locations (relates to D-04 and D-11). | **Legal decision required** |
+
+### 1.1 Proposed controller and lawful bases (D-20)
+
+Approved by the repository owner on 2026-10-22 as a **proposal for Legal and DPO review**. It is not
+Legal or DPO sign-off: D-20 stays open until they validate these bases and approve the privacy
+notice, retention periods, recipients, and any international transfers. No production processing
+is authorized by this proposal.
+
+Proposed data controller: LKS S.Coop.
+
+| Processing purpose | Proposed lawful basis (GDPR) |
+| --- | --- |
+| GitHub sign-in and minimal account creation | Article 6(1)(b), where necessary to take pre-contractual steps or to perform the agreement requested by the contributor. |
+| ICLA execution and administration | Article 6(1)(b), subject to confirmation that the processing is necessary for the agreement. |
+| CCLA signatory data | Article 6(1)(b) where applicable. |
+| Management of the authorized-contributor list | Article 6(1)(f), proposed. |
+| Pull-request contribution-coverage checks | Article 6(1)(f), proposed, with a documented balancing assessment. |
+| Retaining signature evidence and handling potential claims | Article 6(1)(f), proposed; Article 6(1)(c) only if Legal identifies a specific legal obligation. |
+| Security, abuse prevention, and access auditing | Article 6(1)(f), proposed, with limited data and retention. |
+
+Consent must not be used as a blanket basis for processing that is required to use the CLA
+service.
 
 ## 2. Data inventory
 

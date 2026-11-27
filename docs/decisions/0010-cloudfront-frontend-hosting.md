@@ -29,6 +29,10 @@ security headers, without making any S3 bucket public.
 - Serving the portal and API from the same site (through a CloudFront behavior for `/v1/*`) is
   preferred so the session cookie can stay host-only; the exact routing is defined in the Phase 2
   infrastructure feature specification.
+- Update 2026-10-22 (D-02): the API behavior matches `/api/*`, not `/v1/*`. The versioned API is
+  under `/api/v1`, and the GitHub sign-in callback is `/api/auth/github/callback`, outside the
+  versioned routes. The portal origin is `https://cla.developers.lamassu.cloud`; the domain is not
+  provisioned, and D-02 does not authorize deployment.
 
 ## Alternatives considered
 
