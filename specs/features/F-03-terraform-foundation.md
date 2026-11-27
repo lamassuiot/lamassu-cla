@@ -145,11 +145,15 @@ data stores, so rollback is a revert and apply. State buckets are never deleted 
 ## Implementation plan
 
 1. **Implemented:** modules `kms-key`, `s3-bucket`, `github-oidc-role`, `log-group`, with tests.
+   F-07 unit 3 added `dynamodb-table`, `lambda-function`, `http-api`, `secret`, and the
+   `api-service` composition (A-32), with plan-only tests; the environment roots call it.
 2. **Implemented:** `infra/bootstrap`.
 3. **Implemented:** environment roots with variables, validation, and default tags.
 4. **Implemented:** [bootstrap and deployment guide](../../docs/operations/terraform-bootstrap.md).
 5. Deployment workflow with OIDC and production approval. It is enabled only after the platform
-   owner completes the prerequisites; production remains blocked until D-10 is confirmed.
+   owner completes the prerequisites; production remains blocked until D-10 is confirmed. It also
+   extends the deployment role's policy with the permissions for the F-07 resources (tables,
+   keys, secret, function, HTTP API, artifact bucket) and uploads the `api` artifact (A-32).
    **Not started.**
 
 Implementation notes (steps 1 to 4):

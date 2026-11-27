@@ -411,6 +411,17 @@ retained, not destroyed, by default).
 3. **Infrastructure (plan-only).** API Gateway HTTP API, the `api` Lambda, the `core`, `audit`, and
    `ephemeral` tables, the Secrets Manager secret (value set by LKS organization admins; readable only by the authentication backend), and
    least-privilege IAM, with plan-only tests (F07-T11). No apply until F-03 step 5.
+   *Delivered (plan-only):* modules `dynamodb-table`, `lambda-function`, `http-api`, `secret`,
+   and the `api-service` composition called by the three environment roots (parameters,
+   packaging, and Checkov exceptions in A-32). The `api` function receives exactly the unit 2
+   variables; `CLA_GITHUB_CLIENT_SECRET_ID` is the secret name, `CLA_SIGN_IN_ENABLED` defaults
+   to `false`, and the production root rejects `true` until D-20 is recorded. Access logs record
+   no query string, client IP, or user agent (tested). The audit table's IAM denies updates and
+   deletes. New root variables (`portal_origin`, `github_client_id`, `artifacts_bucket_name`,
+   `api_package`, `log_retention_in_days`, `sign_in_enabled`) come from GitHub environment
+   variables at plan time; log retention has no default (D-10). The deployment role's
+   permissions for these resources belong to F-03 step 5; the CloudFront `/api/*` behaviour
+   belongs to the portal hosting work (D-16).
 4. **Portal.** Session state, header states, sign-in error route, privacy-notice link, and
    accessibility runs (F07-T10); the server-state library proposed with evidence.
 

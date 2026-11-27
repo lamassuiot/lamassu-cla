@@ -32,3 +32,46 @@ variable "evidence_object_lock" {
     error_message = "evidence_object_lock.days must be a whole number of at least 1."
   }
 }
+
+# F-07 sign-in API (unit 3). Environment-specific values come from GitHub environment variables
+# at plan time (D-05); nothing environment-specific is committed.
+
+variable "portal_origin" {
+  description = "Portal origin of this environment (https, no path). Custom domains per environment are pending D-16."
+  type        = string
+}
+
+variable "github_client_id" {
+  description = "Client ID of the sign-in OAuth App for this environment (D-30). Its client secret is set in Secrets Manager by the OAuth App owners, never here."
+  type        = string
+}
+
+variable "sign_in_enabled" {
+  description = "Whether sign-in is enabled. Production sign-in stays disabled until D-20 is decided; the pull request that records D-20 removes this guard."
+  type        = bool
+  default     = false
+
+  validation {
+    condition     = !var.sign_in_enabled
+    error_message = "Production sign-in stays disabled until D-20 is decided (F-07)."
+  }
+}
+
+variable "artifacts_bucket_name" {
+  description = "Globally unique name of the deployment-artifact bucket. Supplied per environment; never committed."
+  type        = string
+}
+
+variable "api_package" {
+  description = "Key and object version of the `api` zip uploaded by the deployment workflow."
+  type = object({
+    s3_key            = string
+    s3_object_version = string
+  })
+}
+
+variable "log_retention_in_days" {
+  description = "Retention of the API log groups. No default: log retention is a Legal and DPO decision (D-10)."
+  type        = number
+}
+

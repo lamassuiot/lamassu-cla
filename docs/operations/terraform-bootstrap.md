@@ -126,6 +126,13 @@ Set these environment variables from `terraform output`:
 | `TF_STATE_BUCKET` | `state_bucket_name` |
 | `TF_STATE_KEY` | `environment_state_key` |
 
+The F-07 API adds root variables without defaults. Set them as `TF_VAR_*` environment variables
+in the same GitHub environment (A-32): `TF_VAR_portal_origin`, `TF_VAR_github_client_id` (the
+OAuth App's public client ID, D-30; never the client secret), `TF_VAR_artifacts_bucket_name`,
+and `TF_VAR_log_retention_in_days` (a Legal and DPO decision, D-10). `TF_VAR_api_package` is
+set by the deployment workflow after it uploads the artifact. `TF_VAR_sign_in_enabled` stays
+unset (`false`); production rejects `true` until D-20 is recorded.
+
 For `production`, configure required reviewers on the environment (AC-03-10).
 
 The deployment workflow (F-03 implementation plan, step 5) is not part of this repository yet. It is
