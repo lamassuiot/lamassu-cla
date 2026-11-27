@@ -133,7 +133,13 @@ func (a *Auth) revoke(ctx context.Context, accessToken string) {
 	if accessToken == "" {
 		return
 	}
-	// Best effort by specification: a failure here must not fail the sign-in.
+	timeout := a.cfg.RevokeTimeout
+	if timeout == 0 {
+		timeout = DefaultRevokeTimeout
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	// Best effort by specification: a failure or timeout here must not fail the sign-in.
 	_ = a.deps.Identity.Revoke(ctx, accessToken)
 }
 

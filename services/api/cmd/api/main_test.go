@@ -31,6 +31,9 @@ func TestLoadConfigDefaults(t *testing.T) {
 	if c.SessionIdle != 30*time.Minute || c.SessionAbsolute != 8*time.Hour {
 		t.Fatalf("session policy = %v/%v", c.SessionIdle, c.SessionAbsolute)
 	}
+	if c.UpstreamTimeout != 4*time.Second || c.RevokeTimeout != 2*time.Second {
+		t.Fatalf("budgets = %v/%v", c.UpstreamTimeout, c.RevokeTimeout)
+	}
 	if len(c.ReturnToAllowlist) != 1 || c.ReturnToAllowlist[0] != "/" || c.SignInErrorRoute != "/sign-in/error" {
 		t.Fatalf("defaults = %+v", c)
 	}
@@ -46,12 +49,14 @@ func TestLoadConfigOverrides(t *testing.T) {
 	}
 	m["CLA_SIGN_IN_ENABLED"] = "true"
 	m["CLA_SESSION_IDLE"] = "600"
+	m["CLA_UPSTREAM_TIMEOUT"] = "3"
+	m["CLA_REVOKE_TIMEOUT"] = "1"
 	m["CLA_RETURN_TO_ALLOWLIST"] = "/, /agreements/ ,/profile"
 	c, err := loadConfig(env(m))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !c.SignInEnabled || c.SessionIdle != 10*time.Minute || len(c.ReturnToAllowlist) != 3 || c.ReturnToAllowlist[1] != "/agreements/" {
+	if !c.SignInEnabled || c.SessionIdle != 10*time.Minute || len(c.ReturnToAllowlist) != 3 || c.ReturnToAllowlist[1] != "/agreements/" || c.UpstreamTimeout != 3*time.Second || c.RevokeTimeout != time.Second {
 		t.Fatalf("config = %+v", c)
 	}
 }

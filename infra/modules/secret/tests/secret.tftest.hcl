@@ -21,13 +21,13 @@ run "no_value_and_customer_key" {
   }
 
   assert {
-    condition     = length([for s in jsondecode(output.resource_policy).Statement : s if s.Sid == "AllowReaders" && s.Effect == "Allow" && s.Principal.AWS == ["arn:aws:iam::000000000000:role/synthetic-api"]]) == 1
-    error_message = "Only the reader role is allowed GetSecretValue."
+    condition     = length(jsondecode(output.resource_policy).Statement) == 1
+    error_message = "The resource policy is deny-only; reads come from identity policies."
   }
 
   assert {
     condition     = length([for s in jsondecode(output.resource_policy).Statement : s if s.Sid == "DenyReadToOthers" && s.Effect == "Deny" && s.Action == "secretsmanager:GetSecretValue" && s.Condition.ArnNotEquals["aws:PrincipalArn"] == ["arn:aws:iam::000000000000:role/synthetic-api"]]) == 1
-    error_message = "Every other principal must be denied GetSecretValue."
+    error_message = "Every principal but the reader role must be denied GetSecretValue."
   }
 
   assert {

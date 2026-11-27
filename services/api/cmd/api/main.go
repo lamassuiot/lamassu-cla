@@ -37,12 +37,16 @@ type config struct {
 	ReturnToAllowlist []string
 	SessionIdle       time.Duration
 	SessionAbsolute   time.Duration
-	Tables            awsadapters.Tables
-	GitHubClientID    string
-	GitHubSecretID    string
-	GitHubWebBaseURL  string
-	GitHubAPIBaseURL  string
-	DynamoDBEndpoint  string
+	// UpstreamTimeout bounds each GitHub call; RevokeTimeout bounds best-effort revocation. Together
+	// with the DynamoDB work they must fit the function timeout Terraform sets (A-32).
+	UpstreamTimeout  time.Duration
+	RevokeTimeout    time.Duration
+	Tables           awsadapters.Tables
+	GitHubClientID   string
+	GitHubSecretID   string
+	GitHubWebBaseURL string
+	GitHubAPIBaseURL string
+	DynamoDBEndpoint string
 }
 
 // loadConfig reads the environment. Secrets are never in the environment: only the Secrets
@@ -75,6 +79,12 @@ func loadConfig(getenv func(string) string) (config, error) {
 		return c, err
 	}
 	if c.SessionAbsolute, err = durationSeconds("CLA_SESSION_ABSOLUTE", getenv("CLA_SESSION_ABSOLUTE"), domain.DefaultSessionPolicy.Absolute); err != nil {
+		return c, err
+	}
+	if c.UpstreamTimeout, err = durationSeconds("CLA_UPSTREAM_TIMEOUT", getenv("CLA_UPSTREAM_TIMEOUT"), 4*time.Second); err != nil {
+		return c, err
+	}
+	if c.RevokeTimeout, err = durationSeconds("CLA_REVOKE_TIMEOUT", getenv("CLA_REVOKE_TIMEOUT"), application.DefaultRevokeTimeout); err != nil {
 		return c, err
 	}
 	for _, p := range strings.Split(or("CLA_RETURN_TO_ALLOWLIST", "/"), ",") {
@@ -128,7 +138,7 @@ func build(ctx context.Context, c config, log *slog.Logger) (http.Handler, error
 	}
 	identity, err := github.NewOAuthAdapter(github.OAuthConfig{
 		ClientID: c.GitHubClientID, ClientSecret: clientSecret,
-		WebBaseURL: c.GitHubWebBaseURL, APIBaseURL: c.GitHubAPIBaseURL, Timeout: 10 * time.Second,
+		WebBaseURL: c.GitHubWebBaseURL, APIBaseURL: c.GitHubAPIBaseURL, Timeout: c.UpstreamTimeout,
 	}, &http.Client{})
 	if err != nil {
 		return nil, err
@@ -140,10 +150,11 @@ func build(ctx context.Context, c config, log *slog.Logger) (http.Handler, error
 	}
 	clock := memory.Clock{}
 	auth, err := application.NewAuth(application.AuthConfig{
-		Enabled:     c.SignInEnabled,
-		CallbackURL: c.CallbackURL,
-		ReturnTo:    domain.ReturnToPolicy{Allowed: c.ReturnToAllowlist},
-		Session:     domain.SessionPolicy{Idle: c.SessionIdle, Absolute: c.SessionAbsolute},
+		Enabled:       c.SignInEnabled,
+		CallbackURL:   c.CallbackURL,
+		ReturnTo:      domain.ReturnToPolicy{Allowed: c.ReturnToAllowlist},
+		Session:       domain.SessionPolicy{Idle: c.SessionIdle, Absolute: c.SessionAbsolute},
+		RevokeTimeout: c.RevokeTimeout,
 	}, application.AuthDependencies{
 		Clock: clock, Random: random, Identity: identity, Attempts: stores,
 		Sessions: stores.Sessions(), Contributors: stores.Contributors(), Security: slogSecurity{log},

@@ -1,16 +1,16 @@
 output "api_endpoint" {
-  description = "Execute-api endpoint of the HTTP API; the CloudFront `/api/*` origin (D-02)."
-  value       = module.http_api.api_endpoint
+  description = "Execute-api endpoint of the HTTP API; the CloudFront `/api/*` origin (D-02). Null until the function is deployed (phase B)."
+  value       = one(module.http_api[*].api_endpoint)
 }
 
 output "api_function_name" {
-  description = "Name of the `api` function."
-  value       = module.api.function_name
+  description = "Name of the `api` function. Null until the function is deployed."
+  value       = one(module.api[*].function_name)
 }
 
 output "api_role_arn" {
-  description = "Execution role of the `api` function."
-  value       = module.api.role_arn
+  description = "Execution role of the `api` function (the ARN it has once deployed)."
+  value       = local.api_role_arn
 }
 
 output "table_names" {

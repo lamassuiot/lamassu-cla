@@ -11,7 +11,14 @@ locals {
   region     = data.aws_region.current.region
 
   api_function_name = "${local.prefix}-api"
-  secret_name       = "lamassu-cla/${var.environment}/github-oauth-client-secret"
+  # The role name equals the function name (lambda-function module). Computed here so the secret's
+  # resource policy can name the role before the function exists (first-deployment sequence, A-32).
+  api_role_arn = "arn:aws:iam::${local.account_id}:role/${local.api_function_name}"
+  secret_name  = "lamassu-cla/${var.environment}/github-oauth-client-secret"
+
+  # Without an artifact only the storage, keys, tables, and secret exist: phase A of the
+  # first-deployment sequence (A-32). The function and the HTTP API need the uploaded ZIP.
+  deploy_function = var.api_package != null
 
   # CloudWatch Logs encrypts with the operations key only for this environment's log groups.
   operations_key_policy = jsonencode({
@@ -51,6 +58,9 @@ locals {
       CLA_TABLE_AUDIT             = module.audit_table.name
       CLA_GITHUB_CLIENT_ID        = var.github_client_id
       CLA_GITHUB_CLIENT_SECRET_ID = local.secret_name
+      # Budget (A-32): 2 x upstream + revoke + reserve <= function timeout < integration timeout.
+      CLA_UPSTREAM_TIMEOUT = tostring(var.upstream_timeout_seconds)
+      CLA_REVOKE_TIMEOUT   = tostring(var.revoke_timeout_seconds)
     },
     var.session_idle_seconds == null ? {} : { CLA_SESSION_IDLE = tostring(var.session_idle_seconds) },
     var.session_absolute_seconds == null ? {} : { CLA_SESSION_ABSOLUTE = tostring(var.session_absolute_seconds) },
@@ -85,6 +95,23 @@ locals {
         Effect   = "Deny"
         Action   = ["dynamodb:UpdateItem", "dynamodb:DeleteItem", "dynamodb:BatchWriteItem"]
         Resource = [module.audit_table.arn, "${module.audit_table.arn}/index/*"]
+      },
+      {
+        # DynamoDB decrypts each table key on the caller's behalf (encryption usage notes:
+        # Decrypt via dynamodb.<region> with the table name and account in the encryption
+        # context). Grants, GenerateDataKey, and CreateGrant belong to the table creator (the
+        # deployment role, F-03 step 5), not to the function.
+        Sid      = "DecryptTableKeys"
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:DescribeKey"]
+        Resource = [module.core_key.key_arn, module.audit_key.key_arn]
+        Condition = {
+          StringEquals = {
+            "kms:ViaService"                                  = "dynamodb.${local.region}.amazonaws.com"
+            "kms:EncryptionContext:aws:dynamodb:subscriberId" = local.account_id
+            "kms:EncryptionContext:aws:dynamodb:tableName"    = [module.core_table.name, module.audit_table.name, module.ephemeral_table.name]
+          }
+        }
       },
       {
         Sid      = "ReadGitHubClientSecret"
@@ -184,8 +211,8 @@ module "ephemeral_table" {
   attributes    = { PK = "S" }
 }
 
-# GitHub OAuth client secret: value set by LKS organization admins (D-30), readable only by the
-# `api` function's role.
+# GitHub OAuth client secret: value set by LKS organization admins (D-30) in phase A, before the
+# function exists; readable only by the `api` function's role.
 
 module "github_client_secret" {
   source = "../secret"
@@ -193,7 +220,7 @@ module "github_client_secret" {
   name             = local.secret_name
   description      = "GitHub OAuth App client secret for sign-in (${var.environment})"
   kms_key_arn      = module.secrets_key.key_arn
-  reader_role_arns = [module.api.role_arn]
+  reader_role_arns = [local.api_role_arn]
 }
 
 # Deployment artifacts, uploaded by the deployment workflow.
@@ -209,10 +236,11 @@ module "artifacts_bucket" {
   noncurrent_version_expiration_days = var.artifact_noncurrent_version_expiration_days
 }
 
-# The `api` function and its HTTP API.
+# The `api` function and its HTTP API (phase B: after the artifact is uploaded).
 
 module "api" {
   source = "../lambda-function"
+  count  = local.deploy_function ? 1 : 0
 
   function_name                  = local.api_function_name
   description                    = "CLA platform API (${var.environment})"
@@ -236,14 +264,16 @@ module "api" {
 
 module "http_api" {
   source = "../http-api"
+  count  = local.deploy_function ? 1 : 0
 
-  name                   = local.api_function_name
-  description            = "CLA platform HTTP API (${var.environment})"
-  lambda_invoke_arn      = module.api.invoke_arn
-  lambda_function_name   = module.api.function_name
-  route_keys             = ["ANY /api/{proxy+}"]
-  throttling_burst_limit = var.api_throttling_burst_limit
-  throttling_rate_limit  = var.api_throttling_rate_limit
-  log_retention_in_days  = var.log_retention_in_days
-  kms_key_arn            = module.operations_key.key_arn
+  name                             = local.api_function_name
+  description                      = "CLA platform HTTP API (${var.environment})"
+  lambda_invoke_arn                = module.api[0].invoke_arn
+  lambda_function_name             = module.api[0].function_name
+  route_keys                       = ["ANY /api/{proxy+}"]
+  integration_timeout_milliseconds = var.api_integration_timeout_seconds * 1000
+  throttling_burst_limit           = var.api_throttling_burst_limit
+  throttling_rate_limit            = var.api_throttling_rate_limit
+  log_retention_in_days            = var.log_retention_in_days
+  kms_key_arn                      = module.operations_key.key_arn
 }

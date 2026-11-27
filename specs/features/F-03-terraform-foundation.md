@@ -153,7 +153,10 @@ data stores, so rollback is a revert and apply. State buckets are never deleted 
 5. Deployment workflow with OIDC and production approval. It is enabled only after the platform
    owner completes the prerequisites; production remains blocked until D-10 is confirmed. It also
    extends the deployment role's policy with the permissions for the F-07 resources (tables,
-   keys, secret, function, HTTP API, artifact bucket) and uploads the `api` artifact (A-32).
+   keys including `kms:CreateGrant` and `kms:GenerateDataKey*` as the table creator, secret,
+   function, HTTP API, artifact bucket) and implements the
+   [first-deployment sequence](../../docs/operations/terraform-bootstrap.md#7-first-deployment-sequence):
+   apply without `api_package`, upload the versioned ZIP, apply with the object version (A-32).
    **Not started.**
 
 Implementation notes (steps 1 to 4):

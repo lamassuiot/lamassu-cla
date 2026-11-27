@@ -16,19 +16,12 @@ resource "aws_secretsmanager_secret_policy" "this" {
 }
 
 locals {
-  # Only the listed reader roles can read the value; everyone else in the account can manage the
-  # secret (set the value, rotate, delete) but not read it. The explicit deny also binds the
-  # account root and administrators.
+  # Reads are granted by the readers' identity policies. The resource policy only denies
+  # GetSecretValue to every other principal, administrators and the account root included. A
+  # deny-only policy also lets the secret be created before the reader role exists (A-32).
   resource_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Sid       = "AllowReaders"
-        Effect    = "Allow"
-        Principal = { AWS = var.reader_role_arns }
-        Action    = "secretsmanager:GetSecretValue"
-        Resource  = "*"
-      },
       {
         Sid       = "DenyReadToOthers"
         Effect    = "Deny"

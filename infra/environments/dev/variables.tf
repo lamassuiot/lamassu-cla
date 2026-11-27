@@ -53,11 +53,12 @@ variable "artifacts_bucket_name" {
 }
 
 variable "api_package" {
-  description = "Key and object version of the `api` zip uploaded by the deployment workflow."
+  description = "Key and object version of the `api` zip uploaded by the deployment workflow. Null plans phase A of the first deployment (storage, keys, tables, secret; A-32)."
   type = object({
     s3_key            = string
     s3_object_version = string
   })
+  default = null
 }
 
 variable "log_retention_in_days" {

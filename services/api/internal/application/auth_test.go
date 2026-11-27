@@ -295,6 +295,22 @@ func TestCompleteSignInRevokeFailureIsTolerated(t *testing.T) {
 	}
 }
 
+// A-32: revocation has its own deadline, so an unresponsive GitHub cannot hold the sign-in
+// past the configured budget.
+func TestCompleteSignInRevokeIsBoundedByTimeout(t *testing.T) {
+	h := newHarness(true)
+	h.identity.revokeHangs = true
+	h.auth.cfg.RevokeTimeout = 20 * time.Millisecond
+	start, _ := h.start("/")
+	began := time.Now()
+	if _, err := h.callback(start.State, start.State, ""); err != nil {
+		t.Fatalf("revocation timeout must not fail sign-in: %v", err)
+	}
+	if elapsed := time.Since(began); elapsed > time.Second {
+		t.Fatalf("sign-in waited %v for revocation; the budget is 20ms", elapsed)
+	}
+}
+
 // F07-T12: suspended and revoked contributors sign in; login changes and reuse (AC-07-11, 12).
 func TestCompleteSignInContributorStatusAndLogin(t *testing.T) {
 	h := newHarness(true)

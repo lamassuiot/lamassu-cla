@@ -19,7 +19,7 @@ variable "kms_key_arn" {
 }
 
 variable "reader_role_arns" {
-  description = "IAM role ARNs allowed to read the secret value. Every other principal, including administrators, is denied GetSecretValue."
+  description = "IAM role ARNs exempt from the deny on GetSecretValue; their identity policies grant the read. Every other principal, including administrators, is denied. The roles need not exist yet."
   type        = list(string)
 
   validation {

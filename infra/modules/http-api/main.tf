@@ -1,22 +1,21 @@
 locals {
-  # Access-log fields: no query string, no client IP, no user agent, no cookies, no authorizer
-  # claims (F-07 security considerations, security specification 7). The path carries no personal
-  # data by contract (`return_to` and OAuth parameters travel in the query string).
+  # Access-log fields (F-07 security considerations, security specification 7): no query string,
+  # no raw request path, no client IP, no user agent, no cookies, no identity, and no free-form
+  # messages. The route key is the matched template (`ANY /api/{proxy+}`), not the request path;
+  # the error type and integration status are enumerated values. Per-request diagnosis uses the
+  # request ID against the function's own structured logs.
   access_log_format = jsonencode({
-    requestId               = "$context.requestId"
-    requestTime             = "$context.requestTime"
-    httpMethod              = "$context.httpMethod"
-    path                    = "$context.path"
-    routeKey                = "$context.routeKey"
-    protocol                = "$context.protocol"
-    status                  = "$context.status"
-    responseLength          = "$context.responseLength"
-    responseLatency         = "$context.responseLatency"
-    integrationLatency      = "$context.integrationLatency"
-    integrationStatus       = "$context.integrationStatus"
-    integrationErrorMessage = "$context.integrationErrorMessage"
-    errorMessage            = "$context.error.message"
-    errorResponseType       = "$context.error.responseType"
+    requestId          = "$context.requestId"
+    requestTime        = "$context.requestTime"
+    httpMethod         = "$context.httpMethod"
+    routeKey           = "$context.routeKey"
+    protocol           = "$context.protocol"
+    status             = "$context.status"
+    responseLength     = "$context.responseLength"
+    responseLatency    = "$context.responseLatency"
+    integrationLatency = "$context.integrationLatency"
+    integrationStatus  = "$context.integrationStatus"
+    errorResponseType  = "$context.error.responseType"
   })
 }
 

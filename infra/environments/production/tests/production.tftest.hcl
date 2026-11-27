@@ -1,4 +1,13 @@
-mock_provider "aws" {}
+mock_provider "aws" {
+  # Synthetic account: the api-service composition derives ARNs from it.
+  mock_data "aws_caller_identity" {
+    defaults = { account_id = "000000000000" }
+  }
+
+  mock_data "aws_region" {
+    defaults = { region = "eu-west-1", name = "eu-west-1" }
+  }
+}
 
 # Synthetic values for the F-07 variables that have no defaults; real values come from GitHub
 # environment variables at plan time (D-05).
@@ -63,4 +72,21 @@ run "rejects_sign_in_before_d20" {
   }
 
   expect_failures = [var.sign_in_enabled]
+}
+
+run "phase_a_without_artifact" {
+  command = plan
+
+  variables {
+    api_package = null
+    evidence_object_lock = {
+      mode = "COMPLIANCE"
+      days = 1
+    }
+  }
+
+  assert {
+    condition     = output.api_endpoint == null && output.github_client_secret_name == "lamassu-cla/production/github-oauth-client-secret"
+    error_message = "Without an artifact the root plans storage, keys, tables, and the secret only (A-32)."
+  }
 }

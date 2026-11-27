@@ -75,11 +75,12 @@ variable "artifact_noncurrent_version_expiration_days" {
 }
 
 variable "api_package" {
-  description = "Key and object version of the `api` zip in the artifact bucket, supplied by the deployment workflow."
+  description = "Key and object version of the `api` zip in the artifact bucket, supplied by the deployment workflow. Null plans only storage, keys, tables, and the secret (phase A of the first deployment, A-32)."
   type = object({
     s3_key            = string
     s3_object_version = string
   })
+  default = null
 }
 
 variable "log_retention_in_days" {
@@ -94,9 +95,52 @@ variable "api_memory_size" {
 }
 
 variable "api_timeout" {
-  description = "Timeout of the `api` function in seconds."
+  description = "Timeout of the `api` function in seconds. Must hold two upstream calls, the revocation budget, and a reserve for DynamoDB and the runtime (A-32)."
   type        = number
-  default     = 10
+  default     = 15
+
+  validation {
+    condition     = var.api_timeout >= 2 * var.upstream_timeout_seconds + var.revoke_timeout_seconds + 3
+    error_message = "api_timeout must be at least 2 x upstream_timeout_seconds + revoke_timeout_seconds + 3 seconds of reserve."
+  }
+
+  validation {
+    condition     = var.api_timeout < var.api_integration_timeout_seconds
+    error_message = "api_timeout must be below api_integration_timeout_seconds so the gateway reports the function's timeout, not its own."
+  }
+}
+
+variable "api_integration_timeout_seconds" {
+  description = "API Gateway integration timeout in seconds (at most 30)."
+  type        = number
+  default     = 20
+
+  validation {
+    condition     = var.api_integration_timeout_seconds >= 1 && var.api_integration_timeout_seconds <= 30
+    error_message = "api_integration_timeout_seconds must be between 1 and 30."
+  }
+}
+
+variable "upstream_timeout_seconds" {
+  description = "Timeout of each GitHub call (token exchange, user lookup) in seconds; CLA_UPSTREAM_TIMEOUT."
+  type        = number
+  default     = 4
+
+  validation {
+    condition     = var.upstream_timeout_seconds >= 1
+    error_message = "upstream_timeout_seconds must be at least 1."
+  }
+}
+
+variable "revoke_timeout_seconds" {
+  description = "Budget of the best-effort token revocation in seconds; CLA_REVOKE_TIMEOUT. It bounds how long revocation can delay a sign-in."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.revoke_timeout_seconds >= 1
+    error_message = "revoke_timeout_seconds must be at least 1."
+  }
 }
 
 variable "api_reserved_concurrency" {

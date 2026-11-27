@@ -50,6 +50,24 @@ override_module {
 }
 
 override_module {
+  target = module.core_key
+  outputs = {
+    key_arn    = "arn:aws:kms:eu-west-1:000000000000:key/00000000-0000-0000-0000-00000000c0re"
+    key_id     = "00000000-0000-0000-0000-00000000c0re"
+    alias_name = "alias/lamassu-cla-dev-core"
+  }
+}
+
+override_module {
+  target = module.audit_key
+  outputs = {
+    key_arn    = "arn:aws:kms:eu-west-1:000000000000:key/00000000-0000-0000-0000-0000000aud1t"
+    key_id     = "00000000-0000-0000-0000-0000000aud1t"
+    alias_name = "alias/lamassu-cla-dev-audit"
+  }
+}
+
+override_module {
   target = module.github_client_secret
   outputs = {
     arn             = "arn:aws:secretsmanager:eu-west-1:000000000000:secret:lamassu-cla/dev/github-oauth-client-secret-AbCdEf"
@@ -59,7 +77,7 @@ override_module {
 }
 
 override_module {
-  target = module.api
+  target = module.api[0]
   outputs = {
     function_name  = "lamassu-cla-dev-api"
     function_arn   = "arn:aws:lambda:eu-west-1:000000000000:function:lamassu-cla-dev-api"
@@ -98,13 +116,36 @@ run "composition" {
   }
 
   assert {
-    condition     = output.audit_stream_arn != null && module.api.function_name == "lamassu-cla-dev-api"
+    condition     = output.audit_stream_arn != null && module.api[0].function_name == "lamassu-cla-dev-api"
     error_message = "The audit table streams for export."
   }
 
   assert {
-    condition     = module.http_api.access_log_group_name == "/aws/apigateway/lamassu-cla-dev-api"
+    condition     = module.http_api[0].access_log_group_name == "/aws/apigateway/lamassu-cla-dev-api"
     error_message = "The HTTP API carries the function name."
+  }
+
+  assert {
+    condition     = output.api_role_arn == "arn:aws:iam::000000000000:role/lamassu-cla-dev-api"
+    error_message = "The role ARN is derived from the function name, so the secret can name it before it exists."
+  }
+}
+
+run "phase_a_without_artifact" {
+  command = plan
+
+  variables {
+    api_package = null
+  }
+
+  assert {
+    condition     = length(module.api) == 0 && length(module.http_api) == 0 && output.api_endpoint == null && output.api_function_name == null
+    error_message = "Without an artifact no function or HTTP API is planned (first-deployment sequence, A-32)."
+  }
+
+  assert {
+    condition     = output.github_client_secret_name == "lamassu-cla/dev/github-oauth-client-secret" && output.table_names.core == "lamassu-cla-dev-core"
+    error_message = "Storage, keys, tables, and the secret are planned in phase A."
   }
 }
 
@@ -123,8 +164,10 @@ run "api_environment_is_configuration_only" {
       CLA_TABLE_AUDIT             = "lamassu-cla-dev-audit"
       CLA_GITHUB_CLIENT_ID        = "synthetic-client-id"
       CLA_GITHUB_CLIENT_SECRET_ID = "lamassu-cla/dev/github-oauth-client-secret"
+      CLA_UPSTREAM_TIMEOUT        = "4"
+      CLA_REVOKE_TIMEOUT          = "2"
     }
-    error_message = "The function gets exactly the cmd/api variables; sign-in is off; the secret travels as an identifier."
+    error_message = "The function gets exactly the cmd/api variables; sign-in is off; the secret travels as an identifier; the budgets are explicit."
   }
 
   assert {
@@ -153,7 +196,7 @@ run "least_privilege_data_access" {
   command = plan
 
   assert {
-    condition     = [for s in jsondecode(output.api_data_policy).Statement : s.Sid] == ["EphemeralAttemptsAndSessions", "CoreContributorProfile", "AuditAppend", "AuditAppendOnly", "ReadGitHubClientSecret", "DecryptSecrets"]
+    condition     = [for s in jsondecode(output.api_data_policy).Statement : s.Sid] == ["EphemeralAttemptsAndSessions", "CoreContributorProfile", "AuditAppend", "AuditAppendOnly", "DecryptTableKeys", "ReadGitHubClientSecret", "DecryptSecrets"]
     error_message = "The data policy has exactly the F-07 statements."
   }
 
@@ -181,6 +224,46 @@ run "least_privilege_data_access" {
     condition     = one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptSecrets"]).Condition.StringEquals["kms:ViaService"] == "secretsmanager.eu-west-1.amazonaws.com"
     error_message = "The secrets key is usable only through Secrets Manager."
   }
+
+  assert {
+    condition     = one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptTableKeys"]).Action == ["kms:Decrypt", "kms:DescribeKey"] && length(one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptTableKeys"]).Resource) == 2
+    error_message = "The function may only decrypt the core and audit table keys; grants and data-key generation stay with the table creator."
+  }
+
+  assert {
+    condition     = one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptTableKeys"]).Condition.StringEquals["kms:ViaService"] == "dynamodb.eu-west-1.amazonaws.com" && one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptTableKeys"]).Condition.StringEquals["kms:EncryptionContext:aws:dynamodb:subscriberId"] == "000000000000" && sort(one([for s in jsondecode(output.api_data_policy).Statement : s if s.Sid == "DecryptTableKeys"]).Condition.StringEquals["kms:EncryptionContext:aws:dynamodb:tableName"]) == tolist(["lamassu-cla-dev-audit", "lamassu-cla-dev-core", "lamassu-cla-dev-ephemeral"])
+    error_message = "Table-key decryption is bound to DynamoDB, this account, and these three tables."
+  }
+}
+
+run "timeout_budget" {
+  command = plan
+
+  assert {
+    condition     = var.api_timeout >= 2 * var.upstream_timeout_seconds + var.revoke_timeout_seconds + 3 && var.api_timeout < var.api_integration_timeout_seconds
+    error_message = "Defaults: 2 x 4 s upstream + 2 s revocation + 3 s reserve <= 15 s function < 20 s integration."
+  }
+}
+
+run "rejects_budget_overrun" {
+  command = plan
+
+  variables {
+    upstream_timeout_seconds = 6
+  }
+
+  expect_failures = [var.api_timeout]
+}
+
+run "rejects_function_timeout_at_integration_timeout" {
+  command = plan
+
+  variables {
+    api_timeout                     = 20
+    api_integration_timeout_seconds = 20
+  }
+
+  expect_failures = [var.api_timeout]
 }
 
 run "operations_key_serves_only_this_environment" {

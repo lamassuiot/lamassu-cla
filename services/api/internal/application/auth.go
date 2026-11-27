@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/lamassuiot/lamassu-cla/services/api/internal/domain"
 	"github.com/lamassuiot/lamassu-cla/services/api/internal/ports"
@@ -17,12 +18,21 @@ type AuthConfig struct {
 	CallbackURL string
 	ReturnTo    domain.ReturnToPolicy
 	Session     domain.SessionPolicy
+	// RevokeTimeout bounds best-effort token revocation so it cannot exhaust the sign-in budget
+	// (A-32). Zero selects DefaultRevokeTimeout.
+	RevokeTimeout time.Duration
 }
+
+// DefaultRevokeTimeout is the revocation budget when none is configured.
+const DefaultRevokeTimeout = 2 * time.Second
 
 // Validate reports configuration errors at wiring time.
 func (c AuthConfig) Validate() error {
 	if c.CallbackURL == "" {
 		return errors.New("auth config: callback URL is required")
+	}
+	if c.RevokeTimeout < 0 {
+		return errors.New("auth config: revoke timeout must not be negative")
 	}
 	return c.Session.Validate()
 }
