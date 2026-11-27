@@ -126,6 +126,13 @@ Set these environment variables from `terraform output`:
 | `TF_STATE_BUCKET` | `state_bucket_name` |
 | `TF_STATE_KEY` | `environment_state_key` |
 
+The F-07 API adds root variables without defaults. Set them as `TF_VAR_*` environment variables
+in the same GitHub environment (A-32): `TF_VAR_portal_origin`, `TF_VAR_github_client_id` (the
+OAuth App's public client ID, D-30; never the client secret), `TF_VAR_artifacts_bucket_name`,
+and `TF_VAR_log_retention_in_days` (a Legal and DPO decision, D-10). `TF_VAR_api_package` is
+set by the deployment workflow after it uploads the artifact. `TF_VAR_sign_in_enabled` stays
+unset (`false`); production rejects `true` until D-20 is recorded.
+
 For `production`, configure required reviewers on the environment (AC-03-10).
 
 The deployment workflow (F-03 implementation plan, step 5) is not part of this repository yet. It is
@@ -143,3 +150,72 @@ make check-terraform
 This runs `terraform fmt`, `validate` with `-backend=false`, plan-only `terraform test` with mocked
 providers, TFLint, and the Checkov configuration scan with its insecure-fixture test. The Dev
 Container provides Terraform, TFLint, and Python 3.12.
+
+## 7. First-deployment sequence
+
+The `api` function references a versioned ZIP in the environment's artifact bucket, and that
+bucket is created by the same root. The first deployment of an environment therefore runs in two
+applies (A-32). The deployment workflow (F-03 step 5) implements exactly this sequence; nothing
+below is run until F-03 step 5 is enabled, and production additionally requires D-10.
+
+All commands run as the environment's deployment role, from the environment root
+(`infra/environments/<environment>`), with the GitHub environment variables of section 5 set.
+`<environment>` is `dev`, `staging`, or `production`.
+
+1. **Phase A: storage, keys, tables, secret.** With `TF_VAR_api_package` unset, the plan contains
+   the four KMS keys, the three tables, the GitHub client secret (without a value), and the
+   artifact bucket, and no function or HTTP API.
+
+   ```bash
+   terraform init -input=false
+   terraform plan -input=false -out=phase-a.tfplan
+   terraform apply -input=false phase-a.tfplan
+   ```
+
+2. **Set the secret value.** The OAuth App owners (LKS organization admins, D-30) set the value of
+   the secret named by `terraform output -raw github_client_secret_name` through the AWS console or
+   `aws secretsmanager put-secret-value`. The value is never passed through Terraform, GitHub, or
+   this repository. The resource policy denies reads to everyone except the function's role.
+
+3. **Build and upload the versioned ZIP.** From the repository root, on the commit being deployed:
+
+   ```bash
+   make build-go
+   (cd services/api/dist/api && zip -X -j ../api.zip bootstrap)
+   aws s3api put-object \
+     --bucket "$(terraform -chdir=infra/environments/<environment> output -raw artifacts_bucket_name)" \
+     --key "api/$(git rev-parse HEAD).zip" \
+     --body services/api/dist/api.zip \
+     --server-side-encryption aws:kms \
+     --query VersionId --output text
+   ```
+
+   The printed `VersionId` pins the artifact.
+
+4. **Phase B: function and HTTP API.** With the key and version from step 3:
+
+   ```bash
+   export TF_VAR_api_package='{"s3_key":"api/<commit-sha>.zip","s3_object_version":"<VersionId>"}'
+   terraform plan -input=false -out=phase-b.tfplan
+   terraform apply -input=false phase-b.tfplan
+   ```
+
+   `terraform output -raw api_endpoint` is the execute-api endpoint that the CloudFront `/api/*`
+   behaviour will use (D-02, D-16). Sign-in stays disabled (`TF_VAR_sign_in_enabled` unset).
+
+Later deployments repeat steps 3 and 4 only. A redeployment that changes nothing but the artifact
+replaces the function code in place; tables, keys, the secret, and the bucket are never recreated
+(`prevent_destroy`, deletion protection).
+
+## 8. Table-key authorization
+
+The `core` and `audit` keys keep the default key policy, which delegates to IAM. Two identity
+policies use them (A-32):
+
+- The deployment role, as the table creator, needs `kms:Encrypt`, `kms:Decrypt`, `kms:ReEncrypt*`,
+  `kms:GenerateDataKey*`, `kms:DescribeKey`, and `kms:CreateGrant` through
+  `dynamodb.<region>.amazonaws.com` (F-03 step 5 adds them).
+- The `api` function's role has `kms:Decrypt` and `kms:DescribeKey` on the two keys, only through
+  `dynamodb.<region>.amazonaws.com`, only for this account, and only for the three table names in
+  the encryption context (`api-service` data policy, tested). DynamoDB decrypts the table key on
+  the function's behalf when its five-minute cache expires; the function never calls KMS directly.

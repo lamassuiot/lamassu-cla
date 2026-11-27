@@ -54,6 +54,7 @@ type fakeIdentity struct {
 	lookupLogin   string
 	revoked       []string
 	revokeErr     error
+	revokeHangs   bool
 }
 
 func scope(s string) *string { return &s }
@@ -102,7 +103,11 @@ func (f *fakeIdentity) LookupIdentity(_ context.Context, token string) (ports.Id
 	return ports.IdentityLookup{Identity: domain.GitHubIdentity{UserID: f.lookupID, Login: f.lookupLogin}, OAuthScopes: f.lookupScopes}, nil
 }
 
-func (f *fakeIdentity) Revoke(_ context.Context, token string) error {
+func (f *fakeIdentity) Revoke(ctx context.Context, token string) error {
+	if f.revokeHangs {
+		<-ctx.Done()
+		return ctx.Err()
+	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.revoked = append(f.revoked, token)

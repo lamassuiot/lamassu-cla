@@ -196,7 +196,11 @@ replacement transaction committed but its result was lost (see that row).
   session is created, and the old one deleted, only after authentication and the required writes
   have succeeded, in one transaction (session rotation on authentication).
 - No GitHub token is persisted, logged, or returned, and any `refresh_token` is discarded. The
-  access token is revoked best-effort right after `GET /user`. The OAuth App sends an explicitly
+  access token is revoked best-effort right after `GET /user`, within its own budget
+  (`CLA_REVOKE_TIMEOUT`, default 2 s) so an unresponsive GitHub cannot hold the sign-in; each
+  GitHub call has its own timeout (`CLA_UPSTREAM_TIMEOUT`, default 4 s), and Terraform enforces
+  2 × upstream + revocation + 3 s reserve ≤ function timeout (15 s) < integration timeout (20 s)
+  (A-32). The OAuth App sends an explicitly
   empty `scope` and extracts only `id` and `login` from `GET /user`, which needs no scope; other
   fields, including any public email address, are ignored, and no email endpoint is called. It
   has no repository permissions and no email access (D-06, ADR-0014). Because GitHub grants
@@ -222,7 +226,9 @@ replacement transaction committed but its result was lost (see that row).
 - Session and authentication responses carry `Cache-Control: no-store`. Logs, traces, metrics, and
   problem responses contain no callback query strings, codes, `state` values, session tokens, CSRF
   tokens, cookies, or personal data; the request ID correlates them. API Gateway access logs must
-  not record query strings (unit 3). Audit events record the GitHub user ID as the
+  not record query strings, raw request paths, client IPs, user agents, identities, or free-form
+  error messages; the matched route key, enumerated error type, and integration status are
+  allowed (unit 3, A-32). Audit events record the GitHub user ID as the
   actor, as the domain model allows.
 - Audit events are written in the same transaction as the session change; a sign-in or sign-out
   whose audit write fails is not reported as successful.
@@ -406,11 +412,29 @@ retained, not destroyed, by default).
    `CLA_TABLE_AUDIT`, `CLA_GITHUB_CLIENT_ID`, `CLA_GITHUB_CLIENT_SECRET_ID` (Secrets Manager
    identifier; the secret value never enters the environment), `CLA_GITHUB_WEB_BASE_URL`,
    `CLA_GITHUB_API_BASE_URL`, `CLA_DYNAMODB_ENDPOINT` (local testing only), `CLA_SESSION_IDLE`,
-   `CLA_SESSION_ABSOLUTE` (seconds), and `CLA_RETURN_TO_ALLOWLIST`, fails fast on a missing
+   `CLA_SESSION_ABSOLUTE` (seconds), `CLA_UPSTREAM_TIMEOUT` and `CLA_REVOKE_TIMEOUT` (seconds,
+   A-32), and `CLA_RETURN_TO_ALLOWLIST`, fails fast on a missing
    variable, and starts the Lambda runtime. Unit 3 declares these variables in Terraform.
 3. **Infrastructure (plan-only).** API Gateway HTTP API, the `api` Lambda, the `core`, `audit`, and
    `ephemeral` tables, the Secrets Manager secret (value set by LKS organization admins; readable only by the authentication backend), and
    least-privilege IAM, with plan-only tests (F07-T11). No apply until F-03 step 5.
+   *Delivered (plan-only):* modules `dynamodb-table`, `lambda-function`, `http-api`, `secret`,
+   and the `api-service` composition called by the three environment roots (parameters,
+   packaging, and Checkov exceptions in A-32). The `api` function receives exactly the unit 2
+   variables; `CLA_GITHUB_CLIENT_SECRET_ID` is the secret name, `CLA_SIGN_IN_ENABLED` defaults
+   to `false`, and the production root rejects `true` until D-20 is recorded. Access logs record
+   no query string, raw path, client IP, user agent, or free-form message (tested). The audit
+   table's IAM denies updates and
+   deletes; the function may decrypt the `core` and `audit` table keys only through DynamoDB,
+   for this account and these three tables (tested). The first deployment runs in two applies
+   (phase A without `api_package`: keys, tables, secret, artifact bucket; upload; phase B with
+   the object version: function and HTTP API), recorded in the
+   [bootstrap and deployment guide](../../docs/operations/terraform-bootstrap.md#7-first-deployment-sequence)
+   and implemented by F-03 step 5. New root variables (`portal_origin`, `github_client_id`, `artifacts_bucket_name`,
+   `api_package`, `log_retention_in_days`, `sign_in_enabled`) come from GitHub environment
+   variables at plan time; log retention has no default (D-10). The deployment role's
+   permissions for these resources belong to F-03 step 5; the CloudFront `/api/*` behaviour
+   belongs to the portal hosting work (D-16).
 4. **Portal.** Session state, header states, sign-in error route, privacy-notice link, and
    accessibility runs (F07-T10); the server-state library proposed with evidence.
 

@@ -157,6 +157,9 @@ the login, then discards the token.
 
 - Logs are structured and contain request IDs, actor IDs, and outcomes only. They never contain
   tokens, cookies, secrets, emails, names, document contents, or full webhook payloads.
+- API Gateway and CloudFront access logs record no query strings, raw request paths, client IPs,
+  user agents, identities, or free-form error messages; matched route keys and enumerated status
+  and error-type fields are allowed, and the request ID correlates them with structured logs.
 - Audit events are append-only ([domain model](../domain-model.md#212-audit-event)) and exported to
   locked storage.
 - CloudTrail records management events and data events on the `evidence` bucket.
