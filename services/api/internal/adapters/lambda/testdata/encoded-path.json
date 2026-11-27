@@ -1,0 +1,22 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/api/v1/things/a%2Fb%20c",
+  "rawQueryString": "",
+  "headers": {
+    "host": "cla.example"
+  },
+  "requestContext": {
+    "domainName": "cla.example",
+    "requestId": "synthetic-request-3",
+    "stage": "$default",
+    "http": {
+      "method": "GET",
+      "path": "/api/v1/things/a/b c",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "192.0.2.12",
+      "userAgent": "synthetic-browser/1.0"
+    }
+  },
+  "isBase64Encoded": false
+}

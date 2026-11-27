@@ -389,15 +389,25 @@ retained, not destroyed, by default).
    adapters (test approach proposed with evidence, for example a local DynamoDB container in the
    pinned CI image); handlers, middleware, Lambda wiring, and a local development server (F07-T3,
    F07-T7 to F07-T9).
-   *In progress (PR #89):* `adapters/github` with the reusable `githubtest` fake; `handlers`,
+   *Delivered (PR #89):* `adapters/github` with the reusable `githubtest` fake; `handlers`,
    `middleware`, and `server` (everything under `/api`); `adapters/memory` for tests and the
    development server; `adapters/aws` with the DynamoDB stores (conditional consume,
    `TransactWriteItems` for session changes and their audit events, conditional idle renewal)
    tested against digest-pinned DynamoDB Local in the `DynamoDB adapter tests` CI job (A-30:
    fails, never skips, when the service is unavailable), and the Secrets Manager reader for the
    OAuth client secret; contract tests (F07-T9) with `kin-openapi`; `cmd/devserver` (in-memory
-   stores and the fake GitHub, no AWS). The Lambda entry point waits for A-31 (the API Gateway
-   HTTP API v2 adapter), because the library first proposed is archived upstream.
+   stores and the fake GitHub, no AWS); `adapters/lambda`, the in-repository API Gateway HTTP API
+   payload-format-2.0 adapter (A-31: raw path and query preserved verbatim, cookies arrays in both
+   directions, base64 bodies, request-context propagation; synthetic event fixtures under
+   `testdata`, an equivalence test against `httptest`, and the F-07 server tested end to end behind
+   the adapter); `cmd/api`, the Lambda entry point, which reads `CLA_PORTAL_ORIGIN`,
+   `CLA_GITHUB_CALLBACK_URL`, `CLA_SIGN_IN_ERROR_ROUTE`, `CLA_SIGN_IN_ENABLED` (sign-in stays
+   disabled unless it is exactly `true`), `CLA_TABLE_EPHEMERAL`, `CLA_TABLE_CORE`,
+   `CLA_TABLE_AUDIT`, `CLA_GITHUB_CLIENT_ID`, `CLA_GITHUB_CLIENT_SECRET_ID` (Secrets Manager
+   identifier; the secret value never enters the environment), `CLA_GITHUB_WEB_BASE_URL`,
+   `CLA_GITHUB_API_BASE_URL`, `CLA_DYNAMODB_ENDPOINT` (local testing only), `CLA_SESSION_IDLE`,
+   `CLA_SESSION_ABSOLUTE` (seconds), and `CLA_RETURN_TO_ALLOWLIST`, fails fast on a missing
+   variable, and starts the Lambda runtime. Unit 3 declares these variables in Terraform.
 3. **Infrastructure (plan-only).** API Gateway HTTP API, the `api` Lambda, the `core`, `audit`, and
    `ephemeral` tables, the Secrets Manager secret (value set by LKS organization admins; readable only by the authentication backend), and
    least-privilege IAM, with plan-only tests (F07-T11). No apply until F-03 step 5.
