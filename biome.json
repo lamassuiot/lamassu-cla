@@ -204,6 +204,16 @@
       }
     },
     {
+      "includes": ["**/packages/api-client/src/generated/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConfusingVoidType": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["**/package.json"],
       "json": {
         "formatter": {

@@ -5,14 +5,16 @@ info:
   summary: Contract for the CLA portal, administrative APIs, and webhooks.
   description: |
     Source of truth for the platform API. Conventions are defined in `conventions.md` next to
-    this file. Operations are added by feature specifications; this initial structure defines
-    shared components and the health operation only.
+    this file. Operations are added by feature specifications. Every path is relative to the `/api`
+    base that CloudFront routes to API Gateway (D-02): versioned operations live under `/v1`, and
+    the GitHub sign-in callback stays unversioned at `/auth/github/callback` because it is the URL
+    registered with GitHub.
   license:
     name: AGPL-3.0-only
     identifier: AGPL-3.0-only
 servers:
-  - url: /
-    description: Same origin as the portal. Environment hosts are configured at deployment.
+  - url: /api
+    description: Same origin as the portal, under the `/api` prefix (D-02). Hosts are configured at deployment.
 tags:
   - name: health
     description: Operational endpoints.
@@ -55,6 +57,159 @@ paths:
           $ref: "#/components/responses/TooManyRequests"
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+  /v1/auth/github/start:
+    get:
+      operationId: startGithubSignIn
+      summary: Start GitHub sign-in.
+      description: |
+        Browser navigation, not an XHR call. Validates `return_to` against the relative-path
+        allowlist (falling back to `/`), stores a hashed single-use `state` with a PKCE `S256`
+        verifier for 10 minutes, sets the `__Host-cla_oauth` pre-authentication cookie, and
+        redirects to GitHub with an explicitly empty `scope` and the registered callback URL. Any
+        existing portal session is left untouched (F-07, AC-07-1). While sign-in is disabled by
+        configuration, returns 503 with code `SIGN_IN_DISABLED` without contacting GitHub.
+      tags:
+        - auth
+      security: []
+      parameters:
+        - name: return_to
+          in: query
+          required: false
+          description: Relative portal path to return to after sign-in. Rejected values fall back to `/`.
+          schema:
+            type: string
+            maxLength: 2048
+      responses:
+        "302":
+          description: Redirect to GitHub's authorization page; sets `__Host-cla_oauth`.
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          description: Sign-in is disabled (`SIGN_IN_DISABLED`) or the session store is unavailable (`STORE_UNAVAILABLE`).
+          headers:
+            Retry-After:
+              $ref: "#/components/headers/RetryAfter"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+  /auth/github/callback:
+    get:
+      operationId: completeGithubSignIn
+      summary: Complete GitHub sign-in (registered callback URL).
+      description: |
+        Browser navigation from GitHub. Unversioned because it is the callback URL registered with
+        the OAuth App (D-02). Rejects malformed input, checks the `__Host-cla_oauth` binding,
+        consumes `state` atomically, exchanges `code` with the PKCE verifier, verifies that the
+        granted scope is empty, extracts only `id` and `login` from `GET /user`, creates or
+        refreshes the contributor record, and replaces the session in one transaction with its
+        audit event (F-07, main flow steps 4 to 6). Every outcome redirects: success to the
+        validated `return_to` with the session cookie, failure or cancellation to the portal's
+        sign-in error route with a reason code and no personal data.
+      tags:
+        - auth
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: false
+          description: Authorization code from GitHub. Present on success; never logged.
+          schema:
+            type: string
+            maxLength: 256
+        - name: state
+          in: query
+          required: true
+          description: The single-use `state` issued by the start operation. Never logged.
+          schema:
+            type: string
+            maxLength: 256
+        - name: error
+          in: query
+          required: false
+          description: GitHub error code, for example `access_denied`, when the person declines.
+          schema:
+            type: string
+            maxLength: 128
+      responses:
+        "302":
+          description: Redirect to `return_to` with `__Host-cla_session` set, or to the sign-in error route.
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /v1/session:
+    get:
+      operationId: getSession
+      summary: Read the current session.
+      description: |
+        Returns the signed-in person, the absolute session expiry, and the session's CSRF token.
+        Reading the session does not extend its idle expiry (F-07, AC-07-6). A missing, unknown,
+        or expired session returns 401 with code `SESSION_REQUIRED` and expires any stale cookie.
+      tags:
+        - auth
+      responses:
+        "200":
+          description: The current session.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /v1/session/sign-out:
+    post:
+      operationId: signOut
+      summary: End the current session.
+      description: |
+        Deletes the session and writes the `auth.signed_out` audit event in one transaction, then
+        expires the cookie. Idempotent: without a session it still returns 204 and expires any
+        cookie. The `Origin` check always applies; a valid session also requires its CSRF token
+        (403 with code `CSRF_TOKEN_INVALID` or `ORIGIN_NOT_ALLOWED`). A failed or uncertain
+        deletion returns 503 with code `STORE_UNAVAILABLE`, never 204 (F-07, AC-07-8).
+      tags:
+        - auth
+      security:
+        - sessionCookie: []
+          csrfToken: []
+        - {}
+      responses:
+        "204":
+          description: The session, if any, is ended and the cookie expired.
+          headers:
+            Cache-Control:
+              $ref: "#/components/headers/NoStore"
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 components:
   securitySchemes:
     sessionCookie:
@@ -90,6 +245,17 @@ components:
       schema:
         type: integer
         minimum: 1
+    Location:
+      description: Redirect target.
+      schema:
+        type: string
+        maxLength: 2048
+    NoStore:
+      description: Always `no-store` on session and authentication responses.
+      schema:
+        type: string
+        enum:
+          - no-store
   parameters:
     RequestId:
       name: X-Request-Id
@@ -144,6 +310,33 @@ components:
           type: string
           enum:
             - OK
+    Session:
+      type: object
+      additionalProperties: false
+      description: The signed-in person and session metadata. Never includes the session token.
+      required:
+        - github_user_id
+        - github_login
+        - expires_at
+        - csrf_token
+      properties:
+        github_user_id:
+          type: string
+          pattern: "^[0-9]{1,20}$"
+          description: Numeric GitHub user ID, the stable identity (D-29). A string to avoid integer precision loss.
+        github_login:
+          type: string
+          maxLength: 39
+          description: Current GitHub login, display only; refreshed on every sign-in.
+        expires_at:
+          type: string
+          format: date-time
+          description: Absolute session expiry. Idle expiry is enforced server-side and not exposed.
+        csrf_token:
+          type: string
+          minLength: 43
+          maxLength: 64
+          description: Session-bound token to send as `X-CSRF-Token` on state-changing requests.
     Problem:
       type: object
       description: RFC 9457 Problem Details with platform extensions.

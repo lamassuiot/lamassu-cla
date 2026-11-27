@@ -3,6 +3,10 @@
 # Shared components declared in Phase 1 before any operation references them (A-18).
 # Remove each entry when an operation starts using the component.
 specs/api/openapi.yaml:
+  # Browser-navigation operations that only ever redirect (F-07): no 2xx response exists by design.
+  operation-2xx-response:
+    - '#/paths/~1v1~1auth~1github~1start/get/responses'
+    - '#/paths/~1auth~1github~1callback/get/responses'
   no-unused-components:
     - '#/components/parameters/RequestId'
     - '#/components/parameters/IdempotencyKey'
@@ -10,13 +14,9 @@ specs/api/openapi.yaml:
     - '#/components/parameters/Limit'
     - '#/components/parameters/Cursor'
     - '#/components/schemas/PageInfo'
-    - '#/components/responses/BadRequest'
-    - '#/components/responses/Unauthorized'
-    - '#/components/responses/Forbidden'
     - '#/components/responses/NotFound'
     - '#/components/responses/Conflict'
     - '#/components/responses/PreconditionFailed'
     - '#/components/responses/IdempotencyKeyReused'
-    - '#/components/securitySchemes/csrfToken'
     - '#/components/securitySchemes/githubWebhookSignature'
     - '#/components/securitySchemes/signingProviderSignature'

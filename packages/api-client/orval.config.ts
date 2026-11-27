@@ -9,6 +9,8 @@ export default defineConfig({
       client: 'fetch',
       mode: 'single',
       clean: true,
+      // Matches the contract's `/api` server (D-02); the fetcher only accepts same-origin paths.
+      baseUrl: '/api',
       override: {
         mutator: { path: './src/fetcher.ts', name: 'apiFetch' },
       },
