@@ -59,13 +59,22 @@ scope, separate from the GitHub App of section 3.2. The API reads the numeric Gi
 the login, then discards the token.
 
 - Authorization-code flow with a cryptographically random `state` bound to a pre-authentication
-  cookie, single use, 10-minute expiry, stored hashed in the `ephemeral` table.
+  cookie, single use, 10-minute expiry, stored hashed in the `ephemeral` table. `state` is consumed
+  atomically (conditional delete returning the item) before any other processing of a callback,
+  on success and error callbacks alike.
 - PKCE is used where GitHub supports it for OAuth Apps. The verifier is stored in plaintext in the
   same encrypted, TTL-bounded `ephemeral` item as the hashed `state`, because the code exchange
   needs the original value; the item is deleted before the exchange, and the verifier never
   appears in logs, responses, or cookies.
-- Redirect URIs are registered exactly; no wildcards. Post-login `return_to` accepts only relative
-  paths from an allowlist.
+- The authorization request sends an explicitly empty `scope`; the API verifies that the granted
+  scope in the token response is empty and refuses the sign-in otherwise, because GitHub can grant
+  previously authorized scopes when `scope` is omitted.
+- Redirect URIs are registered exactly; no wildcards, and the same `redirect_uri` is sent in the
+  authorization and token-exchange requests. Post-login `return_to` accepts only relative
+  paths from an allowlist, compared after a single percent-decoding and rejection of any scheme,
+  authority, leading `//` or `/\`, backslash, control character, or remaining encoding.
+- A session by itself authorizes only reading and ending that session; every other operation is
+  authorized by a role (section 2, D-13) or an object-relationship check.
 - GitHub user access tokens are used only during sign-in to read the numeric user ID and login,
   then discarded. They are never stored or sent to the browser. Verified emails are not read at
   sign-in (C-03 in `specs/STATE.md` covers the later email step).

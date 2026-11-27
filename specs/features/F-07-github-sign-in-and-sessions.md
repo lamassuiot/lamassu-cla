@@ -58,14 +58,24 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
    minutes, keyed by the hash of `state`, holding the verifier in plaintext (the code exchange
    needs the original value; the table is encrypted at rest with its KMS key) and the validated
    `return_to`. It sets a short-lived pre-authentication cookie bound to `state`, and redirects to
-   GitHub's authorization page with the exact registered callback URL.
+   GitHub's authorization page with the exact registered callback URL as `redirect_uri` and an
+   explicitly empty `scope` parameter (not omitted: GitHub may otherwise reuse scopes that the
+   same account granted to this app before).
 3. The person approves on GitHub. GitHub redirects to the registered callback,
-   `GET /api/auth/github/callback`, with `code` and `state`. The callback stays outside the
+   `GET /api/auth/github/callback`, with `code` and `state`, or with `error` and `state`. The
+   callback stays outside the
    versioned API, so the registered URL does not change when the API version changes (D-02).
-4. The API checks that `state` exists, is unexpired, unused, and matches the pre-authentication
-   cookie; deletes it; exchanges `code` (with the PKCE verifier) for a user access token; reads the
-   GitHub user ID and login; and discards the token. The token is never stored, logged, or sent to
-   the browser.
+4. On every callback, success or error, the API first **consumes** `state` in one atomic
+   operation: a conditional delete of `OAUTH#{state_hash}` that succeeds only if the item exists
+   and is unexpired, and returns the item. A failed delete (missing, expired, or already used)
+   ends the request with no further work. The returned item must then match the
+   pre-authentication cookie; a mismatch also ends the request. Only after that does the API act
+   on the callback: for `error`, it shows the cancelled or error result; for `code`, it exchanges
+   `code` with the PKCE verifier and the same `redirect_uri` for a user access token, verifies
+   that the **granted scope is empty** (the token response's `scope` field and the
+   `X-OAuth-Scopes` header), calls `GET /user` for the numeric ID and login, and discards the
+   token. A non-empty granted scope ends sign-in without a session. The token is never stored,
+   logged, or sent to the browser.
 5. The API creates or updates the minimal contributor record (D-29): the numeric GitHub user ID,
    which is the only stable identifier, and the current login, refreshed on every sign-in for
    display only (FR-CON-01). A new contributor starts as `PENDING`. The login is never used as an
@@ -106,8 +116,9 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 
 | Case | Detection | System behavior | User-visible result |
 | --- | --- | --- | --- |
-| Missing, expired, reused, or mismatched `state` | `ephemeral` lookup and pre-authentication cookie check | No token exchange; audit-free; logged as a security event without personal data | Error page: sign-in could not be completed, with a link to try again |
-| Person declines on GitHub | `error=access_denied` on the callback | No session | Signed-out portal with a message that sign-in was cancelled |
+| Missing, expired, reused, or mismatched `state`, on a success or an error callback | Atomic consume of `OAUTH#{state_hash}` and pre-authentication cookie check | No token exchange and no cancelled message; audit-free; logged as a security event without personal data | Error page: sign-in could not be completed, with a link to try again |
+| Person declines on GitHub | `error=access_denied` on the callback, after `state` was consumed and matched | No session | Signed-out portal with a message that sign-in was cancelled |
+| Granted scope is not empty | `scope` in the token response or `X-OAuth-Scopes` header | Token discarded; no session; logged as a security event (`scope_unexpected`) | Error page with a link to try again |
 | GitHub unavailable or code exchange fails | Upstream error or timeout | No session; no retry loop | Error page with a link to try again |
 | `return_to` not allowed | Allowlist check | Falls back to `/` | Lands on the landing page |
 | Missing, unknown, or expired session | Middleware | 401 problem response | Signed-out state with a sign-in prompt |
@@ -119,22 +130,35 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
 - Follows the [security specification](../security/security.md#31-people-github-sign-in), section
   3.1, and threats T-15 (session theft or CSRF) and T-16 (open redirect).
 - `state` is single use, expires after 10 minutes, and is stored only as a hash, because it is
-  only compared. The PKCE verifier cannot be hashed: the code exchange needs the original value. It
+  only compared. It is consumed atomically (conditional delete that returns the item) before any
+  other callback processing, on success and error callbacks alike, so a replayed or forged
+  callback can neither complete a sign-in nor show a misleading result. The PKCE verifier cannot be hashed: the code exchange needs the original value. It
   is stored in plaintext inside the same encrypted, TTL-bounded `ephemeral` item, which is deleted
   before the exchange, and it never appears in logs, responses, or cookies. On its own it is
   useless without the authorization `code`, which only transits in the browser redirect. The
   pre-authentication cookie binds the item to the browser that started sign-in.
 - Session tokens are 256-bit random values from a cryptographic source, stored only as SHA-256
   hashes; comparisons of secrets are constant time. The CSRF token is bound to the session.
-- No GitHub token is persisted, logged, or returned. The OAuth App requests no scopes: it reads only
-  the public numeric user ID and login, with no repository permissions and no email access (D-06,
-  ADR-0014). It is separate from the GitHub App, so a sign-in token never carries repository or
-  Checks permissions.
+- No GitHub token is persisted, logged, or returned. The OAuth App sends an explicitly empty
+  `scope` and reads only the public numeric user ID and login from `GET /user`, which needs no
+  scope; it has no repository permissions and no email access (D-06, ADR-0014). Because GitHub
+  can grant previously authorized scopes when a request omits `scope`, the API verifies that the
+  granted scope is empty and refuses the sign-in otherwise. It is separate from the GitHub App,
+  so a sign-in token never carries repository or Checks permissions.
+- The registered callback URL is sent unchanged as `redirect_uri` in both the authorization and
+  the token-exchange request; GitHub rejects a mismatch.
 - Identity is the numeric GitHub user ID. The login can change and be reused by another account, so
   it is never used as an identifier, key, or authorization input (D-29).
-- Signing in grants no permissions and does not restore an agreement's validity (D-28).
-- `return_to` accepts only relative paths from an allowlist; protocol-relative and absolute URLs
-  are rejected.
+- Signing in grants no permissions and does not restore an agreement's validity (D-28). A session
+  by itself authorizes only `GET /api/v1/session` and `POST /api/v1/session/sign-out`. Every other
+  operation is authorized by F-08 roles or by the object-relationship checks in the security
+  specification (section 2), never by the mere existence of a session. A `PENDING` contributor
+  may use their own signing flow (F-11); maintainer and administrator functions stay closed until
+  F-08 assigns a role.
+- `return_to` accepts only relative paths from an allowlist. The value is percent-decoded once and
+  rejected if it still contains a percent sign, has a scheme or authority, starts with `//` or
+  `/\`, contains a backslash or a control character, or does not start with `/`; the canonical
+  path is then compared with the allowlist. Anything rejected falls back to `/`.
 - Logs, metrics, and problem responses contain no session tokens, codes, `state` values, or
   personal data; the request ID correlates them. Audit events record the GitHub user ID as the
   actor, as the domain model allows.
@@ -181,16 +205,19 @@ exists yet, so this is not a breaking change for any client.
 ## Acceptance criteria
 
 - **AC-07-1** Given a visitor who starts sign-in, the API redirects to GitHub's OAuth authorization
-  page with a new single-use `state`, a PKCE challenge where supported, no requested scopes, and
-  the exact registered callback URL, and sets a pre-authentication cookie bound to that `state`.
-- **AC-07-2** Given a callback whose `state` is missing, expired, already used, or not bound to the
-  browser's pre-authentication cookie, no code exchange happens and no session is created.
+  page with a new single-use `state`, a PKCE challenge where supported, an explicitly empty
+  `scope`, and the exact registered callback URL as `redirect_uri`, and sets a pre-authentication
+  cookie bound to that `state`.
+- **AC-07-2** Given a callback, success or error, whose `state` is missing, expired, already used,
+  or not bound to the browser's pre-authentication cookie, no code exchange happens, no session is
+  created, and no cancelled message is shown; two concurrent callbacks with the same `state`
+  complete at most one sign-in.
 - **AC-07-3** Given a successful callback, a contributor record exists for the GitHub user ID with
   the current login, a session exists whose token is stored only as a hash, the `__Host-cla_session`
   cookie is `HttpOnly`, `Secure`, `SameSite=Lax`, and `Path=/`, and the browser is redirected to the
   validated `return_to`.
 - **AC-07-4** Given any `return_to` that is not an allowed relative path (absolute, protocol-relative,
-  backslash, or encoded variants), the redirect goes to `/`.
+  backslash, double-encoded, or other encoded variants), the redirect goes to `/`.
 - **AC-07-5** No GitHub token, authorization code, session token, or email address appears in
   storage, logs, metrics, audit events, responses, or cookies. `state` appears in storage only as
   a hash, and the PKCE verifier only in the `OAUTH#{state_hash}` item until it is used; neither
@@ -210,15 +237,17 @@ exists yet, so this is not a breaking change for any client.
 - **AC-07-12** Given two sign-ins by the same numeric GitHub user ID with different logins, one
   contributor record exists with the latest login; given a sign-in whose login matches another
   record's former login, no record is matched by login (D-29).
+- **AC-07-13** Given a token exchange whose granted scope is not empty, the token is discarded, no
+  session is created, and a `scope_unexpected` security event is logged without personal data.
 
 ## Automated test scenarios
 
 | ID | Scenario | Level | Covers |
 | --- | --- | --- | --- |
 | F07-T1 | Sign-in start: redirect parameters, stored hashed `state`, stored verifier and `return_to`, pre-authentication cookie. | Unit (use case with fakes), handler | AC-07-1 |
-| F07-T2 | Callback with missing, expired, reused, and mismatched `state`: no exchange, no session. | Unit, handler | AC-07-2 |
+| F07-T2 | Callback with missing, expired, reused, and mismatched `state`, on success and error callbacks, and two concurrent callbacks with the same `state` against a fake store with conditional delete: at most one exchange, no session otherwise. | Unit, handler | AC-07-2 |
 | F07-T3 | Successful callback against a local fake of GitHub's endpoints: contributor upsert, hashed session, cookie attributes, redirect. | Adapter and handler (local test server) | AC-07-3, AC-07-9 |
-| F07-T4 | `return_to` table test with relative, absolute, protocol-relative, backslash, and encoded inputs. | Unit | AC-07-4 |
+| F07-T4 | `return_to` table test with relative, absolute, protocol-relative, backslash, control-character, single- and double-encoded inputs. | Unit | AC-07-4 |
 | F07-T5 | Logs, audit events, stored items, responses, and cookies from the flows above are scanned for the token, code, `state`, PKCE verifier, and session token; the `OAUTH#{state_hash}` item is gone after the callback. | Unit, handler | AC-07-5 |
 | F07-T6 | Middleware: idle and absolute expiry with a fake clock; unknown token. | Unit | AC-07-6 |
 | F07-T7 | CSRF and `Origin` checks on a state-changing route. | Handler | AC-07-7 |
@@ -227,11 +256,12 @@ exists yet, so this is not a breaking change for any client.
 | F07-T10 | Portal header states and sign-in error route, axe and reflow at the F-06 widths, with the API mocked. | Component (browser) | AC-07-10 |
 | F07-T11 | Terraform plan-only tests with mocked providers for the new API, Lambda, tables, and secret. | Infrastructure | Rollback and least privilege |
 | F07-T12 | Sign-in of suspended and revoked contributors, and login changes and reuse, with fakes. | Unit | AC-07-11, AC-07-12 |
+| F07-T13 | Token exchange against the local GitHub fake returning a non-empty `scope` or `X-OAuth-Scopes`: token discarded, no session, `scope_unexpected` logged; the fake also asserts that `redirect_uri` and an empty `scope` were sent. | Adapter and handler (local test server) | AC-07-1, AC-07-13 |
 
 ## Observability requirements
 
 - Structured log events (no personal data, request ID included): `auth.start`, `auth.callback`
-  with outcome (`success`, `state_invalid`, `denied`, `upstream_error`), `auth.sign_out`,
+  with outcome (`success`, `state_invalid`, `denied`, `scope_unexpected`, `upstream_error`), `auth.sign_out`,
   `session.rejected` with reason (`unknown`, `idle_expired`, `expired`, `csrf`, `origin`).
 - Metrics: sign-in outcomes by reason; GitHub exchange latency and errors; session store errors.
 - Alarm proposals (finalized in F-18): sustained GitHub exchange errors; spikes in `state_invalid`
