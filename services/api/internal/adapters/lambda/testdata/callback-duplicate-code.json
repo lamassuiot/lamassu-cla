@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/api/auth/github/callback",
+  "rawQueryString": "code=first&code=second&state=abc%3D%3D",
+  "cookies": ["__Host-cla_oauth=abc%3D%3D", "other=value"],
+  "headers": {
+    "host": "cla.example"
+  },
+  "queryStringParameters": {
+    "code": "first,second",
+    "state": "abc=="
+  },
+  "requestContext": {
+    "domainName": "cla.example",
+    "requestId": "synthetic-request-2",
+    "stage": "$default",
+    "http": {
+      "method": "GET",
+      "path": "/api/auth/github/callback",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "192.0.2.11",
+      "userAgent": "synthetic-browser/1.0"
+    }
+  },
+  "isBase64Encoded": false
+}

@@ -96,6 +96,21 @@ test-web:
 test-go:
 	cd $(GO_DIR) && go test -race ./...
 
+# DynamoDB Local (A-30), pinned by digest; its default command runs in memory.
+DYNAMODB_LOCAL_IMAGE := amazon/dynamodb-local:3.3.2@sha256:6ada631ec7aa5fc83446855eb17233e3dad184fec47477e8140c6c569cfe0c86
+DYNAMODB_LOCAL_PORT ?= 8000
+# Endpoint for the DynamoDB adapter tests. CI points it at the service container.
+CLA_DYNAMODB_ENDPOINT ?=
+
+.PHONY: test-dynamodb
+test-dynamodb: ## Run the DynamoDB adapter tests against DynamoDB Local (A-30); fails if it is unreachable.
+	@if [[ -z "$(CLA_DYNAMODB_ENDPOINT)" ]]; then echo "CLA_DYNAMODB_ENDPOINT is required (for example http://127.0.0.1:$(DYNAMODB_LOCAL_PORT)); see 'make dynamodb-local'"; exit 1; fi
+	cd $(GO_DIR) && CLA_DYNAMODB_ENDPOINT="$(CLA_DYNAMODB_ENDPOINT)" CLA_DYNAMODB_REQUIRED=1 go test -race -count=1 ./internal/adapters/aws/...
+
+.PHONY: dynamodb-local
+dynamodb-local: ## Start DynamoDB Local on 127.0.0.1:$(DYNAMODB_LOCAL_PORT) in the foreground (Docker).
+	docker run --rm -p 127.0.0.1:$(DYNAMODB_LOCAL_PORT):8000 $(DYNAMODB_LOCAL_IMAGE)
+
 .PHONY: vuln-go
 vuln-go: $(GOVULNCHECK) ## Scan the Go module and toolchain for known vulnerabilities (needs network).
 	cd $(GO_DIR) && $(GOVULNCHECK) ./...

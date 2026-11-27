@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/api/v1/session/sign-out",
+  "rawQueryString": "",
+  "cookies": ["__Host-cla_session=tok"],
+  "headers": {
+    "host": "cla.example",
+    "origin": "https://cla.example",
+    "x-csrf-token": "csrf-1",
+    "content-type": "application/octet-stream"
+  },
+  "requestContext": {
+    "domainName": "cla.example",
+    "requestId": "synthetic-request-4",
+    "stage": "$default",
+    "http": {
+      "method": "POST",
+      "path": "/api/v1/session/sign-out",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "192.0.2.13",
+      "userAgent": "synthetic-browser/1.0"
+    }
+  },
+  "body": "AAEC/w==",
+  "isBase64Encoded": true
+}

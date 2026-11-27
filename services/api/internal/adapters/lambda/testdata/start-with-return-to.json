@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/api/v1/auth/github/start",
+  "rawQueryString": "return_to=%2Fagreements%2Ficla%20v2",
+  "headers": {
+    "host": "cla.example",
+    "user-agent": "synthetic-browser/1.0",
+    "x-request-id": "01J9Z3K4Q8X7M2N5P6R7S8T9V0"
+  },
+  "requestContext": {
+    "accountId": "000000000000",
+    "apiId": "synthetic",
+    "domainName": "cla.example",
+    "requestId": "synthetic-request-1",
+    "stage": "$default",
+    "timeEpoch": 1767268800000,
+    "http": {
+      "method": "GET",
+      "path": "/api/v1/auth/github/start",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "192.0.2.10",
+      "userAgent": "synthetic-browser/1.0"
+    }
+  },
+  "isBase64Encoded": false
+}

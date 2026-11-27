@@ -77,6 +77,49 @@ jobs:
       - name: go test -race
         run: make test-go
 
+  dynamodb:
+    name: DynamoDB adapter tests
+    needs: changes
+    if: ${{ always() && github.event_name != 'schedule' && needs.changes.outputs.backend != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The job runs on the runner host; DynamoDB Local (A-30) is a service container whose port is
+    # published to the host, so the endpoint is localhost. The step fails, never skips, when the
+    # service is unreachable (CLA_DYNAMODB_REQUIRED=1 inside make test-dynamodb).
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local:3.3.2@sha256:6ada631ec7aa5fc83446855eb17233e3dad184fec47477e8140c6c569cfe0c86
+        ports:
+          - 8000:8000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version-file: services/api/go.mod
+          cache-dependency-path: |
+            services/api/go.mod
+            Makefile
+
+      - name: Wait for DynamoDB Local
+        # DynamoDB Local answers GET / with 400; any HTTP status means the port is serving.
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ || true)
+            if [[ "$code" != "000" && -n "$code" ]]; then
+              echo "DynamoDB Local ready after ${i}s (HTTP $code)"; exit 0
+            fi
+            sleep 1
+          done
+          echo '::error::DynamoDB Local did not become reachable on 127.0.0.1:8000'; exit 1
+
+      - name: DynamoDB adapter tests
+        run: make test-dynamodb CLA_DYNAMODB_ENDPOINT=http://127.0.0.1:8000
+
   govulncheck:
     name: Go vulnerability scan
     needs: changes
