@@ -3,7 +3,7 @@
 This file is the orchestrator's task-state record. Update it when a task starts, is blocked, or
 completes. See [the SDD workflow](sdd-workflow.md).
 
-Last updated: 2026-10-22
+Last updated: 2026-11-27
 
 ## Current position
 
@@ -29,12 +29,17 @@ Last updated: 2026-10-22
 - **Phase 3:** done. F-04 (PRs #26, #30, #39); F-05 (PRs #47 to #55; A-23 to A-26, D-25, C-02);
   F-06 (PRs #56, #57, #59; A-27, D-27). Still open and not blocking: D-12 (final brand assets) and
   D-26 (source-code link, Legal).
-- **Next gate:** Phase 4 (authentication and user profile). The
+- **Next gate:** Phase 4 (authentication and user profile) has started. D-06 was decided by the
+  Security owner on 2026-11-27
+  ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)):
+  sign-in-only OAuth App, no repository or email scope, server-side sessions (30 minutes idle,
+  8 hours absolute). The
   [F-07 specification](features/F-07-github-sign-in-and-sessions.md) (GitHub sign-in and sessions)
-  is a draft (PR #61); its approval needs D-06 (Security owner, on the repository owner's
-  proposal). D-30 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App (and the pull-request GitHub App, D-08); this does not authorize deployment or real sign-ins. Sign-in by real people and contributor-record
+  was approved by the repository owner on 2026-11-27 (PR #86); units 1 and 2 are in progress. D-30 was decided on 2026-10-22: the `lksnext` GitHub organization owns the sign-in OAuth App (and the pull-request GitHub App, D-08); this does not authorize deployment or real sign-ins. Sign-in by real people and contributor-record
   creation also need D-20 (Legal and DPO; the repository owner's lawful-basis proposal is
   recorded). D-02, D-28, and D-29 were decided on 2026-10-22; the D-19 technical default applies.
+  C-03 (no email scope at sign-in versus the email reads assumed in data protection section 4) is
+  open for the Security owner and the DPO and does not block F-07.
   F-08 (roles) needs D-13 (Security owner). Running sign-in in an
   environment needs F-03 step 5 (platform owner). Phase 2 still needs the Security-owner and
   platform-owner review of the final A-19, ADR-0012, and T-19 wording and approval of D-24; F-03
@@ -73,6 +78,8 @@ Last updated: 2026-10-22
 | 2026-10-22 | Repository owner | D-06 proposal for the Security owner (sign-in-only OAuth App; separate GitHub App for pull requests and Checks; server-side sessions, 30 minutes idle and 8 hours absolute). D-20 lawful-basis proposal for Legal and DPO review (controller LKS S.Coop); D-20 stays open and no production processing is authorized. |
 | 2026-10-22 | Repository owner | D-30 decided: the sign-in OAuth App is owned by the `lksnext` GitHub organization (controlled by LKS S.Coop., the data controller); LKS organization admins register and manage it; the client secret lives in AWS Secrets Manager, readable only by the authentication backend. The same LKS ownership applies to the pull-request GitHub App (D-08; installation scope stays open). This confirms the organization account only: it does not authorize production deployment or real sign-ins, and D-06 and D-20 stay subject to their assigned reviews. |
 | 2026-11-27 | Repository owner | A-28 decided: Node.js 26 replaces Node.js 24 as the pinned release line (ADR-0013 supersedes ADR-0007), triggered by the Playwright 1.65.1 image. Biome 2.6 configuration adapted (ADR-0011 consequences). |
+| 2026-11-27 | Security owner (reported by the repository owner) | D-06 decided ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)): dedicated sign-in-only GitHub OAuth App with no repository permissions and no email access, reading only the numeric user ID and login; separate GitHub App for pull requests and Checks (D-08); server-side sessions with an opaque 256-bit token in a `__Host-` HttpOnly, Secure, SameSite=Lax cookie, hash-only storage, 30 minutes idle and 8 hours absolute, no silent renewal, CSRF token and Origin check. C-03 recorded for the email reads assumed in data protection section 4. |
+| 2026-11-27 | Repository owner | F-07 specification approved at commit `5185972` of PR #86, after two security reviews, with one clarification applied in the same PR (F07-T8 distinguishes a confirmed transaction failure, which preserves the session and writes no audit event, from a committed transaction whose response was lost, which deletes the session and writes the event even though the API returns 503). Units 1 and 2 may start. The deferred tool decisions (DynamoDB test approach in unit 2, TanStack Query in unit 4), the deployment restrictions (F-03 step 5), the D-20 gate on real sign-ins and contributor records, and the C-03 follow-up stay as documented. |
 
 ## Phases
 
@@ -81,7 +88,7 @@ Last updated: 2026-10-22
 | 1 | Discovery and specification foundation | Done (PR #4) | — |
 | 2 | Repository and tooling foundation | In progress | Deployment only: platform-owner prerequisites (F-03); production also D-10. |
 | 3 | Frontend shell and design system | Done (F-04, F-05, F-06) | Final visual values: D-12 (does not block Phase 4). |
-| 4 | Authentication and user profile | Not started (F-07 specification in draft) | Phase 2; D-06, D-13, D-19 (DPO), D-20. |
+| 4 | Authentication and user profile | In progress (F-07 approved; units 1 and 2 started) | Phase 2 for deployment; D-13 (F-08), D-19 (DPO), D-20 (real sign-ins). |
 | 5 | Public CLA catalogue | Not started | Phase 4; D-03, D-10, D-21. |
 | 6 | ICLA workflow | Not started | Phase 5; D-09, D-11, D-15. |
 | 7 | CCLA workflow | Not started | Phase 6; D-15. |
@@ -112,7 +119,7 @@ Feature specifications are written at the start of the phase that implements the
 | F-04 | [Design tokens and themes](features/F-04-design-tokens-and-themes.md), including token-only CSS validation (D-23) | 3 | F-01 | Approved (PR #25); units 1 to 3 merged (PRs #26, #30, #39); done |
 | F-05 | [Component library and preview](features/F-05-component-library.md) | 3 | F-04 | Approved (PR #43); unit 1 (tooling evaluation) done; A-23 and D-25 decided; unit 2 done (PR #47 and PR #48); unit 3 done (PR #49); unit 4 done (PR #50), with A-24 and A-25 decided; unit 5 done (PR #51 and PR #52); unit 6 done (PR #54 and PR #55, with A-26 decided); done |
 | F-06 | [App shell and static screens](features/F-06-app-shell-and-static-screens.md) | 3 | F-05; D-26, D-27 | Approved (PR #56); unit 1 (PR #57, A-27 decided) and unit 2 (PR #59, D-27 decided) merged; done |
-| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20 | Specification draft; approval needs D-06 (Security owner) and D-30; real sign-ins and contributor records need D-20 |
+| F-07 | [GitHub sign-in and sessions](features/F-07-github-sign-in-and-sessions.md) | 4 | F-02, F-03, F-06; D-06, D-20 | Approved (PR #86, 2026-11-27; D-06 via ADR-0014, D-30 decided); units 1 and 2 in progress; real sign-ins and contributor records need D-20; units 3 and 4 follow |
 | F-08 | Roles and authorization middleware | 4 | F-07, D-13 | Not started |
 | F-09 | Public CLA catalogue | 5 | F-08, D-03 | Not started |
 | F-10 | Signing-provider port and DocuSign adapter | 6 | F-03, D-09, D-11 | Not started |
@@ -131,6 +138,7 @@ Feature specifications are written at the start of the phase that implements the
 | --- | --- | --- | --- |
 | C-01 | `infra/bootstrap` and [F-03](features/F-03-terraform-foundation.md#main-flow) create the state bucket and KMS key in each workload account. They use one role for state access and deployment, with state keys under `<environment>/` (D-05). [T-19](security/threat-model.md#3-threats-and-mitigations) and D-24 describe a dedicated Infrastructure/Tooling state account, `lamassu-cla/<environment>/<stack>/terraform.tfstate` keys, and separate state and deployment roles. | After D-24 is approved, rework `infra/bootstrap`, F-03, and the [architecture](architecture.md#9-infrastructure-as-code) in a separate pull request, with plan-only, mocked-provider tests. Until then, the current bootstrap must not be run. | Open; awaiting D-24 |
 | C-02 | The agreement state `VOIDED` ([domain model](domain-model.md), section 3.2) has no status color in the [design tokens](ux/design-tokens.md#23-status-colors) (section 2.3). The status badge renders it as `neutral` through the unknown-state fallback (AC-05-6). | Add `VOIDED` to the `neutral` row, next to `EXPIRED`, as a design-token specification change, and add it to the status mapping and its test. | Resolved: approved by the repository owner on 2026-10-22 and implemented in the C-02 PR |
+| C-03 | D-06 ([ADR-0014](../docs/decisions/0014-github-oauth-app-sign-in-and-sessions.md)) gives the sign-in OAuth App no email access, and D-29 creates the contributor record without email. The [data-protection notes](security/data-protection.md#4-email-lookup-values-d-19) assume that verified emails are read from GitHub at sign-in (section 4.1, "reading verified emails at sign-in") and that HMAC re-keying happens "when a contributor signs in" (section 4.4, step 3). | Move email reads to a later, explicit step that requests the email scope separately, for example when a contributor starts an agreement or links commit emails (Phase 6 or Phase 8), and re-key lazily at that step; update data protection section 4 and the F-11 or F-15 specification accordingly. Sign-in (F-07) stays email-free. | Open; needs the Security owner and the DPO (D-19). Does not block F-07 |
 
 ## Blocked items
 
