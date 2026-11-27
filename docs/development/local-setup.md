@@ -9,7 +9,7 @@ See [`specs/features/F-01-monorepo-tooling.md`](../../specs/features/F-01-monore
 | --- | --- | --- |
 | Node.js | 26 (from `.nvmrc`) | Install with [nvm](https://github.com/nvm-sh/nvm) and run `nvm use`. Other major versions are rejected (`engine-strict`). |
 | npm | 11 or later | Ships with Node.js 26. |
-| Go | Any Go 1.21 or later | The `Makefile` sets `GOTOOLCHAIN=go1.27.1`; Go downloads that toolchain automatically. |
+| Go | Any Go 1.21 or later | The `Makefile` sets `GOTOOLCHAIN=go1.27.4`; Go downloads that toolchain automatically. |
 | GNU Make | Any recent version | |
 | Docker | Any recent version | Only for the Dev Container and local emulators. |
 
