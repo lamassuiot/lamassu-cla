@@ -58,18 +58,24 @@ dedicated GitHub OAuth App used only for sign-in, with no repository permissions
 scope, separate from the GitHub App of section 3.2. The API reads the numeric GitHub user ID and
 the login, then discards the token.
 
-- Authorization-code flow with a cryptographically random `state` bound to a pre-authentication
-  cookie, single use, 10-minute expiry, stored hashed in the `ephemeral` table. `state` is consumed
-  atomically (conditional delete returning the item) before any other processing of a callback,
-  on success and error callbacks alike.
-- PKCE is used where GitHub supports it for OAuth Apps. The verifier is stored in plaintext in the
+- Authorization-code flow with a cryptographically random `state` bound to the pre-authentication
+  cookie `__Host-cla_oauth` (`HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, 10 minutes), single
+  use, 10-minute expiry, stored hashed in the `ephemeral` table. On a callback the cookie binding
+  is checked first (a mismatch consumes nothing), then `state` is consumed atomically (conditional
+  delete with the expiry condition, returning the item) before any other processing, on success
+  and error callbacks alike; the cookie is cleared on every outcome.
+- PKCE with `S256` is always used (`code_challenge`, `code_challenge_method=S256`,
+  `code_verifier`). The verifier is stored in plaintext in the
   same encrypted, TTL-bounded `ephemeral` item as the hashed `state`, because the code exchange
   needs the original value; the item is deleted before the exchange, and the verifier never
   appears in logs, responses, or cookies.
-- The authorization request sends an explicitly empty `scope`; the API verifies that the granted
-  scope in the token response is empty and refuses the sign-in otherwise, because GitHub can grant
-  previously authorized scopes when `scope` is omitted.
-- Redirect URIs are registered exactly; no wildcards, and the same `redirect_uri` is sent in the
+- The authorization request sends an explicitly empty `scope`; because GitHub grants previously
+  authorized scopes when no `scope` is provided, the API verifies that the granted scope in the
+  token response is empty and refuses the sign-in otherwise. Only `id` and `login` are extracted
+  from `GET /user`; other fields, including a public email, are ignored and never persisted or
+  logged. The access token is revoked best-effort after use; any refresh token is discarded.
+- Redirect URIs are registered exactly, with GitHub's wildcard matching disabled, and the same
+  `redirect_uri` is sent in the
   authorization and token-exchange requests. Post-login `return_to` accepts only relative
   paths from an allowlist, compared after a single percent-decoding and rejection of any scheme,
   authority, leading `//` or `/\`, backslash, control character, or remaining encoding.
@@ -80,8 +86,12 @@ the login, then discards the token.
   sign-in (C-03 in `specs/STATE.md` covers the later email step).
 - Sessions use an opaque 256-bit random token in a `__Host-` cookie (`HttpOnly`, `Secure`,
   `SameSite=Lax`), stored hashed. Idle and absolute timeouts are configuration with the decided
-  defaults of 30 minutes idle and 8 hours absolute; there is no silent renewal. Sessions rotate on
-  sign-in and role change and are revoked on sign-out.
+  defaults of 30 minutes idle and 8 hours absolute; there is no silent renewal after expiry, while
+  accepted requests (other than reading the session) slide the idle expiry to
+  `min(now + idle, absolute)` conditionally and at most once per minute. A new session replaces
+  the old one only after authentication succeeds, in one transaction with its audit event;
+  sessions rotate on sign-in and role change and are revoked on sign-out. Session and
+  authentication responses are `Cache-Control: no-store`.
 - CSRF: `SameSite=Lax` plus a session-bound `X-CSRF-Token` header and `Origin` check on state-changing
   requests.
 
