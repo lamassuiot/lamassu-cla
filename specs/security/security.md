@@ -96,7 +96,9 @@ the login, then discards the token.
   sessions rotate on sign-in and role change and are revoked on sign-out. Session and
   authentication responses are `Cache-Control: no-store`.
 - CSRF: `SameSite=Lax` plus a session-bound `X-CSRF-Token` header and `Origin` check on state-changing
-  requests.
+  requests. The CSRF token is a separate random value stored as is in the encrypted session item,
+  so that it can be returned to the portal repeatedly; it is useless without the hashed-only
+  session cookie.
 
 ### 3.2 GitHub App
 

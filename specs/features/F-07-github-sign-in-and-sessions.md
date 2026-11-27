@@ -101,7 +101,9 @@ No role-specific behavior. F-08 maps people to maintainer and administrator role
    that resolves commit authors (F-15, C-03).
 6. The API creates the session **only now**: a 256-bit random token, stored only as a hash in the
    `ephemeral` table with the GitHub user ID, `created_at`, `last_seen_at`, `idle_expires_at`,
-   `expires_at`, and a session-bound CSRF secret. In one transaction it writes the new session,
+   `expires_at`, and a session-bound 256-bit random CSRF token, stored as is so that
+   `GET /api/v1/session` can return the same value for the life of the session (it is useless
+   without the session cookie, whose value is stored only hashed). In one transaction it writes the new session,
    deletes the browser's previous session if the request carried a valid one (rotation), and
    writes the `auth.signed_in` audit event; if the transaction does not commit, nothing changes and
    the previous session stays valid. It then sets the `__Host-cla_session` cookie (`HttpOnly`,
@@ -187,7 +189,10 @@ replacement transaction committed but its result was lost (see that row).
   `Path=/`, without `Domain`, and lives 10 minutes. `Lax` lets the browser send it on GitHub's
   top-level `GET` redirect to the callback. It is cleared on every outcome of the attempt.
 - Session tokens are 256-bit random values from a cryptographic source, stored only as SHA-256
-  hashes; comparisons of secrets are constant time. The CSRF token is bound to the session. A new
+  hashes; comparisons of secrets are constant time. The CSRF token is a separate 256-bit random
+  value bound to the session and stored in the encrypted session item as is, because the portal
+  must be able to read it again; on its own it grants nothing, since the session cookie is only
+  stored hashed. It changes whenever the session is replaced. A new
   session is created, and the old one deleted, only after authentication and the required writes
   have succeeded, in one transaction (session rotation on authentication).
 - No GitHub token is persisted, logged, or returned, and any `refresh_token` is discarded. The
@@ -234,9 +239,9 @@ exists yet, so this is not a breaking change for any client.
 
 | Operation | Purpose | Responses |
 | --- | --- | --- |
-| `GET /api/v1/auth/github/start` | Start sign-in; query `return_to` (relative path) | 302 to GitHub; 400 for malformed input; 503 while sign-in is disabled |
-| `GET /api/auth/github/callback` | Complete sign-in; query `code`, `state`, or `error`. Unversioned: it is the URL registered with GitHub (D-02) | 302 to `return_to` with the session cookie; 302 to a portal error route on failure |
-| `GET /api/v1/session` | Current session (`sessionCookie`); `Cache-Control: no-store`; does not extend idle expiry | 200 with `github_user_id`, `github_login`, `expires_at`, `csrf_token`; 401 |
+| `GET /api/v1/auth/github/start` | Start sign-in; query `return_to` (relative path) | 302 to GitHub; 400 for malformed input; 503 while sign-in is disabled or when the `ephemeral` store is unavailable |
+| `GET /api/auth/github/callback` | Complete sign-in; query `code`, `state`, or `error`. Unversioned: it is the URL registered with GitHub (D-02) | 302 to `return_to` with the session cookie; 302 to a portal error route on every failure, including store failures |
+| `GET /api/v1/session` | Current session (`sessionCookie`); `Cache-Control: no-store`; does not extend idle expiry | 200 with `github_user_id`, `github_login`, `expires_at`, `csrf_token`; 401; 503 when the store is unavailable |
 | `POST /api/v1/session/sign-out` | End the session (`sessionCookie` and `csrfToken`; `Origin` checked) | 204 (also without a session); 403; 503 when the deletion fails or is uncertain |
 
 ## Data-model changes
@@ -245,7 +250,7 @@ exists yet, so this is not a breaking change for any client.
   PKCE verifier (plaintext; the table is encrypted at rest and the item is deleted on use) and the
   validated `return_to`; the existing `SESSION#{session_token_hash}` record is
   specified (GitHub user ID, `created_at`, `last_seen_at`, `idle_expires_at`, `expires_at`, CSRF
-  secret hash). Both use TTL on `expires_at` as cleanup only; expiry is enforced in the conditional
+  token in plaintext). Both use TTL on `expires_at` as cleanup only; expiry is enforced in the conditional
   operations and readers treat expired items as absent. Session creation, deletion of the replaced
   session, and the audit event are one `TransactWriteItems`.
 - `core` table: contributor records are created on first sign-in (`PENDING`), and `github_login`
@@ -282,10 +287,14 @@ exists yet, so this is not a breaking change for any client.
   validated `return_to`.
 - **AC-07-4** Given any `return_to` that is not an allowed relative path (absolute, protocol-relative,
   backslash, double-encoded, or other encoded variants), the redirect goes to `/`.
-- **AC-07-5** No GitHub token, authorization code, session token, or email address appears in
-  storage, logs, metrics, audit events, responses, or cookies. `state` appears in storage only as
-  a hash, and the PKCE verifier only in the `OAUTH#{state_hash}` item until it is used; neither
-  appears in logs, metrics, audit events, or responses.
+- **AC-07-5** No GitHub access token, refresh token, authorization code, or email address appears in
+  storage, logs, metrics, audit events, response bodies, or cookies. The session token appears
+  only in the `Set-Cookie` header of the callback response and in the session cookie, and is
+  stored only as a hash. `state` appears only in the redirect to GitHub, in the callback query, and
+  in the pre-authentication cookie binding, and is stored only as a hash. The PKCE verifier appears
+  only in the `OAUTH#{state_hash}` item until it is used. The CSRF token appears only in the
+  `GET /api/v1/session` body, the `X-CSRF-Token` request header, and the session item. None of these
+  values appears in logs, metrics, traces, or audit events.
 - **AC-07-6** Given a session past its idle or absolute expiry, or an unknown token, authenticated
   operations return 401 and expire the cookie. Given an accepted request other than
   `GET /api/v1/session`, `idle_expires_at` becomes `min(now + 30 minutes, expires_at)` at most once
@@ -293,9 +302,11 @@ exists yet, so this is not a breaking change for any client.
 - **AC-07-7** Given a state-changing request without the session's CSRF token or with a missing,
   `null`, or disallowed `Origin`, the API returns 403 with a distinct problem `code` per reason,
   runs no business operation, and extends no session.
-- **AC-07-8** Given sign-out, the session is deleted together with its audit event, the cookie is
+- **AC-07-8** Given sign-out, the session is deleted and the `auth.signed_out` audit event is
+  created in the same transaction, the cookie is
   expired, and the old token no longer authenticates; if the deletion fails or is uncertain, the
-  API returns 503, not 204; without a session, sign-out returns 204.
+  API returns 503, not 204; without a session, sign-out returns 204. Audit events are never
+  deleted.
 - **AC-07-9** Given a signed-in browser that completes a new sign-in, the new session replaces the
   old one in one transaction and the old token no longer authenticates; given an attempt that is
   cancelled or fails before session replacement, the old session stays valid.
@@ -327,10 +338,10 @@ exists yet, so this is not a breaking change for any client.
 | F07-T2 | Callback with missing, expired, reused, and mismatched `state`, on success and error callbacks, and two concurrent callbacks with the same `state` against a fake store with conditional delete: at most one exchange, no session otherwise. | Unit, handler | AC-07-2 |
 | F07-T3 | Successful callback against a local fake of GitHub's endpoints: `S256` challenge and verifier pair, `redirect_uri` on both requests, contributor upsert, hashed session, cookie attributes, pre-authentication cookie cleared, redirect; with an existing session, the old token stops working only after success; with a cancelled attempt, it keeps working. | Adapter and handler (local test server) | AC-07-3, AC-07-9 |
 | F07-T4 | `return_to` table test with relative, absolute, protocol-relative, backslash, control-character, single- and double-encoded inputs. | Unit | AC-07-4 |
-| F07-T5 | Logs, audit events, stored items, responses, and cookies from the flows above are scanned for the token, code, `state`, PKCE verifier, and session token; the `OAUTH#{state_hash}` item is gone after the callback. | Unit, handler | AC-07-5 |
+| F07-T5 | Logs, audit events, stored items, response bodies, and cookies from the flows above are scanned for the access token, refresh token, code, `state`, PKCE verifier, session token, and CSRF token; each may appear only where AC-07-5 allows (the session token only in `Set-Cookie`, `state` only in the GitHub redirect and callback, the CSRF token only in the session body and header); the `OAUTH#{state_hash}` item is gone after the callback. | Unit, handler | AC-07-5 |
 | F07-T6 | Middleware: idle and absolute expiry with a fake clock; unknown token; sliding `idle_expires_at` capped by `expires_at`, throttled to one write per minute, skipped for `GET /api/v1/session`, and not applied to a session deleted between check and update. | Unit | AC-07-6 |
 | F07-T7 | CSRF and `Origin` checks on a state-changing route. | Handler | AC-07-7 |
-| F07-T8 | Sign-out deletes the session and its audit event transactionally and expires the cookie; the old token returns 401; a failing or timing-out store yields 503; sign-out without a session yields 204. | Handler | AC-07-8 |
+| F07-T8 | Sign-out deletes the session and creates `auth.signed_out` in one transaction and expires the cookie; the old token returns 401; the audit event remains; a failing or timing-out store yields 503 and no audit event; sign-out without a session yields 204. | Handler | AC-07-8 |
 | F07-T9 | OpenAPI contract tests: every new operation's responses validate against `openapi.yaml`. | Contract | All API criteria |
 | F07-T10 | Portal header states and sign-in error route, axe and reflow at the F-06 widths, with the API mocked. | Component (browser) | AC-07-10 |
 | F07-T11 | Terraform plan-only tests with mocked providers for the new API, Lambda, tables, and secret. | Infrastructure | Rollback and least privilege |
