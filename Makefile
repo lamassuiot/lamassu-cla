@@ -6,7 +6,7 @@ SHELL := bash
 .DEFAULT_GOAL := help
 
 GO_DIR := services/api
-GO_TOOLCHAIN := go1.27.1
+GO_TOOLCHAIN := go1.27.4
 GOLANGCI_LINT_VERSION := v2.14.0
 TOOLS_BIN := $(CURDIR)/.tools/bin
 GOLANGCI_LINT := $(TOOLS_BIN)/golangci-lint

@@ -119,7 +119,7 @@ Implementation notes:
 - TypeScript is pinned to 6.0.3 (A-13). The original reason, the `typescript-eslint` peer range,
   no longer applies after A-17; changing the pin needs a separate decision.
 - Biome is pinned to 2.5.15 (A-17), replacing the ESLint 9.39.5 pin.
-- Go 1.27.1 is pinned in `go.mod`; the `Makefile` sets `GOTOOLCHAIN` so older local Go installs
+- Go 1.27.4 is pinned in `go.mod`; the `Makefile` sets `GOTOOLCHAIN` so older local Go installs
   download it automatically. `golangci-lint` v2.14.0 is installed into `.tools/bin`.
 - Stylelint was removed after `npm audit` reported an unpatched `braces` advisory (D-23).
 - The pins above are accepted (A-13). Changing one requires a reviewed PR that updates this
